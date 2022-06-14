@@ -1,0 +1,60 @@
+{
+  "name": "yt-fake-backend",
+  "version": "1.0.0",
+  "description": "Backend da plataforma inspirado no youtube com funcionalidades a mais.",
+  "main": "src/main/index.ts",
+  "engines": {
+    "node": "16.x"
+  },
+  "scripts": {
+    "test": "npx jest --config jest.config.js --runInBand --detectOpenHandles",
+    "test:ci": "npm run test -- --coverage --silent --verbose",
+    "test:watch": "npm run test -- --watch",
+    "prebuild": "npx rimraf ./dist",
+    "build": "npx swc ./src -d ./dist",
+    "heroku-cleanup": "rm -rf ./src ./dist/test",
+    "start": "node ./dist/main/index.js",
+    "dev": "ts-node-dev --respawn --transpile-only ./src/main/index.ts"
+  },
+  "dependencies": {
+    "dotenv": "^16.0.0",
+    "express": "^4.17.3"
+  },
+  "devDependencies": {
+    "@faker-js/faker": "^6.0.0-alpha.7",
+    "@swc/cli": "^0.1.57",
+    "@swc/core": "^1.2.189",
+    "@swc/jest": "^0.2.21",
+    "@types/dotenv": "^8.2.0",
+    "@types/express": "^4.17.13",
+    "@types/jest": "^27.4.1",
+    "@types/node": "^17.0.25",
+    "@types/supertest": "^2.0.12",
+    "jest": "^27.5.1",
+    "prettier": "^2.6.2",
+    "rimraf": "^3.0.2",
+    "sqlite3": "5.0.0",
+    "supertest": "6.1.6",
+    "ts-jest": "^27.1.4",
+    "ts-node": "^10.7.0",
+    "ts-node-dev": "^1.1.8",
+    "typescript": "^4.6.3"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/felippedesouza/frexco-controle-estoque"
+  },
+  "keywords": [
+    "node",
+    "typescript",
+    "heroku",
+    "express",
+    "typeorm",
+    "docker",
+    "postgres",
+    "github-actions",
+    "sqlite",
+    "jest"
+  ],
+  "license": "MIT"
+}
