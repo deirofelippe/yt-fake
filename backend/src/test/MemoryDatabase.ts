@@ -1,4 +1,7 @@
+import { ChannelAttributes } from '../domain/entities/Channel';
+import { PlaylistAttributes } from '../domain/entities/Playlist';
+
 export class MemoryDatabase {
-  public channels: any[] = [];
-  public playlists: any[] = [];
+  public channels: ChannelAttributes[] = [];
+  public playlists: PlaylistAttributes[] = [];
 }
