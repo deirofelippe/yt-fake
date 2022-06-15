@@ -1,5 +1,8 @@
+import { ChannelDTO } from '../dto/ChannelDTO';
+import { Channel } from '../entities/Channel';
+
 export interface ChannelRepository {
-  findAll(): Promise<any>;
-  findById(id: string): Promise<any>;
-  create(channel: object): Promise<any>;
+  findAll(): Promise<ChannelDTO[]>;
+  findById(id: string): Promise<ChannelDTO>;
+  create(channel: Channel): Promise<void>;
 }
