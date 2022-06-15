@@ -13,5 +13,6 @@
 | `style` | Mudança de formatação do código (lint) |
 | `docs` | Insere documentação |
 | `config` | Ajustes nas configurações |
+| `ci-cd` | Ajustes nas configurações de CI/CD |
 
 - **diretório**: pode ser `raiz`, `backend` ou `frontend`
