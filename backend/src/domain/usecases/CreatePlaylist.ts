@@ -1,30 +1,33 @@
-import { randomUUID } from 'crypto';
+import { Playlist, PlaylistAttributes } from '../entities/Playlist';
+import { IDGenerator } from '../libs/IDGenerator';
+import { Validator } from '../libs/Validator';
 import { ChannelRepository } from '../repositories/ChannelRepository';
 import { PlaylistRepository } from '../repositories/PlaylistRepository';
 
-export class CreatePlaylist {
-  constructor(
-    private playlistRepository: PlaylistRepository,
-    private channelRepository: ChannelRepository
-  ) {}
+type CreatePlaylistDependencies = {
+  playlistRepository: PlaylistRepository;
+  channelRepository: ChannelRepository;
+  playlistValidator: Validator;
+  idGenerator: IDGenerator;
+};
 
-  public async execute(body: any, params: any) {
-    const id_channel = params.id;
-    const channelExists = await this.channelRepository.findById(id_channel);
+export class CreatePlaylist {
+  constructor(private dependencies: CreatePlaylistDependencies) {}
+
+  public async execute(playlist: PlaylistAttributes) {
+    const channelExists = await this.dependencies.channelRepository.findById(
+      playlist.id_channel
+    );
 
     if (!channelExists) {
       throw new Error('Channel not exists.');
     }
 
-    const playlist = {
-      id: randomUUID(),
-      id_channel,
-      title: body.title,
-      description: body.description,
-      type: body.type,
-      visibility: body.visibility
-    };
+    const newPlaylist = new Playlist(playlist, {
+      idGenerator: this.dependencies.idGenerator,
+      validator: this.dependencies.playlistValidator
+    });
 
-    await this.playlistRepository.create(playlist);
+    await this.dependencies.playlistRepository.create(newPlaylist);
   }
 }
