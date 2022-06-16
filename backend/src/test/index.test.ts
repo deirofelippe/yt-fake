@@ -1,6 +1,4 @@
 import { test, expect, describe } from '@jest/globals';
-import { randomUUID } from 'crypto';
-import { PlaylistDTO } from '../domain/dto/PlaylistDTO';
 import { Channel, ChannelAttributes } from '../domain/entities/Channel';
 import {
   PlaylistAttributes,
@@ -16,23 +14,10 @@ import { ChannelRepositoryMemory } from '../infra/repositories/memory/ChannelRep
 import { PlaylistRepositoryMemory } from '../infra/repositories/memory/PlaylistRepositoryMemory';
 import { MemoryDatabase } from './MemoryDatabase';
 
-describe('POST /channel/:id/playlist', () => {
-  test('Deve ser criada a playlist', async () => {
-    const channel: ChannelAttributes = {
-      id: '63102cbb-ef58-459d-b583-4fe4a7ad3335',
-      email: 'teste@gmail.com',
-      password: 'teste'
-    };
-
-    const playlist: PlaylistAttributes = {
-      id_channel: channel.id,
-      title: 'Curso de Fullcycle Development',
-      type: PlaylistType.BUYABLE,
-      visibility: PlaylistVisibility.PUBLIC,
-      description:
-        'Curso que aborda arquitetura de software, backend, frontend e devops'
-    };
-
+describe('Usecase Playlist', () => {
+  describe('POST /playlist', () => {
+    let channel: ChannelAttributes;
+    let playlist: PlaylistAttributes;
     const memoryDatabase = new MemoryDatabase();
     const playlistRepository = new PlaylistRepositoryMemory(memoryDatabase);
     const channelRepository = new ChannelRepositoryMemory(memoryDatabase);
@@ -40,24 +25,50 @@ describe('POST /channel/:id/playlist', () => {
     const playlistValidator = new JoiValidator(playlistJoiSchema);
     const channelValidator = new JoiValidator(channelJoiSchema);
 
-    const channelEntity = new Channel(channel, {
-      idGenerator,
-      validator: channelValidator
+    beforeEach(() => {
+      memoryDatabase.channels = [];
+      memoryDatabase.playlists = [];
+
+      channel = {
+        id: '63102cbb-ef58-459d-b583-4fe4a7ad3335',
+        email: 'teste@gmail.com',
+        password: 'teste'
+      };
+
+      playlist = {
+        id_channel: channel.id,
+        title: 'Curso de Fullcycle Development',
+        type: PlaylistType.BUYABLE,
+        visibility: PlaylistVisibility.PUBLIC,
+        description:
+          'Curso que aborda arquitetura de software, backend, frontend e devops'
+      };
     });
 
-    await channelRepository.create(channelEntity);
+    test('Deve ser criada a playlist', async () => {
+      const channelEntity = new Channel(channel, {
+        idGenerator,
+        validator: channelValidator
+      });
 
-    const oldPlaylists = await playlistRepository.findAll();
+      await channelRepository.create(channelEntity);
 
-    expect(oldPlaylists).toHaveLength(0);
+      const oldPlaylists = await playlistRepository.findAll();
 
-    const createPlaylist = new CreatePlaylist({
-      playlistRepository,
-      channelRepository,
-      playlistValidator,
-      idGenerator
+      expect(oldPlaylists).toHaveLength(0);
+
+      const createPlaylist = new CreatePlaylist({
+        playlistRepository,
+        channelRepository,
+        playlistValidator,
+        idGenerator
+      });
+      await createPlaylist.execute(playlist);
+
+      const playlists = await playlistRepository.findAll();
+
+      expect(playlists[0]).toEqual(expect.objectContaining({ ...playlist }));
     });
-    await createPlaylist.execute(playlist);
 
     const playlists = await playlistRepository.findAll();
 
