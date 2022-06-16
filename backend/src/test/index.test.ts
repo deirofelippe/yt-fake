@@ -6,6 +6,7 @@ import {
   PlaylistVisibility
 } from '../domain/entities/Playlist';
 import { CreatePlaylist } from '../domain/usecases/CreatePlaylist';
+import { ChannelNotFoundError } from '../errors/ChannelNotFoundError';
 import { CryptoIDGenerator } from '../infra/libs/CryptoIDGenerator';
 import { channelJoiSchema } from '../infra/libs/joi/ChannelJoiSchema';
 import { JoiValidator } from '../infra/libs/joi/JoiValidator';
@@ -70,12 +71,21 @@ describe('Usecase Playlist', () => {
       expect(playlists[0]).toEqual(expect.objectContaining({ ...playlist }));
     });
 
-    const playlists = await playlistRepository.findAll();
+    test('Deve retornar erro ao criada a Playlist com Channel inexistente', async () => {
+      playlist.id_channel = '001';
 
-    expect(playlists[0]).toEqual(expect.objectContaining({ ...playlist }));
+      const createPlaylist = new CreatePlaylist({
+        playlistRepository,
+        channelRepository,
+        playlistValidator,
+        idGenerator
+      });
+      const execute = async () => await createPlaylist.execute(playlist);
+
+      await expect(execute).rejects.toThrowError(ChannelNotFoundError);
+    });
+
+    test.skip('Deve ser adicionado modulos na playlist', async () => {});
+    test.skip('Deve ser adicionado videos aos modulos da playlist', async () => {});
   });
-
-  test.skip('Deve ser criada a playlist do tipo pago', async () => {});
-  test.skip('Deve ser adicionado modulos na playlist', async () => {});
-  test.skip('Deve ser adicionado videos aos modulos da playlist', async () => {});
 });

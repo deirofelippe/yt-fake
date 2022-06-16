@@ -1,3 +1,4 @@
+import { ChannelNotFoundError } from '../../errors/ChannelNotFoundError';
 import { Playlist, PlaylistAttributes } from '../entities/Playlist';
 import { IDGenerator } from '../libs/IDGenerator';
 import { Validator } from '../libs/Validator';
@@ -20,7 +21,7 @@ export class CreatePlaylist {
     );
 
     if (!channelExists) {
-      throw new Error('Channel not exists.');
+      throw new ChannelNotFoundError(playlist.id_channel);
     }
 
     const newPlaylist = new Playlist(playlist, {

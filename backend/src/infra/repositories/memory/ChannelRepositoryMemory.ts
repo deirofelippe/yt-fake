@@ -20,6 +20,9 @@ export class ChannelRepositoryMemory implements ChannelRepository {
     const channelFound = this.memoryDatabase.channels.find(
       (channel) => channel.id === id
     );
+
+    if (!channelFound) return Promise.resolve(undefined);
+
     const channelDTO: ChannelDTO = {
       id: channelFound.id,
       ...channelFound
