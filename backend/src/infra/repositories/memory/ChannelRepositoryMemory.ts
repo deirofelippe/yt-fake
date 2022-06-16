@@ -5,7 +5,7 @@ import { MemoryDatabase } from '../../../test/MemoryDatabase';
 
 export class ChannelRepositoryMemory implements ChannelRepository {
   constructor(private memoryDatabase: MemoryDatabase) {}
-  async findAll(): Promise<ChannelDTO[]> {
+  async findAll(): Promise<ChannelDTO[] | undefined> {
     const channels = this.memoryDatabase.channels.map((channel) => {
       const channelDTO: ChannelDTO = {
         id: channel.id,
@@ -16,7 +16,7 @@ export class ChannelRepositoryMemory implements ChannelRepository {
 
     return Promise.resolve(channels);
   }
-  async findById(id: string): Promise<ChannelDTO> {
+  async findById(id: string): Promise<ChannelDTO | undefined> {
     const channelFound = this.memoryDatabase.channels.find(
       (channel) => channel.id === id
     );

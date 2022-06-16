@@ -6,7 +6,7 @@ import { MemoryDatabase } from '../../../test/MemoryDatabase';
 export class PlaylistRepositoryMemory implements PlaylistRepository {
   constructor(private memoryDatabase: MemoryDatabase) {}
 
-  async findAll(): Promise<PlaylistDTO[]> {
+  async findAll(): Promise<PlaylistDTO[] | undefined> {
     const playlists = this.memoryDatabase.playlists.map((playlist) => {
       const playlistDTO: PlaylistDTO = {
         id: playlist.id,
@@ -16,7 +16,7 @@ export class PlaylistRepositoryMemory implements PlaylistRepository {
     });
     return playlists;
   }
-  async findById(id: string): Promise<PlaylistDTO> {
+  async findById(id: string): Promise<PlaylistDTO | undefined> {
     const playlistFound = this.memoryDatabase.playlists.find(
       (playlist) => playlist.id === id
     );
