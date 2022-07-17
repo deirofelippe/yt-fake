@@ -1,7 +1,7 @@
 import Joi from 'joi';
 
 export const channelJoiSchema = Joi.object({
-  id: Joi.string().uuid(),
+  id: Joi.string(),
   email: Joi.string().email().required(),
   password: Joi.string().required(),
   description: Joi.string(),
