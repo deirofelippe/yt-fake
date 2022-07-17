@@ -23,4 +23,41 @@ export class PlaylistRepositoryMemory implements PlaylistRepository {
       })
     );
   }
+  async addVideo(videoInPlaylist: VideoInPlaylistAttributes): Promise<void> {
+    Promise.resolve(
+      this.memoryDatabase.videoInPlaylist.push({
+        ...videoInPlaylist
+      })
+    );
+  }
+  async findAllVideos(id_playlist: string): Promise<FindAllVideosOutput> {
+    const videosReferences = this.memoryDatabase.videoInPlaylist.filter(
+      (video) => video.id_playlist === id_playlist
+    );
+
+    const videosInPlaylist = [];
+    for (const videoReference of videosReferences) {
+      const videoFound = this.memoryDatabase.videos.find(
+        (video) => videoReference.id_referenced_video === video.id
+      );
+
+      if (!videoFound) continue;
+
+      videosInPlaylist.push({
+        id: videoFound.id,
+        title: videoFound.title,
+        thumbnail: videoFound.thumbnail
+      });
+    }
+
+    return Promise.resolve(videosInPlaylist);
+  }
 }
+
+export type FindAllVideosOutput =
+  | {
+      id: string;
+      title: string;
+      thumbnail: string;
+    }[]
+  | undefined;
