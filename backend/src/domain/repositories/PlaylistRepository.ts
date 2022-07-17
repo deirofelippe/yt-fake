@@ -1,8 +1,11 @@
-import { PlaylistDTO } from '../dto/PlaylistDTO';
-import { Playlist } from '../entities/Playlist';
+import { FindAllVideosOutput } from '../../infra/repositories/memory/PlaylistRepositoryMemory';
+import { PlaylistAttributes } from '../entities/Playlist';
+import { VideoInPlaylistAttributes } from '../entities/VideoInPlaylist';
 
 export interface PlaylistRepository {
-  findAll(): Promise<PlaylistDTO[] | undefined>;
-  findById(id: string): Promise<PlaylistDTO | undefined>;
-  create(playlist: Playlist): Promise<void>;
+  findAll(): Promise<PlaylistAttributes[] | undefined>;
+  findById(id: string): Promise<PlaylistAttributes | undefined>;
+  create(playlist: PlaylistAttributes): Promise<void>;
+  addVideo(videoInPlaylist: VideoInPlaylistAttributes): Promise<void>;
+  findAllVideos(id_playlist: string): Promise<FindAllVideosOutput>;
 }

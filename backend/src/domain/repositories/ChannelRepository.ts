@@ -1,8 +1,7 @@
-import { ChannelDTO } from '../dto/ChannelDTO';
-import { Channel } from '../entities/Channel';
+import { ChannelAttributes } from '../entities/Channel';
 
 export interface ChannelRepository {
-  findAll(): Promise<ChannelDTO[] | undefined>;
-  findById(id: string): Promise<ChannelDTO | undefined>;
-  create(channel: Channel): Promise<void>;
+  findAll(): Promise<ChannelAttributes[] | undefined>;
+  findById(id: string): Promise<ChannelAttributes | undefined>;
+  create(channel: ChannelAttributes): Promise<void>;
 }
