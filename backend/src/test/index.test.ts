@@ -6,7 +6,7 @@ import {
   PlaylistVisibility
 } from '../domain/entities/Playlist';
 import { CreatePlaylist } from '../domain/usecases/CreatePlaylist';
-import { ChannelNotFoundError } from '../errors/ChannelNotFoundError';
+import { NotFoundError } from '../errors/NotFoundError';
 import { CryptoIDGenerator } from '../infra/libs/CryptoIDGenerator';
 import { channelJoiSchema } from '../infra/libs/joi/ChannelJoiSchema';
 import { JoiValidator } from '../infra/libs/joi/JoiValidator';
@@ -16,15 +16,16 @@ import { PlaylistRepositoryMemory } from '../infra/repositories/memory/PlaylistR
 import { MemoryDatabase } from './MemoryDatabase';
 
 describe('Usecase Playlist', () => {
+  const memoryDatabase = new MemoryDatabase();
+  const playlistRepository = new PlaylistRepositoryMemory(memoryDatabase);
+  const channelRepository = new ChannelRepositoryMemory(memoryDatabase);
+  const idGenerator = new CryptoIDGenerator();
+  const playlistValidator = new JoiValidator(playlistJoiSchema);
+  const channelValidator = new JoiValidator(channelJoiSchema);
+
   describe('POST /playlist', () => {
     let channel: ChannelAttributes;
     let playlist: PlaylistAttributes;
-    const memoryDatabase = new MemoryDatabase();
-    const playlistRepository = new PlaylistRepositoryMemory(memoryDatabase);
-    const channelRepository = new ChannelRepositoryMemory(memoryDatabase);
-    const idGenerator = new CryptoIDGenerator();
-    const playlistValidator = new JoiValidator(playlistJoiSchema);
-    const channelValidator = new JoiValidator(channelJoiSchema);
 
     beforeEach(() => {
       memoryDatabase.channels = [];
@@ -46,13 +47,13 @@ describe('Usecase Playlist', () => {
       };
     });
 
-    test('Deve ser criada a playlist', async () => {
+    test('Deve ser criada a playlist.', async () => {
       const channelEntity = new Channel(channel, {
         idGenerator,
         validator: channelValidator
       });
 
-      await channelRepository.create(channelEntity);
+      await channelRepository.create(channelEntity.getAttributes());
 
       const oldPlaylists = await playlistRepository.findAll();
 
@@ -71,8 +72,8 @@ describe('Usecase Playlist', () => {
       expect(playlists[0]).toEqual(expect.objectContaining({ ...playlist }));
     });
 
-    test('Deve retornar erro ao criada a Playlist com Channel inexistente', async () => {
-      playlist.id_channel = '001';
+    test('Deve lençar erro ao criar playlist com channel inexistente.', async () => {
+      playlist.id_channel = '63102cbb-ef58-459d-b583-4fe4a7ad3335';
 
       const createPlaylist = new CreatePlaylist({
         playlistRepository,
@@ -82,10 +83,7 @@ describe('Usecase Playlist', () => {
       });
       const execute = async () => await createPlaylist.execute(playlist);
 
-      await expect(execute).rejects.toThrowError(ChannelNotFoundError);
+      await expect(execute).rejects.toThrowError(NotFoundError);
     });
-
-    test.skip('Deve ser adicionado modulos na playlist', async () => {});
-    test.skip('Deve ser adicionado videos aos modulos da playlist', async () => {});
   });
 });
