@@ -28,30 +28,19 @@ export type PlaylistDependencies = {
 export class Playlist {
   private attributes: PlaylistAttributes;
 
-  constructor(
-    playlist: PlaylistAttributes,
-    private dependencies: PlaylistDependencies
-  ) {
-    delete playlist.id;
-    this.validate(playlist);
-    const id = this.generateID();
-    this.setAttributes(playlist, id);
+  private constructor(playlist: PlaylistAttributes) {
+    this.setAttributes(playlist);
   }
 
-  private generateID(): string {
-    return this.dependencies.idGenerator.generate();
+  public static create(playlist: PlaylistAttributes) {
+    return new Playlist(playlist);
   }
-  private validate(playlist: PlaylistAttributes): void {
-    this.dependencies.validator.execute(playlist);
-  }
-  private setAttributes(playlist: PlaylistAttributes, id: string): void {
+
+  private setAttributes(playlist: PlaylistAttributes): void {
     this.attributes = {
       type: PlaylistType.REGULAR,
       visibility: PlaylistVisibility.PUBLIC,
-      ...playlist,
-      id: id,
-      id_channel: playlist.id_channel,
-      title: playlist.title
+      ...playlist
     };
   }
   public getAttributes(): PlaylistAttributes {
