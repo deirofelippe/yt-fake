@@ -1,4 +1,3 @@
-import { ChannelDTO } from '../dto/ChannelDTO';
 import { IDGenerator } from '../libs/IDGenerator';
 import { Validator } from '../libs/Validator';
 
@@ -11,7 +10,7 @@ export type Address = {
 };
 
 export type ChannelAttributes = {
-  id?: string;
+  id: string;
   email: string;
   password: string;
   description?: string;
@@ -34,13 +33,6 @@ export class Channel {
     this.validate(channel);
     const id = this.generateID();
     this.setAttributes(channel, id);
-  }
-
-  public toDTO(): Partial<ChannelDTO> {
-    const channelDTO: Partial<ChannelDTO> = {
-      ...this.attributes
-    };
-    return channelDTO;
   }
 
   private generateID(): string {

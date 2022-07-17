@@ -1,4 +1,3 @@
-import { PlaylistDTO } from '../dto/PlaylistDTO';
 import { IDGenerator } from '../libs/IDGenerator';
 import { Validator } from '../libs/Validator';
 
@@ -16,12 +15,12 @@ export type PlaylistAttributes = {
   id?: string;
   id_channel: string;
   title: string;
-  type: PlaylistType;
-  visibility: PlaylistVisibility;
+  type?: PlaylistType;
+  visibility?: PlaylistVisibility;
   description?: string;
 };
 
-type PlaylistDependencies = {
+export type PlaylistDependencies = {
   validator: Validator;
   idGenerator: IDGenerator;
 };
@@ -33,16 +32,10 @@ export class Playlist {
     playlist: PlaylistAttributes,
     private dependencies: PlaylistDependencies
   ) {
+    delete playlist.id;
     this.validate(playlist);
     const id = this.generateID();
     this.setAttributes(playlist, id);
-  }
-
-  public toDTO(): Partial<PlaylistDTO> {
-    const playlistDTO: Partial<PlaylistDTO> = {
-      ...this.attributes
-    };
-    return playlistDTO;
   }
 
   private generateID(): string {
@@ -55,30 +48,13 @@ export class Playlist {
     this.attributes = {
       type: PlaylistType.REGULAR,
       visibility: PlaylistVisibility.PUBLIC,
+      ...playlist,
       id: id,
-      ...playlist
+      id_channel: playlist.id_channel,
+      title: playlist.title
     };
   }
   public getAttributes(): PlaylistAttributes {
     return this.attributes;
-  }
-
-  public get id(): string {
-    return this.attributes.id;
-  }
-  public get id_channel(): string {
-    return this.attributes.id_channel;
-  }
-  public get title(): string {
-    return this.attributes.title;
-  }
-  public get type(): PlaylistType {
-    return this.attributes.type;
-  }
-  public get visibility(): PlaylistVisibility {
-    return this.attributes.visibility;
-  }
-  public get description(): string {
-    return this.attributes.description;
   }
 }
