@@ -17,10 +17,9 @@ export class VideoInPlaylistFactory
     attributes: VideoInPlaylistAttributes,
     dependencies: VideoInPlaylistDependencies
   ) {
-    delete attributes.id;
-    dependencies.validator.execute(attributes);
     const id = dependencies.idGenerator.generate();
     attributes.id = id;
+    dependencies.validator.execute(attributes);
     return VideoInPlaylist.create(attributes);
   }
 }
