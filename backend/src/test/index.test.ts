@@ -7,6 +7,7 @@ import {
 } from '../domain/entities/Playlist';
 import { VideoAttributes, VideoVisibility } from '../domain/entities/Video';
 import { VideoInPlaylist } from '../domain/entities/VideoInPlaylist';
+import { PlaylistFactory } from '../domain/factories/PlaylistFactory';
 import { VideoInPlaylistFactory } from '../domain/factories/VideoInPlaylistFactory';
 import { PlaylistRepository } from '../domain/repositories/PlaylistRepository';
 import { VideoRepository } from '../domain/repositories/VideoRepository';
@@ -14,7 +15,10 @@ import {
   AddVideoInPlaylistInput,
   AddVideoToPlaylist
 } from '../domain/usecases/AddVideoToPlaylist';
-import { CreatePlaylist } from '../domain/usecases/CreatePlaylist';
+import {
+  CreatePlaylist,
+  CreatePlaylistInput
+} from '../domain/usecases/CreatePlaylist';
 import { FieldsValidationError } from '../errors/FieldsValidationError';
 import { NotFoundError } from '../errors/NotFoundError';
 import { CryptoIDGenerator } from '../infra/libs/CryptoIDGenerator';
@@ -37,6 +41,7 @@ describe('Usecase Playlist', () => {
   const channelValidator = new JoiValidator(channelJoiSchema);
   const videoInPlaylistValidator = new JoiValidator(videoInPlaylistJoiSchema);
   const videoInPlaylistFactory = new VideoInPlaylistFactory();
+  const playlistFactory = new PlaylistFactory();
 
   describe('POST /playlist', () => {
     let channel: ChannelAttributes;
@@ -70,33 +75,40 @@ describe('Usecase Playlist', () => {
 
       await channelRepository.create(channelEntity.getAttributes());
 
-      const oldPlaylists = await playlistRepository.findAll();
-
-      expect(oldPlaylists).toHaveLength(0);
-
       const createPlaylist = new CreatePlaylist({
+        playlistFactory,
         playlistRepository,
         channelRepository,
         playlistValidator,
         idGenerator
       });
-      await createPlaylist.execute(playlist);
+
+      const input: CreatePlaylistInput = {
+        ...playlist,
+        id_authenticated_channel: playlist.id_channel
+      };
+      await createPlaylist.execute(input);
 
       const playlists = await playlistRepository.findAll();
 
+      expect(playlists).toHaveLength(1);
       expect(playlists[0]).toEqual(expect.objectContaining({ ...playlist }));
     });
 
     test('Deve lençar erro ao criar playlist com channel inexistente.', async () => {
-      playlist.id_channel = '63102cbb-ef58-459d-b583-4fe4a7ad3335';
+      const input: CreatePlaylistInput = {
+        ...playlist,
+        id_authenticated_channel: '63102cbb-ef58-459d-b583-4fe4a7ad3335'
+      };
 
       const createPlaylist = new CreatePlaylist({
+        playlistFactory,
         playlistRepository,
         channelRepository,
         playlistValidator,
         idGenerator
       });
-      const execute = async () => await createPlaylist.execute(playlist);
+      const execute = async () => await createPlaylist.execute(input);
 
       await expect(execute).rejects.toThrowError(NotFoundError);
     });
