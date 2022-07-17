@@ -6,6 +6,7 @@
   "engines": {
     "node": "16.x"
   },
+  "author": "Felippe Deiró <sergiofelippe.deiro@gmail.com>",
   "scripts": {
     "test": "npx jest --config jest.config.js --runInBand --detectOpenHandles",
     "test:ci": "npm run test -- --coverage --silent --verbose",
@@ -44,7 +45,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/felippedesouza/frexco-controle-estoque"
+    "url": "https://github.com/deirofelippe/yt-fake"
   },
   "keywords": [
     "node",
