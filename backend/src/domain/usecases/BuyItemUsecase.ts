@@ -34,6 +34,7 @@ export class BuyItemUsecase {
     } = this.dependencies;
 
     const items = input.items;
+    if (items.length <= 0) throw new Error('Não há itens para ser comprado.');
 
     const videos: Item[] = [],
       playlists: Item[] = [];
