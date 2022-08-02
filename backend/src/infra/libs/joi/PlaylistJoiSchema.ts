@@ -1,18 +1,14 @@
 import Joi from 'joi';
-import {
-  PlaylistType,
-  PlaylistVisibility
-} from '../../../domain/entities/Playlist';
+import { PlaylistVisibility } from '../../../domain/entities/Playlist';
 
 export const playlistJoiSchema = Joi.object({
   id: Joi.string(),
   id_channel: Joi.string().required(),
   title: Joi.string().required(),
-  type: Joi.string()
-    .equal(PlaylistType.REGULAR, PlaylistType.BUYABLE)
-    .case('lower'),
+  price: Joi.number().min(0).default(0),
   visibility: Joi.string()
     .equal(PlaylistVisibility.PUBLIC, PlaylistVisibility.PRIVATE)
-    .case('lower'),
+    .case('lower')
+    .default(PlaylistVisibility.PUBLIC),
   description: Joi.string()
 });
