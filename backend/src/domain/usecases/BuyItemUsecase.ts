@@ -2,7 +2,7 @@ import { Order } from '../entities/Order';
 import { PlaylistAttributes, Playlist } from '../entities/Playlist';
 import { VideoAttributes, Video } from '../entities/Video';
 import { IDGenerator } from '../libs/IDGenerator';
-import { OrderRepository } from '../repositories/OrderRepository';
+import { OrderRepositoryInterface } from '../repositories/OrderRepositoryInterface';
 import { PlaylistRepository } from '../repositories/PlaylistRepository';
 import { VideoRepository } from '../repositories/VideoRepository';
 
@@ -18,7 +18,7 @@ export type BuyItemInput = {
 export type BuyItemDependencies = {
   playlistRepository: PlaylistRepository;
   videoRepository: VideoRepository;
-  orderRepository: OrderRepository;
+  orderRepository: OrderRepositoryInterface;
   // buyItemValidator: BuyItemValidator;
   idGenerator: IDGenerator;
 };
