@@ -6,6 +6,20 @@ import { MemoryDatabase } from '../../../test/MemoryDatabase';
 export class PlaylistRepositoryMemory implements PlaylistRepository {
   constructor(private memoryDatabase: MemoryDatabase) {}
 
+  async findPlaylistsByIds(ids: string): Promise<PlaylistAttributes[] | []> {
+    let playlistsFound: PlaylistAttributes[] = [];
+    ids.split(',').forEach((id) => {
+      const playlistFound = this.memoryDatabase.playlists.find(
+        (playlist) => playlist.id === id
+      );
+      if (!playlistFound) {
+        return;
+      }
+      playlistsFound.push(playlistFound);
+    });
+    return playlistsFound;
+  }
+
   async findAll(): Promise<PlaylistAttributes[] | undefined> {
     return Promise.resolve(this.memoryDatabase.playlists);
   }
@@ -30,34 +44,4 @@ export class PlaylistRepositoryMemory implements PlaylistRepository {
       })
     );
   }
-  async findAllVideos(id_playlist: string): Promise<FindAllVideosOutput> {
-    const videosReferences = this.memoryDatabase.videoInPlaylist.filter(
-      (video) => video.id_playlist === id_playlist
-    );
-
-    const videosInPlaylist = [];
-    for (const videoReference of videosReferences) {
-      const videoFound = this.memoryDatabase.videos.find(
-        (video) => videoReference.id_referenced_video === video.id
-      );
-
-      if (!videoFound) continue;
-
-      videosInPlaylist.push({
-        id: videoFound.id,
-        title: videoFound.title,
-        thumbnail: videoFound.thumbnail
-      });
-    }
-
-    return Promise.resolve(videosInPlaylist);
-  }
 }
-
-export type FindAllVideosOutput =
-  | {
-      id: string;
-      title: string;
-      thumbnail: string;
-    }[]
-  | undefined;
