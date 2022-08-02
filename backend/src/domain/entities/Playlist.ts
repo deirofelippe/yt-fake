@@ -18,6 +18,7 @@ export type PlaylistAttributes = {
   type?: PlaylistType;
   visibility?: PlaylistVisibility;
   description?: string;
+  price?: number;
 };
 
 export type PlaylistDependencies = {
@@ -45,5 +46,33 @@ export class Playlist {
   }
   public getAttributes(): PlaylistAttributes {
     return this.attributes;
+  }
+  /**
+   * Verifica se a visibilidade do vídeo é publica.
+   * @returns boolean
+   */
+  public isPublic() {
+    return this.attributes.visibility === PlaylistVisibility.PUBLIC;
+  }
+  /**
+   * Verifica se a visibilidade do vídeo é privada.
+   * @returns boolean
+   */
+  public isPrivate() {
+    return this.attributes.visibility === PlaylistVisibility.PUBLIC;
+  }
+  /**
+   * Verifica se o preço é zero.
+   * @returns boolean
+   */
+  public isFree() {
+    return this.attributes.price === 0;
+  }
+  /**
+   * Verifica se o maior que zero.
+   * @returns boolean
+   */
+  public isNotFree() {
+    return this.attributes.price > 0;
   }
 }
