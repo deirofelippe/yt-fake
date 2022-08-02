@@ -28,29 +28,51 @@ type VideoDependencies = {
 export class Video {
   private attributes: VideoAttributes;
 
-  constructor(video: VideoAttributes, private dependencies: VideoDependencies) {
-    this.validate(video);
-    const id = this.generateID();
-    this.setAttributes(video, id);
+  private constructor(video: VideoAttributes) {
+    this.setAttributes(video);
   }
 
-  private generateID(): string {
-    return this.dependencies.idGenerator.generate();
+  public static create(video: VideoAttributes) {
+    return new Video(video);
   }
-  private validate(video: VideoAttributes): void {
-    this.dependencies.validator.execute(video);
-  }
-  private setAttributes(video: VideoAttributes, id: string): void {
+  private setAttributes(video: VideoAttributes): void {
     this.attributes = {
-      visibility: VideoVisibility.PUBLIC,
-      ...video,
-      id: id,
-      id_channel: video.id_channel,
-      title: video.title,
-      video: video.video
+      ...video
     };
   }
+  /**
+   * Retorna os atributos de vídeo.
+   * @returns VideoAttributes
+   */
   public getAttributes(): VideoAttributes {
     return this.attributes;
+  }
+  /**
+   * Verifica se a visibilidade do vídeo é publica.
+   * @returns boolean
+   */
+  public isPublic() {
+    return this.attributes.visibility === VideoVisibility.PUBLIC;
+  }
+  /**
+   * Verifica se a visibilidade do vídeo é privada.
+   * @returns boolean
+   */
+  public isPrivate() {
+    return this.attributes.visibility === VideoVisibility.PUBLIC;
+  }
+  /**
+   * Verifica se o preço é zero.
+   * @returns boolean
+   */
+  public isFree() {
+    return this.attributes.price === 0;
+  }
+  /**
+   * Verifica se o maior que zero.
+   * @returns boolean
+   */
+  public isNotFree() {
+    return this.attributes.price > 0;
   }
 }
