@@ -6,20 +6,16 @@ import {
 import { FactoryInterface } from './FactoryInterface';
 
 export class VideoInPlaylistFactory
-  implements
-    FactoryInterface<
-      VideoInPlaylistAttributes,
-      VideoInPlaylistDependencies,
-      VideoInPlaylist
-    >
+  implements FactoryInterface<VideoInPlaylistAttributes, VideoInPlaylist>
 {
-  create(
-    attributes: VideoInPlaylistAttributes,
-    dependencies: VideoInPlaylistDependencies
-  ) {
-    const id = dependencies.idGenerator.generate();
+  constructor(private readonly dependencies: VideoInPlaylistDependencies) {}
+
+  create(attributes: VideoInPlaylistAttributes) {
+    const { idGenerator, validator } = this.dependencies;
+
+    const id = idGenerator.generate();
     attributes.id = id;
-    dependencies.validator.execute(attributes);
+    validator.execute(attributes);
     return VideoInPlaylist.create(attributes);
   }
 }

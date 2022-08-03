@@ -1,3 +1,3 @@
-export interface FactoryInterface<A, D, E> {
-  create(attributes: A, dependencies?: D): E;
+export interface FactoryInterface<A, E> {
+  create(attributes: A): E;
 }

@@ -6,13 +6,16 @@ import {
 import { FactoryInterface } from './FactoryInterface';
 
 export class PlaylistFactory
-  implements
-    FactoryInterface<PlaylistAttributes, PlaylistDependencies, Playlist>
+  implements FactoryInterface<PlaylistAttributes, Playlist>
 {
-  create(attributes: PlaylistAttributes, dependencies: PlaylistDependencies) {
-    const id = dependencies.idGenerator.generate();
+  constructor(private readonly dependencies: PlaylistDependencies) {}
+
+  create(attributes: PlaylistAttributes) {
+    const { idGenerator, validator } = this.dependencies;
+
+    const id = idGenerator.generate();
     attributes.id = id;
-    dependencies.validator.execute(attributes);
+    validator.execute(attributes);
     return Playlist.create(attributes);
   }
 }
