@@ -19,9 +19,8 @@ import { VideoRepositoryMemory } from '../../../infra/repositories/memory/VideoR
 import { MemoryDatabase } from '../../MemoryDatabase';
 
 describe('BuyItemUsecase', () => {
-  describe('Adicionar nova order', () => {
+  describe('Comprar items', () => {
     const memoryDatabase = new MemoryDatabase();
-    const idGenerator = new CryptoIDGenerator();
     const videoRepository = new VideoRepositoryMemory(memoryDatabase);
     const playlistRepository = new PlaylistRepositoryMemory(memoryDatabase);
     const orderRepository = new OrderRepositoryMemory(memoryDatabase);

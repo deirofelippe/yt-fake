@@ -1,120 +1,36 @@
-import { describe, expect, test } from '@jest/globals';
-import { Channel, ChannelAttributes } from '../domain/entities/Channel';
 import {
   PlaylistAttributes,
   PlaylistVisibility
-} from '../domain/entities/Playlist';
-import { VideoAttributes, VideoVisibility } from '../domain/entities/Video';
-import { VideoInPlaylist } from '../domain/entities/VideoInPlaylist';
-import { PlaylistFactory } from '../domain/factories/PlaylistFactory';
-import { VideoInPlaylistFactory } from '../domain/factories/VideoInPlaylistFactory';
-import { PlaylistRepository } from '../domain/repositories/PlaylistRepository';
-import { VideoRepository } from '../domain/repositories/VideoRepository';
+} from '../../../domain/entities/Playlist';
+import {
+  VideoAttributes,
+  VideoVisibility
+} from '../../../domain/entities/Video';
+import { VideoInPlaylist } from '../../../domain/entities/VideoInPlaylist';
+import { VideoInPlaylistFactory } from '../../../domain/factories/VideoInPlaylistFactory';
+import { PlaylistRepository } from '../../../domain/repositories/PlaylistRepository';
+import { VideoRepository } from '../../../domain/repositories/VideoRepository';
 import {
   AddVideoInPlaylistInput,
   AddVideoToPlaylistUsecase
-} from '../domain/usecases/AddVideoToPlaylistUsecase';
-import {
-  CreatePlaylistInput,
-  CreatePlaylistUsecase
-} from '../domain/usecases/CreatePlaylistUsecase';
-import { FieldsValidationError } from '../errors/FieldsValidationError';
-import { NotFoundError } from '../errors/NotFoundError';
-import { CryptoIDGenerator } from '../infra/libs/CryptoIDGenerator';
-import { channelJoiSchema } from '../infra/libs/joi/ChannelJoiSchema';
-import { JoiValidator } from '../infra/libs/joi/JoiValidator';
-import { playlistJoiSchema } from '../infra/libs/joi/PlaylistJoiSchema';
-import { videoInPlaylistJoiSchema } from '../infra/libs/joi/VideoInPlaylistJoiSchema';
-import { videoJoiSchema } from '../infra/libs/joi/VideoJoiSchema';
-import { ChannelRepositoryMemory } from '../infra/repositories/memory/ChannelRepositoryMemory';
-import { PlaylistRepositoryMemory } from '../infra/repositories/memory/PlaylistRepositoryMemory';
-import { VideoRepositoryMemory } from '../infra/repositories/memory/VideoRepositoryMemory';
-import { MemoryDatabase } from './MemoryDatabase';
+} from '../../../domain/usecases/AddVideoToPlaylistUsecase';
+import { FieldsValidationError } from '../../../errors/FieldsValidationError';
+import { CryptoIDGenerator } from '../../../infra/libs/CryptoIDGenerator';
+import { JoiValidator } from '../../../infra/libs/joi/JoiValidator';
+import { videoInPlaylistJoiSchema } from '../../../infra/libs/joi/VideoInPlaylistJoiSchema';
+import { PlaylistRepositoryMemory } from '../../../infra/repositories/memory/PlaylistRepositoryMemory';
+import { VideoRepositoryMemory } from '../../../infra/repositories/memory/VideoRepositoryMemory';
+import { MemoryDatabase } from '../../MemoryDatabase';
 
-describe('Usecase Playlist', () => {
+describe('AddVideoToPlaylistUsecase', () => {
   const memoryDatabase = new MemoryDatabase();
   const playlistRepository = new PlaylistRepositoryMemory(memoryDatabase);
-  const channelRepository = new ChannelRepositoryMemory(memoryDatabase);
   const videoRepository = new VideoRepositoryMemory(memoryDatabase);
   const idGenerator = new CryptoIDGenerator();
-  const playlistValidator = new JoiValidator(playlistJoiSchema);
-  const channelValidator = new JoiValidator(channelJoiSchema);
   const videoInPlaylistValidator = new JoiValidator(videoInPlaylistJoiSchema);
   const videoInPlaylistFactory = new VideoInPlaylistFactory();
-  const playlistFactory = new PlaylistFactory();
 
-  describe('POST /playlist', () => {
-    let channel: ChannelAttributes;
-    let playlist: PlaylistAttributes;
-
-    beforeEach(() => {
-      memoryDatabase.channels = [];
-      memoryDatabase.playlists = [];
-
-      channel = {
-        id: '63102cbb-ef58-459d-b583-4fe4a7ad3335',
-        email: 'teste@gmail.com',
-        password: 'teste'
-      };
-
-      playlist = {
-        id_channel: channel.id,
-        title: 'Curso de Fullcycle Development',
-        price: 12,
-        visibility: PlaylistVisibility.PUBLIC,
-        description:
-          'Curso que aborda arquitetura de software, backend, frontend e devops'
-      };
-    });
-
-    test('Deve ser criada a playlist.', async () => {
-      const channelEntity = new Channel(channel, {
-        idGenerator,
-        validator: channelValidator
-      });
-
-      await channelRepository.create(channelEntity.getAttributes());
-
-      const createPlaylist = new CreatePlaylistUsecase({
-        playlistFactory,
-        playlistRepository,
-        channelRepository,
-        playlistValidator,
-        idGenerator
-      });
-
-      const input: CreatePlaylistInput = {
-        ...playlist,
-        id_authenticated_channel: playlist.id_channel
-      };
-      await createPlaylist.execute(input);
-
-      const playlists = await playlistRepository.findAll();
-
-      expect(playlists).toHaveLength(1);
-      expect(playlists[0]).toEqual(expect.objectContaining({ ...playlist }));
-    });
-
-    test('Deve lançar erro ao criar playlist com channel inexistente.', async () => {
-      const input: CreatePlaylistInput = {
-        ...playlist,
-        id_authenticated_channel: '63102cbb-ef58-459d-b583-4fe4a7ad3335'
-      };
-
-      const createPlaylist = new CreatePlaylistUsecase({
-        playlistFactory,
-        playlistRepository,
-        channelRepository,
-        playlistValidator,
-        idGenerator
-      });
-      const execute = async () => await createPlaylist.execute(input);
-
-      await expect(execute).rejects.toThrowError(NotFoundError);
-    });
-  });
-
-  describe('POST /playlist/video', () => {
+  describe('Adicionar video na playlist', () => {
     describe('Validations', () => {
       test('Error campo "id_reference_video" e "id_playlist"', async () => {
         const input: AddVideoInPlaylistInput = {
