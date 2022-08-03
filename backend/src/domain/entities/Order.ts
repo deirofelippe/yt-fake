@@ -20,26 +20,10 @@ export type OrderDependencies = {
 export class Order {
   private constructor(private attributes: OrderAttributes) {}
 
-  public static create(dependencies: OrderDependencies, input: BuyItemInput) {
-    const { idGenerator } = dependencies;
-
-    const id_order = idGenerator.generate();
-    const orderItem = input.items.map(
-      (item): OrderItemAttributes => ({
-        id: idGenerator.generate(),
-        id_order,
-        id_purchased_item: item.id,
-        type: item.type
-      })
-    );
-    const order: OrderAttributes = {
-      id: id_order,
-      id_channel: input.id_authenticated_channel,
-      items: orderItem
-    };
-
-    return new Order(order);
+  public static create(attributes: OrderAttributes) {
+    return new Order(attributes);
   }
+
   get id() {
     return this.attributes.id;
   }

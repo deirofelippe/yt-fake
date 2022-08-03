@@ -20,25 +20,25 @@ export type VideoAttributes = {
   description?: string;
 };
 
-type VideoDependencies = {
+export type VideoDependencies = {
   validator: Validator;
   idGenerator: IDGenerator;
 };
 
 export class Video {
-  private attributes: VideoAttributes;
-
-  private constructor(video: VideoAttributes) {
-    this.setAttributes(video);
-  }
-
-  public static create(video: VideoAttributes) {
-    return new Video(video);
-  }
-  private setAttributes(video: VideoAttributes): void {
+  private constructor(private attributes: VideoAttributes) {
     this.attributes = {
-      ...video
+      price: 0,
+      visibility: VideoVisibility.PUBLIC,
+      dislikes: 0,
+      likes: 0,
+      views: 0,
+      ...attributes
     };
+  }
+
+  public static create(attributes: VideoAttributes) {
+    return new Video(attributes);
   }
   /**
    * Retorna os atributos de vídeo.

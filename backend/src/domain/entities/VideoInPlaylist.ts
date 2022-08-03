@@ -13,21 +13,12 @@ export type VideoInPlaylistDependencies = {
 };
 
 export class VideoInPlaylist {
-  private attributes: VideoInPlaylistAttributes;
-
-  private constructor(attributes: VideoInPlaylistAttributes) {
-    this.setAttributes(attributes);
-  }
+  private constructor(private attributes: VideoInPlaylistAttributes) {}
 
   public static create(attributes: VideoInPlaylistAttributes) {
     return new VideoInPlaylist(attributes);
   }
 
-  private setAttributes(attributes: VideoInPlaylistAttributes): void {
-    this.attributes = {
-      ...attributes
-    };
-  }
   public getAttributes(): VideoInPlaylistAttributes {
     return this.attributes;
   }

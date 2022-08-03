@@ -22,23 +22,18 @@ export type PlaylistDependencies = {
 };
 
 export class Playlist {
-  private attributes: PlaylistAttributes;
-
-  private constructor(playlist: PlaylistAttributes) {
-    this.setAttributes(playlist);
-  }
-
-  public static create(playlist: PlaylistAttributes) {
-    return new Playlist(playlist);
-  }
-
-  private setAttributes(playlist: PlaylistAttributes): void {
+  private constructor(private attributes: PlaylistAttributes) {
     this.attributes = {
       price: 0,
       visibility: PlaylistVisibility.PUBLIC,
-      ...playlist
+      ...attributes
     };
   }
+
+  public static create(attributes: PlaylistAttributes) {
+    return new Playlist(attributes);
+  }
+
   public getAttributes(): PlaylistAttributes {
     return CloneObject.clone(this.attributes);
   }
