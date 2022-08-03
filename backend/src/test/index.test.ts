@@ -12,12 +12,12 @@ import { PlaylistRepository } from '../domain/repositories/PlaylistRepository';
 import { VideoRepository } from '../domain/repositories/VideoRepository';
 import {
   AddVideoInPlaylistInput,
-  AddVideoToPlaylist
-} from '../domain/usecases/AddVideoToPlaylist';
+  AddVideoToPlaylistUsecase
+} from '../domain/usecases/AddVideoToPlaylistUsecase';
 import {
-  CreatePlaylist,
-  CreatePlaylistInput
-} from '../domain/usecases/CreatePlaylist';
+  CreatePlaylistInput,
+  CreatePlaylistUsecase
+} from '../domain/usecases/CreatePlaylistUsecase';
 import { FieldsValidationError } from '../errors/FieldsValidationError';
 import { NotFoundError } from '../errors/NotFoundError';
 import { CryptoIDGenerator } from '../infra/libs/CryptoIDGenerator';
@@ -75,7 +75,7 @@ describe('Usecase Playlist', () => {
 
       await channelRepository.create(channelEntity.getAttributes());
 
-      const createPlaylist = new CreatePlaylist({
+      const createPlaylist = new CreatePlaylistUsecase({
         playlistFactory,
         playlistRepository,
         channelRepository,
@@ -101,7 +101,7 @@ describe('Usecase Playlist', () => {
         id_authenticated_channel: '63102cbb-ef58-459d-b583-4fe4a7ad3335'
       };
 
-      const createPlaylist = new CreatePlaylist({
+      const createPlaylist = new CreatePlaylistUsecase({
         playlistFactory,
         playlistRepository,
         channelRepository,
@@ -123,7 +123,7 @@ describe('Usecase Playlist', () => {
           id_playlist: ''
         };
 
-        const addVideoInPlaylist = new AddVideoToPlaylist({
+        const addVideoInPlaylist = new AddVideoToPlaylistUsecase({
           videoInPlaylistFactory,
           playlistRepository,
           videoRepository,
@@ -197,7 +197,7 @@ describe('Usecase Playlist', () => {
       await playlistRepository.create(playlist);
       await videoRepository.create(video);
 
-      const addVideoInPlaylist = new AddVideoToPlaylist({
+      const addVideoInPlaylist = new AddVideoToPlaylistUsecase({
         videoInPlaylistFactory,
         playlistRepository,
         videoRepository,
@@ -257,7 +257,7 @@ describe('Usecase Playlist', () => {
       await videoRepository.create(video1);
       await videoRepository.create(video2);
 
-      const addVideoInPlaylist = new AddVideoToPlaylist({
+      const addVideoInPlaylist = new AddVideoToPlaylistUsecase({
         videoInPlaylistFactory,
         playlistRepository,
         videoRepository,
@@ -290,7 +290,7 @@ describe('Usecase Playlist', () => {
         create: (attributes, dependencies) => videoInPlaylistMock
       };
 
-      const addVideoInPlaylist = new AddVideoToPlaylist({
+      const addVideoInPlaylist = new AddVideoToPlaylistUsecase({
         videoInPlaylistFactory: mockVideoInPlaylistFactory,
         playlistRepository,
         videoRepository,
@@ -335,7 +335,7 @@ describe('Usecase Playlist', () => {
         findVideosByIds: async () => undefined
       };
 
-      const addVideoInPlaylist = new AddVideoToPlaylist({
+      const addVideoInPlaylist = new AddVideoToPlaylistUsecase({
         videoInPlaylistFactory: mockVideoInPlaylistFactory,
         playlistRepository: mockPlaylistRepository,
         videoRepository: mockVideoRepository,
@@ -357,7 +357,7 @@ describe('Usecase Playlist', () => {
       await playlistRepository.create(playlist);
       await videoRepository.create(video);
 
-      const addVideoInPlaylist = new AddVideoToPlaylist({
+      const addVideoInPlaylist = new AddVideoToPlaylistUsecase({
         videoInPlaylistFactory,
         playlistRepository,
         videoRepository,
@@ -379,7 +379,7 @@ describe('Usecase Playlist', () => {
       await playlistRepository.create(playlist);
       await videoRepository.create(video);
 
-      const addVideoInPlaylist = new AddVideoToPlaylist({
+      const addVideoInPlaylist = new AddVideoToPlaylistUsecase({
         videoInPlaylistFactory,
         playlistRepository,
         videoRepository,
@@ -403,7 +403,7 @@ describe('Usecase Playlist', () => {
       await playlistRepository.create(playlist);
       await videoRepository.create(video);
 
-      const addVideoInPlaylist = new AddVideoToPlaylist({
+      const addVideoInPlaylist = new AddVideoToPlaylistUsecase({
         videoInPlaylistFactory,
         playlistRepository,
         videoRepository,
@@ -428,7 +428,7 @@ describe('Usecase Playlist', () => {
       await playlistRepository.create(playlist);
       await videoRepository.create(video);
 
-      const addVideoInPlaylist = new AddVideoToPlaylist({
+      const addVideoInPlaylist = new AddVideoToPlaylistUsecase({
         videoInPlaylistFactory,
         playlistRepository,
         videoRepository,

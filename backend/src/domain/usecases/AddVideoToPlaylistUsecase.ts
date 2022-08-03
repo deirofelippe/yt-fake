@@ -30,7 +30,7 @@ export type AddVideoToPlaylistDependencies = {
   >;
 };
 
-export class AddVideoToPlaylist {
+export class AddVideoToPlaylistUsecase {
   constructor(private dependencies: AddVideoToPlaylistDependencies) {}
 
   public async execute(input: AddVideoInPlaylistInput) {

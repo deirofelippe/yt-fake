@@ -26,7 +26,7 @@ export type CreatePlaylistDependencies = {
   >;
 };
 
-export class CreatePlaylist {
+export class CreatePlaylistUsecase {
   constructor(private dependencies: CreatePlaylistDependencies) {}
 
   public async execute(input: CreatePlaylistInput): Promise<void> {
