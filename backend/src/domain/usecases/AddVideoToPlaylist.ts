@@ -1,6 +1,5 @@
 import { NotAuthorizedError } from '../../errors/NotAuthorizedError';
 import { NotFoundError } from '../../errors/NotFoundError';
-import { PlaylistType } from '../entities/Playlist';
 import { VideoVisibility } from '../entities/Video';
 import {
   VideoInPlaylist,
@@ -74,7 +73,7 @@ export class AddVideoToPlaylist {
 
     let cantAddVideoToPlaylist = null;
 
-    const playlistIsBuyable = playlistFound.type === PlaylistType.BUYABLE;
+    const playlistIsBuyable = playlistFound.price > 0;
     const playlistAndVideoOwnerIsNotSame =
       playlistFound.id_channel !== videoFound.id_channel;
     cantAddVideoToPlaylist =
@@ -85,7 +84,7 @@ export class AddVideoToPlaylist {
         "Can't add a third-party video to your own buyable playlist."
       );
 
-    const playlistIsRegular = playlistFound.type === PlaylistType.REGULAR;
+    const playlistIsRegular = playlistFound.price === 0;
     const videoIsBuyable = videoFound.price > 0;
     cantAddVideoToPlaylist = playlistIsRegular && videoIsBuyable;
     if (cantAddVideoToPlaylist)

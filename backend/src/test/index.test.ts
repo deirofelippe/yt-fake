@@ -2,7 +2,6 @@ import { describe, expect, test } from '@jest/globals';
 import { Channel, ChannelAttributes } from '../domain/entities/Channel';
 import {
   PlaylistAttributes,
-  PlaylistType,
   PlaylistVisibility
 } from '../domain/entities/Playlist';
 import { VideoAttributes, VideoVisibility } from '../domain/entities/Video';
@@ -60,7 +59,7 @@ describe('Usecase Playlist', () => {
       playlist = {
         id_channel: channel.id,
         title: 'Curso de Fullcycle Development',
-        type: PlaylistType.BUYABLE,
+        price: 12,
         visibility: PlaylistVisibility.PUBLIC,
         description:
           'Curso que aborda arquitetura de software, backend, frontend e devops'
@@ -95,7 +94,7 @@ describe('Usecase Playlist', () => {
       expect(playlists[0]).toEqual(expect.objectContaining({ ...playlist }));
     });
 
-    test('Deve lençar erro ao criar playlist com channel inexistente.', async () => {
+    test('Deve lançar erro ao criar playlist com channel inexistente.', async () => {
       const input: CreatePlaylistInput = {
         ...playlist,
         id_authenticated_channel: '63102cbb-ef58-459d-b583-4fe4a7ad3335'
@@ -178,7 +177,7 @@ describe('Usecase Playlist', () => {
         id: '001',
         id_channel: '001',
         title: 'Curso de Fullcycle Development',
-        type: PlaylistType.REGULAR,
+        price: 0,
         visibility: PlaylistVisibility.PUBLIC,
         description: 'Descrição da playlist.'
       };
@@ -370,7 +369,7 @@ describe('Usecase Playlist', () => {
     });
 
     test('Deve lançar erro ao adicionar video de terceiro na propria playlist com tipo "buyable".', async () => {
-      playlist.type = PlaylistType.BUYABLE;
+      playlist.price = 12;
       video.id_channel = '002';
       input.id_authenticated_channel = '001';
 
@@ -394,7 +393,7 @@ describe('Usecase Playlist', () => {
     test('Deve lançar erro ao adicionar video de terceiro com visibilidade "private" na propria playlist com tipo "regular".', async () => {
       video.visibility = VideoVisibility.PRIVATE;
       video.id_channel = '002';
-      playlist.type = PlaylistType.REGULAR;
+      playlist.price = 0;
       playlist.id_channel = '001';
       input.id_authenticated_channel = '001';
 
@@ -420,7 +419,7 @@ describe('Usecase Playlist', () => {
       video.visibility = VideoVisibility.PUBLIC;
       video.id_channel = '002';
       playlist.id_channel = '001';
-      playlist.type = PlaylistType.REGULAR;
+      playlist.price = 0;
       input.id_authenticated_channel = '001';
 
       await playlistRepository.create(playlist);

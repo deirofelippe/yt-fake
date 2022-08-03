@@ -1,10 +1,6 @@
+import { CloneObject } from '../../utils/CloneObject';
 import { IDGenerator } from '../libs/IDGenerator';
 import { Validator } from '../libs/Validator';
-
-export enum PlaylistType {
-  REGULAR = 'regular',
-  BUYABLE = 'buyable'
-}
 
 export enum PlaylistVisibility {
   PUBLIC = 'public',
@@ -15,7 +11,6 @@ export type PlaylistAttributes = {
   id?: string;
   id_channel: string;
   title: string;
-  type?: PlaylistType;
   visibility?: PlaylistVisibility;
   description?: string;
   price?: number;
@@ -39,13 +34,13 @@ export class Playlist {
 
   private setAttributes(playlist: PlaylistAttributes): void {
     this.attributes = {
-      type: PlaylistType.REGULAR,
+      price: 0,
       visibility: PlaylistVisibility.PUBLIC,
       ...playlist
     };
   }
   public getAttributes(): PlaylistAttributes {
-    return this.attributes;
+    return CloneObject.clone(this.attributes);
   }
   /**
    * Verifica se a visibilidade do vídeo é publica.
