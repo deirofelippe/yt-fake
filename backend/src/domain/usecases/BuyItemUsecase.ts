@@ -3,8 +3,8 @@ import { PlaylistAttributes, Playlist } from '../entities/Playlist';
 import { VideoAttributes, Video } from '../entities/Video';
 import { IDGenerator } from '../libs/IDGenerator';
 import { OrderRepositoryInterface } from '../repositories/OrderRepositoryInterface';
-import { PlaylistRepository } from '../repositories/PlaylistRepository';
-import { VideoRepository } from '../repositories/VideoRepository';
+import { PlaylistRepositoryInterface } from '../repositories/PlaylistRepositoryInterface';
+import { VideoRepositoryInterface } from '../repositories/VideoRepositoryInterface';
 
 export type Item = {
   id: string;
@@ -16,8 +16,8 @@ export type BuyItemInput = {
 };
 
 export type BuyItemDependencies = {
-  playlistRepository: PlaylistRepository;
-  videoRepository: VideoRepository;
+  playlistRepository: PlaylistRepositoryInterface;
+  videoRepository: VideoRepositoryInterface;
   orderRepository: OrderRepositoryInterface;
   // buyItemValidator: BuyItemValidator;
   idGenerator: IDGenerator;

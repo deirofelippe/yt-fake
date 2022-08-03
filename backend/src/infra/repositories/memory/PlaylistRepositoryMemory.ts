@@ -1,9 +1,9 @@
 import { PlaylistAttributes } from '../../../domain/entities/Playlist';
 import { VideoInPlaylistAttributes } from '../../../domain/entities/VideoInPlaylist';
-import { PlaylistRepository } from '../../../domain/repositories/PlaylistRepository';
+import { PlaylistRepositoryInterface } from '../../../domain/repositories/PlaylistRepositoryInterface';
 import { MemoryDatabase } from '../../../test/MemoryDatabase';
 
-export class PlaylistRepositoryMemory implements PlaylistRepository {
+export class PlaylistRepositoryMemory implements PlaylistRepositoryInterface {
   constructor(private memoryDatabase: MemoryDatabase) {}
 
   async findPlaylistsByIds(ids: string): Promise<PlaylistAttributes[] | []> {

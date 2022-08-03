@@ -12,7 +12,6 @@ import {
   BuyItemInput,
   BuyItemUsecase
 } from '../../../domain/usecases/BuyItemUsecase';
-import { CryptoIDGenerator } from '../../../infra/libs/CryptoIDGenerator';
 import { OrderRepositoryMemory } from '../../../infra/repositories/memory/OrderRepositoryMemory';
 import { PlaylistRepositoryMemory } from '../../../infra/repositories/memory/PlaylistRepositoryMemory';
 import { VideoRepositoryMemory } from '../../../infra/repositories/memory/VideoRepositoryMemory';

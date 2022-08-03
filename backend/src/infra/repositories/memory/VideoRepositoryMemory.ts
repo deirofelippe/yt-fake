@@ -1,11 +1,11 @@
 import { VideoAttributes } from '../../../domain/entities/Video';
 import {
   FindAllVideosOutput,
-  VideoRepository
-} from '../../../domain/repositories/VideoRepository';
+  VideoRepositoryInterface
+} from '../../../domain/repositories/VideoRepositoryInterface';
 import { MemoryDatabase } from '../../../test/MemoryDatabase';
 
-export class VideoRepositoryMemory implements VideoRepository {
+export class VideoRepositoryMemory implements VideoRepositoryInterface {
   constructor(private memoryDatabase: MemoryDatabase) {}
 
   async findVideosByIds(ids: string): Promise<VideoAttributes[] | []> {

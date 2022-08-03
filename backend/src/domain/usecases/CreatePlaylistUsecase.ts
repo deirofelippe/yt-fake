@@ -7,16 +7,16 @@ import {
 import { FactoryInterface } from '../factories/FactoryInterface';
 import { IDGenerator } from '../libs/IDGenerator';
 import { Validator } from '../libs/Validator';
-import { ChannelRepository } from '../repositories/ChannelRepository';
-import { PlaylistRepository } from '../repositories/PlaylistRepository';
+import { ChannelRepositoryInterface } from '../repositories/ChannelRepositoryInterface';
+import { PlaylistRepositoryInterface } from '../repositories/PlaylistRepositoryInterface';
 
 export type CreatePlaylistInput = Omit<PlaylistAttributes, 'id_channel'> & {
   id_authenticated_channel: string;
 };
 
 export type CreatePlaylistDependencies = {
-  playlistRepository: PlaylistRepository;
-  channelRepository: ChannelRepository;
+  playlistRepository: PlaylistRepositoryInterface;
+  channelRepository: ChannelRepositoryInterface;
   playlistValidator: Validator;
   idGenerator: IDGenerator;
   playlistFactory: FactoryInterface<

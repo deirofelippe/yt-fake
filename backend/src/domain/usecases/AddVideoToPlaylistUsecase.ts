@@ -9,8 +9,8 @@ import {
 import { FactoryInterface } from '../factories/FactoryInterface';
 import { IDGenerator } from '../libs/IDGenerator';
 import { Validator } from '../libs/Validator';
-import { PlaylistRepository } from '../repositories/PlaylistRepository';
-import { VideoRepository } from '../repositories/VideoRepository';
+import { PlaylistRepositoryInterface } from '../repositories/PlaylistRepositoryInterface';
+import { VideoRepositoryInterface } from '../repositories/VideoRepositoryInterface';
 
 export type AddVideoInPlaylistInput = {
   id_authenticated_channel: string;
@@ -19,8 +19,8 @@ export type AddVideoInPlaylistInput = {
 };
 
 export type AddVideoToPlaylistDependencies = {
-  playlistRepository: PlaylistRepository;
-  videoRepository: VideoRepository;
+  playlistRepository: PlaylistRepositoryInterface;
+  videoRepository: VideoRepositoryInterface;
   videoInPlaylistValidator: Validator;
   idGenerator: IDGenerator;
   videoInPlaylistFactory: FactoryInterface<

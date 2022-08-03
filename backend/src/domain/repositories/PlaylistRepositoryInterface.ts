@@ -1,7 +1,7 @@
 import { PlaylistAttributes } from '../entities/Playlist';
 import { VideoInPlaylistAttributes } from '../entities/VideoInPlaylist';
 
-export interface PlaylistRepository {
+export interface PlaylistRepositoryInterface {
   findAll(): Promise<PlaylistAttributes[] | []>;
   findById(id: string): Promise<PlaylistAttributes | undefined>;
   create(playlist: PlaylistAttributes): Promise<void>;

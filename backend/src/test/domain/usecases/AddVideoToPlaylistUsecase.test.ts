@@ -8,8 +8,8 @@ import {
 } from '../../../domain/entities/Video';
 import { VideoInPlaylist } from '../../../domain/entities/VideoInPlaylist';
 import { VideoInPlaylistFactory } from '../../../domain/factories/VideoInPlaylistFactory';
-import { PlaylistRepository } from '../../../domain/repositories/PlaylistRepository';
-import { VideoRepository } from '../../../domain/repositories/VideoRepository';
+import { PlaylistRepositoryInterface } from '../../../domain/repositories/PlaylistRepositoryInterface';
+import { VideoRepositoryInterface } from '../../../domain/repositories/VideoRepositoryInterface';
 import {
   AddVideoInPlaylistInput,
   AddVideoToPlaylistUsecase
@@ -234,14 +234,14 @@ describe('AddVideoToPlaylistUsecase', () => {
         id: '003'
       };
 
-      const mockPlaylistRepository: PlaylistRepository = {
+      const mockPlaylistRepository: PlaylistRepositoryInterface = {
         findById: async (id) => mockReturnPlaylist,
         addVideo: async () => undefined,
         create: async () => undefined,
         findAll: async () => undefined,
         findPlaylistsByIds: async () => undefined
       };
-      const mockVideoRepository: VideoRepository = {
+      const mockVideoRepository: VideoRepositoryInterface = {
         findById: async (id) => undefined,
         create: async () => undefined,
         findAll: async () => undefined,

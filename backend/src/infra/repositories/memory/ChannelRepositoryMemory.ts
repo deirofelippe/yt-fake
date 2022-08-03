@@ -1,10 +1,10 @@
 import { ChannelAttributes } from '../../../domain/entities/Channel';
-import { ChannelRepository } from '../../../domain/repositories/ChannelRepository';
+import { ChannelRepositoryInterface } from '../../../domain/repositories/ChannelRepositoryInterface';
 import { MemoryDatabase } from '../../../test/MemoryDatabase';
 
-export class ChannelRepositoryMemory implements ChannelRepository {
+export class ChannelRepositoryMemory implements ChannelRepositoryInterface {
   constructor(private memoryDatabase: MemoryDatabase) {}
-  async findAll(): Promise<ChannelAttributes[] | undefined> {
+  async findAll(): Promise<ChannelAttributes[] | []> {
     return Promise.resolve(this.memoryDatabase.channels);
   }
   async findById(id: string): Promise<ChannelAttributes | undefined> {
