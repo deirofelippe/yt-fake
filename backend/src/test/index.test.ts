@@ -25,6 +25,7 @@ import { channelJoiSchema } from '../infra/libs/joi/ChannelJoiSchema';
 import { JoiValidator } from '../infra/libs/joi/JoiValidator';
 import { playlistJoiSchema } from '../infra/libs/joi/PlaylistJoiSchema';
 import { videoInPlaylistJoiSchema } from '../infra/libs/joi/VideoInPlaylistJoiSchema';
+import { videoJoiSchema } from '../infra/libs/joi/VideoJoiSchema';
 import { ChannelRepositoryMemory } from '../infra/repositories/memory/ChannelRepositoryMemory';
 import { PlaylistRepositoryMemory } from '../infra/repositories/memory/PlaylistRepositoryMemory';
 import { VideoRepositoryMemory } from '../infra/repositories/memory/VideoRepositoryMemory';
@@ -205,7 +206,7 @@ describe('Usecase Playlist', () => {
       });
       await addVideoInPlaylist.execute(input);
 
-      const playlistVideos = await playlistRepository.findAllVideos(
+      const playlistVideos = await videoRepository.findAllVideosByPlaylist(
         playlist.id
       );
 
@@ -266,7 +267,7 @@ describe('Usecase Playlist', () => {
       await addVideoInPlaylist.execute(input1);
       await addVideoInPlaylist.execute(input2);
 
-      const playlistVideos = await playlistRepository.findAllVideos(
+      const playlistVideos = await videoRepository.findAllVideosByPlaylist(
         playlist.id
       );
 
@@ -324,12 +325,14 @@ describe('Usecase Playlist', () => {
         addVideo: async () => undefined,
         create: async () => undefined,
         findAll: async () => undefined,
-        findAllVideos: async () => undefined
+        findPlaylistsByIds: async () => undefined
       };
       const mockVideoRepository: VideoRepository = {
         findById: async (id) => undefined,
         create: async () => undefined,
-        findAll: async () => undefined
+        findAll: async () => undefined,
+        findAllVideosByPlaylist: async () => undefined,
+        findVideosByIds: async () => undefined
       };
 
       const addVideoInPlaylist = new AddVideoToPlaylist({

@@ -54,7 +54,7 @@ export class BuyItemUsecase {
       videosFound: VideoAttributes[] = [];
     if (videos.length > 0) {
       videosIds = videos.map((item) => item.id).join(',');
-      videosFound = await videoRepository.findVideosById(videosIds);
+      videosFound = await videoRepository.findVideosByIds(videosIds);
       const canBuyVideos = videosFound.every((video) => {
         const videoEntity = Video.create(video);
         return videoEntity.isNotFree() && videoEntity.isPublic();
@@ -66,7 +66,9 @@ export class BuyItemUsecase {
       playlistsFound: PlaylistAttributes[] = [];
     if (playlists.length > 0) {
       playlistsIds = playlists.map((item) => item.id).join(',');
-      playlistsFound = await playlistRepository.findPlaylistsById(playlistsIds);
+      playlistsFound = await playlistRepository.findPlaylistsByIds(
+        playlistsIds
+      );
       const canBuyPlaylists = playlistsFound.every((playlist) => {
         const playlistEntity = Playlist.create(playlist);
         return playlistEntity.isNotFree() && playlistEntity.isPublic();
