@@ -1,3 +1,4 @@
+import { CloneObject } from '../../utils/CloneObject';
 import { IDGenerator } from '../libs/IDGenerator';
 import { BuyItemInput } from '../usecases/BuyItemUsecase';
 
@@ -43,7 +44,7 @@ export class Order {
     return this.attributes.id;
   }
   public getOrder(): Omit<OrderAttributes, 'items'> {
-    const order = JSON.parse(JSON.stringify(this.attributes));
+    const order = CloneObject.clone(this.attributes);
     delete order.items;
     return order;
   }
