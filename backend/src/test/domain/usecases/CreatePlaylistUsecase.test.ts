@@ -31,8 +31,7 @@ describe('CreatePlaylistUsecase', () => {
     let playlist: PlaylistAttributes;
 
     beforeEach(() => {
-      memoryDatabase.channels = [];
-      memoryDatabase.playlists = [];
+      memoryDatabase.clear();
 
       channel = {
         id: '63102cbb-ef58-459d-b583-4fe4a7ad3335',

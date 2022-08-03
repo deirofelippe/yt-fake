@@ -26,10 +26,7 @@ describe('BuyItemUsecase', () => {
     const orderRepository = new OrderRepositoryMemory(memoryDatabase);
 
     beforeEach(() => {
-      memoryDatabase.playlists = [];
-      memoryDatabase.videos = [];
-      memoryDatabase.orders = [];
-      memoryDatabase.orderItems = [];
+      memoryDatabase.clear();
     });
 
     //video e playlist inexistente, video e playlist privados ou gratuitos, validacao, ja comprado, playlist e video n pode ser da propria pessoa

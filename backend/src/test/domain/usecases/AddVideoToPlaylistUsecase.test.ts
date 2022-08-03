@@ -72,9 +72,7 @@ describe('AddVideoToPlaylistUsecase', () => {
     let input: AddVideoInPlaylistInput;
 
     beforeEach(() => {
-      memoryDatabase.playlists = [];
-      memoryDatabase.videos = [];
-      memoryDatabase.videoInPlaylist = [];
+      memoryDatabase.clear();
 
       video = {
         id: '001',

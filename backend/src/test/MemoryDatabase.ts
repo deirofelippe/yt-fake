@@ -11,4 +11,13 @@ export class MemoryDatabase {
   public playlists: PlaylistAttributes[] = [];
   public videos: VideoAttributes[] = [];
   public videoInPlaylist: VideoInPlaylistAttributes[] = [];
+
+  public clear() {
+    this.channels = [];
+    this.videos = [];
+    this.playlists = [];
+    this.videoInPlaylist = [];
+    this.orders = [];
+    this.orderItems = [];
+  }
 }
