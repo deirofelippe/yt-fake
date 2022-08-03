@@ -7,11 +7,16 @@ import {
   VideoAttributes,
   VideoVisibility
 } from '../../../domain/entities/Video';
+import { OrderFactory } from '../../../domain/factories/OrderFactory';
 import { IDGenerator } from '../../../domain/libs/IDGenerator';
+import { OrderRepositoryInterface } from '../../../domain/repositories/OrderRepositoryInterface';
+import { PlaylistRepositoryInterface } from '../../../domain/repositories/PlaylistRepositoryInterface';
+import { VideoRepositoryInterface } from '../../../domain/repositories/VideoRepositoryInterface';
 import {
   BuyItemInput,
   BuyItemUsecase
 } from '../../../domain/usecases/BuyItemUsecase';
+import { CryptoIDGenerator } from '../../../infra/libs/CryptoIDGenerator';
 import { OrderRepositoryMemory } from '../../../infra/repositories/memory/OrderRepositoryMemory';
 import { PlaylistRepositoryMemory } from '../../../infra/repositories/memory/PlaylistRepositoryMemory';
 import { VideoRepositoryMemory } from '../../../infra/repositories/memory/VideoRepositoryMemory';
@@ -23,6 +28,17 @@ describe('BuyItemUsecase', () => {
     const videoRepository = new VideoRepositoryMemory(memoryDatabase);
     const playlistRepository = new PlaylistRepositoryMemory(memoryDatabase);
     const orderRepository = new OrderRepositoryMemory(memoryDatabase);
+    const idGenerator = new CryptoIDGenerator();
+    const orderFactory = new OrderFactory({ idGenerator });
+
+    const createBuyItemUsecase = (): BuyItemUsecase => {
+      return new BuyItemUsecase({
+        orderRepository,
+        playlistRepository,
+        videoRepository,
+        orderFactory
+      });
+    };
 
     beforeEach(() => {
       memoryDatabase.clear();
@@ -62,11 +78,14 @@ describe('BuyItemUsecase', () => {
       const idGeneratorMock: IDGenerator = {
         generate: () => id_mock
       };
+      const orderFactoryMock = new OrderFactory({
+        idGenerator: idGeneratorMock
+      });
       const buyItem = new BuyItemUsecase({
-        idGenerator: idGeneratorMock,
         orderRepository,
         playlistRepository,
-        videoRepository
+        videoRepository,
+        orderFactory: orderFactoryMock
       });
       await buyItem.execute(input);
 

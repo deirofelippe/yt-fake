@@ -8,8 +8,6 @@ import {
 } from '../../../domain/entities/Video';
 import { VideoInPlaylist } from '../../../domain/entities/VideoInPlaylist';
 import { VideoInPlaylistFactory } from '../../../domain/factories/VideoInPlaylistFactory';
-import { PlaylistRepositoryInterface } from '../../../domain/repositories/PlaylistRepositoryInterface';
-import { VideoRepositoryInterface } from '../../../domain/repositories/VideoRepositoryInterface';
 import {
   AddVideoInPlaylistInput,
   AddVideoToPlaylistUsecase
@@ -27,8 +25,19 @@ describe('AddVideoToPlaylistUsecase', () => {
   const playlistRepository = new PlaylistRepositoryMemory(memoryDatabase);
   const videoRepository = new VideoRepositoryMemory(memoryDatabase);
   const idGenerator = new CryptoIDGenerator();
-  const videoInPlaylistValidator = new JoiValidator(videoInPlaylistJoiSchema);
-  const videoInPlaylistFactory = new VideoInPlaylistFactory();
+  const validator = new JoiValidator(videoInPlaylistJoiSchema);
+  const videoInPlaylistFactory = new VideoInPlaylistFactory({
+    idGenerator,
+    validator
+  });
+
+  const createAddVideoToPlaylistUsecase = (): AddVideoToPlaylistUsecase => {
+    return new AddVideoToPlaylistUsecase({
+      videoInPlaylistFactory,
+      playlistRepository,
+      videoRepository
+    });
+  };
 
   describe('Adicionar video na playlist', () => {
     describe('Validations', () => {
@@ -39,13 +48,7 @@ describe('AddVideoToPlaylistUsecase', () => {
           id_playlist: ''
         };
 
-        const addVideoInPlaylist = new AddVideoToPlaylistUsecase({
-          videoInPlaylistFactory,
-          playlistRepository,
-          videoRepository,
-          idGenerator,
-          videoInPlaylistValidator
-        });
+        const addVideoInPlaylist = createAddVideoToPlaylistUsecase();
 
         const expectedError = [
           {
@@ -111,13 +114,7 @@ describe('AddVideoToPlaylistUsecase', () => {
       await playlistRepository.create(playlist);
       await videoRepository.create(video);
 
-      const addVideoInPlaylist = new AddVideoToPlaylistUsecase({
-        videoInPlaylistFactory,
-        playlistRepository,
-        videoRepository,
-        idGenerator,
-        videoInPlaylistValidator
-      });
+      const addVideoInPlaylist = createAddVideoToPlaylistUsecase();
       await addVideoInPlaylist.execute(input);
 
       const playlistVideos = await videoRepository.findAllVideosByPlaylist(
@@ -171,13 +168,8 @@ describe('AddVideoToPlaylistUsecase', () => {
       await videoRepository.create(video1);
       await videoRepository.create(video2);
 
-      const addVideoInPlaylist = new AddVideoToPlaylistUsecase({
-        videoInPlaylistFactory,
-        playlistRepository,
-        videoRepository,
-        idGenerator,
-        videoInPlaylistValidator
-      });
+      const addVideoInPlaylist = createAddVideoToPlaylistUsecase();
+
       await addVideoInPlaylist.execute(input1);
       await addVideoInPlaylist.execute(input2);
 
@@ -200,16 +192,16 @@ describe('AddVideoToPlaylistUsecase', () => {
         id_playlist: input.id_playlist,
         id_referenced_video: input.id_referenced_video
       });
-      const mockVideoInPlaylistFactory: VideoInPlaylistFactory = {
-        create: (attributes, dependencies) => videoInPlaylistMock
-      };
+      const videoInPlaylistFactoryMock = new VideoInPlaylistFactory({
+        idGenerator,
+        validator
+      });
+      videoInPlaylistFactoryMock.create = () => videoInPlaylistMock;
 
       const addVideoInPlaylist = new AddVideoToPlaylistUsecase({
-        videoInPlaylistFactory: mockVideoInPlaylistFactory,
+        videoInPlaylistFactory: videoInPlaylistFactoryMock,
         playlistRepository,
-        videoRepository,
-        idGenerator,
-        videoInPlaylistValidator
+        videoRepository
       });
 
       const execute = async () => await addVideoInPlaylist.execute(input);
@@ -224,9 +216,11 @@ describe('AddVideoToPlaylistUsecase', () => {
         id_playlist: input.id_playlist,
         id_referenced_video: input.id_referenced_video
       });
-      const mockVideoInPlaylistFactory: VideoInPlaylistFactory = {
-        create: (attributes, dependencies) => videoInPlaylistMock
-      };
+      const videoInPlaylistFactoryMock = new VideoInPlaylistFactory({
+        idGenerator,
+        validator
+      });
+      videoInPlaylistFactoryMock.create = () => videoInPlaylistMock;
 
       const mockReturnPlaylist: PlaylistAttributes = {
         id_channel: '0',
@@ -234,27 +228,18 @@ describe('AddVideoToPlaylistUsecase', () => {
         id: '003'
       };
 
-      const mockPlaylistRepository: PlaylistRepositoryInterface = {
-        findById: async (id) => mockReturnPlaylist,
-        addVideo: async () => undefined,
-        create: async () => undefined,
-        findAll: async () => undefined,
-        findPlaylistsByIds: async () => undefined
-      };
-      const mockVideoRepository: VideoRepositoryInterface = {
-        findById: async (id) => undefined,
-        create: async () => undefined,
-        findAll: async () => undefined,
-        findAllVideosByPlaylist: async () => undefined,
-        findVideosByIds: async () => undefined
-      };
+      const mockPlaylistRepository = new PlaylistRepositoryMemory(
+        memoryDatabase
+      );
+      mockPlaylistRepository.findById = async (id) => mockReturnPlaylist;
+
+      const mockVideoRepository = new VideoRepositoryMemory(memoryDatabase);
+      mockVideoRepository.findById = async (id) => undefined;
 
       const addVideoInPlaylist = new AddVideoToPlaylistUsecase({
-        videoInPlaylistFactory: mockVideoInPlaylistFactory,
+        videoInPlaylistFactory: videoInPlaylistFactoryMock,
         playlistRepository: mockPlaylistRepository,
-        videoRepository: mockVideoRepository,
-        idGenerator,
-        videoInPlaylistValidator
+        videoRepository: mockVideoRepository
       });
 
       const execute = async () => await addVideoInPlaylist.execute(input);
@@ -271,13 +256,7 @@ describe('AddVideoToPlaylistUsecase', () => {
       await playlistRepository.create(playlist);
       await videoRepository.create(video);
 
-      const addVideoInPlaylist = new AddVideoToPlaylistUsecase({
-        videoInPlaylistFactory,
-        playlistRepository,
-        videoRepository,
-        idGenerator,
-        videoInPlaylistValidator
-      });
+      const addVideoInPlaylist = createAddVideoToPlaylistUsecase();
       const execute = async () => await addVideoInPlaylist.execute(input);
 
       await expect(execute).rejects.toThrowError(
@@ -293,13 +272,7 @@ describe('AddVideoToPlaylistUsecase', () => {
       await playlistRepository.create(playlist);
       await videoRepository.create(video);
 
-      const addVideoInPlaylist = new AddVideoToPlaylistUsecase({
-        videoInPlaylistFactory,
-        playlistRepository,
-        videoRepository,
-        idGenerator,
-        videoInPlaylistValidator
-      });
+      const addVideoInPlaylist = createAddVideoToPlaylistUsecase();
       const execute = async () => await addVideoInPlaylist.execute(input);
 
       await expect(execute).rejects.toThrowError(
@@ -317,13 +290,7 @@ describe('AddVideoToPlaylistUsecase', () => {
       await playlistRepository.create(playlist);
       await videoRepository.create(video);
 
-      const addVideoInPlaylist = new AddVideoToPlaylistUsecase({
-        videoInPlaylistFactory,
-        playlistRepository,
-        videoRepository,
-        idGenerator,
-        videoInPlaylistValidator
-      });
+      const addVideoInPlaylist = createAddVideoToPlaylistUsecase();
       const execute = async () => await addVideoInPlaylist.execute(input);
 
       await expect(execute).rejects.toThrowError(
@@ -345,9 +312,7 @@ describe('AddVideoToPlaylistUsecase', () => {
       const addVideoInPlaylist = new AddVideoToPlaylistUsecase({
         videoInPlaylistFactory,
         playlistRepository,
-        videoRepository,
-        idGenerator,
-        videoInPlaylistValidator
+        videoRepository
       });
       const execute = async () => await addVideoInPlaylist.execute(input);
 

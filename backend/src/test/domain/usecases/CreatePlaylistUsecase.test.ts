@@ -21,10 +21,18 @@ describe('CreatePlaylistUsecase', () => {
   const memoryDatabase = new MemoryDatabase();
   const playlistRepository = new PlaylistRepositoryMemory(memoryDatabase);
   const channelRepository = new ChannelRepositoryMemory(memoryDatabase);
-  const idGenerator = new CryptoIDGenerator();
-  const playlistValidator = new JoiValidator(playlistJoiSchema);
   const channelValidator = new JoiValidator(channelJoiSchema);
-  const playlistFactory = new PlaylistFactory();
+  const idGenerator = new CryptoIDGenerator();
+  const validator = new JoiValidator(playlistJoiSchema);
+  const playlistFactory = new PlaylistFactory({ idGenerator, validator });
+
+  const createPlaylistUsecase = (): CreatePlaylistUsecase => {
+    return new CreatePlaylistUsecase({
+      playlistFactory,
+      playlistRepository,
+      channelRepository
+    });
+  };
 
   describe('Criar playlist', () => {
     let channel: ChannelAttributes;
@@ -57,13 +65,7 @@ describe('CreatePlaylistUsecase', () => {
 
       await channelRepository.create(channelEntity.getAttributes());
 
-      const createPlaylist = new CreatePlaylistUsecase({
-        playlistFactory,
-        playlistRepository,
-        channelRepository,
-        playlistValidator,
-        idGenerator
-      });
+      const createPlaylist = createPlaylistUsecase();
 
       const input: CreatePlaylistInput = {
         ...playlist,
@@ -83,13 +85,8 @@ describe('CreatePlaylistUsecase', () => {
         id_authenticated_channel: '63102cbb-ef58-459d-b583-4fe4a7ad3335'
       };
 
-      const createPlaylist = new CreatePlaylistUsecase({
-        playlistFactory,
-        playlistRepository,
-        channelRepository,
-        playlistValidator,
-        idGenerator
-      });
+      const createPlaylist = createPlaylistUsecase();
+
       const execute = async () => await createPlaylist.execute(input);
 
       await expect(execute).rejects.toThrowError(NotFoundError);
