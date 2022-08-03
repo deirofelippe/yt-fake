@@ -1,7 +1,7 @@
 import { Order } from '../entities/Order';
 import { PlaylistAttributes, Playlist } from '../entities/Playlist';
 import { VideoAttributes, Video } from '../entities/Video';
-import { IDGenerator } from '../libs/IDGenerator';
+import { FactoryInterface } from '../factories/FactoryInterface';
 import { OrderRepositoryInterface } from '../repositories/OrderRepositoryInterface';
 import { PlaylistRepositoryInterface } from '../repositories/PlaylistRepositoryInterface';
 import { VideoRepositoryInterface } from '../repositories/VideoRepositoryInterface';
@@ -20,17 +20,18 @@ export type BuyItemDependencies = {
   videoRepository: VideoRepositoryInterface;
   orderRepository: OrderRepositoryInterface;
   // buyItemValidator: BuyItemValidator;
-  idGenerator: IDGenerator;
+  orderFactory: FactoryInterface<BuyItemInput, Order>;
 };
 
 export class BuyItemUsecase {
-  constructor(private dependencies: BuyItemDependencies) {}
+  constructor(private readonly dependencies: BuyItemDependencies) {}
+
   public async execute(input: BuyItemInput) {
     const {
       videoRepository,
       playlistRepository,
       orderRepository,
-      idGenerator
+      orderFactory
     } = this.dependencies;
 
     const items = input.items;
@@ -82,7 +83,7 @@ export class BuyItemUsecase {
     if (totalLength !== items.length)
       throw new Error('Algum item não foi encontrado.');
 
-    const order = Order.create({ idGenerator }, input);
+    const order = orderFactory.create(input);
 
     await orderRepository.createOrder(order.getOrder());
     await orderRepository.createOrderItems(order.getOrderItems());

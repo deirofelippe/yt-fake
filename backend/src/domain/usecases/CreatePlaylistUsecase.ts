@@ -1,12 +1,6 @@
 import { NotFoundError } from '../../errors/NotFoundError';
-import {
-  Playlist,
-  PlaylistAttributes,
-  PlaylistDependencies
-} from '../entities/Playlist';
+import { Playlist, PlaylistAttributes } from '../entities/Playlist';
 import { FactoryInterface } from '../factories/FactoryInterface';
-import { IDGenerator } from '../libs/IDGenerator';
-import { Validator } from '../libs/Validator';
 import { ChannelRepositoryInterface } from '../repositories/ChannelRepositoryInterface';
 import { PlaylistRepositoryInterface } from '../repositories/PlaylistRepositoryInterface';
 
@@ -17,26 +11,15 @@ export type CreatePlaylistInput = Omit<PlaylistAttributes, 'id_channel'> & {
 export type CreatePlaylistDependencies = {
   playlistRepository: PlaylistRepositoryInterface;
   channelRepository: ChannelRepositoryInterface;
-  playlistValidator: Validator;
-  idGenerator: IDGenerator;
-  playlistFactory: FactoryInterface<
-    PlaylistAttributes,
-    PlaylistDependencies,
-    Playlist
-  >;
+  playlistFactory: FactoryInterface<PlaylistAttributes, Playlist>;
 };
 
 export class CreatePlaylistUsecase {
-  constructor(private dependencies: CreatePlaylistDependencies) {}
+  constructor(private readonly dependencies: CreatePlaylistDependencies) {}
 
   public async execute(input: CreatePlaylistInput): Promise<void> {
-    const {
-      channelRepository,
-      playlistFactory,
-      playlistRepository,
-      idGenerator,
-      playlistValidator
-    } = this.dependencies;
+    const { channelRepository, playlistFactory, playlistRepository } =
+      this.dependencies;
 
     const channelExists = await channelRepository.findById(
       input.id_authenticated_channel
@@ -52,14 +35,7 @@ export class CreatePlaylistUsecase {
     };
     delete playlistAttributes.id_authenticated_channel;
 
-    const playlistDependencies = {
-      idGenerator: idGenerator,
-      validator: playlistValidator
-    };
-    const playlist = playlistFactory.create(
-      playlistAttributes,
-      playlistDependencies
-    );
+    const playlist = playlistFactory.create(playlistAttributes);
 
     await playlistRepository.create(playlist.getAttributes());
   }

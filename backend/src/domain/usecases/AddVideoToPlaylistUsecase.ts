@@ -3,12 +3,9 @@ import { NotFoundError } from '../../errors/NotFoundError';
 import { VideoVisibility } from '../entities/Video';
 import {
   VideoInPlaylist,
-  VideoInPlaylistAttributes,
-  VideoInPlaylistDependencies
+  VideoInPlaylistAttributes
 } from '../entities/VideoInPlaylist';
 import { FactoryInterface } from '../factories/FactoryInterface';
-import { IDGenerator } from '../libs/IDGenerator';
-import { Validator } from '../libs/Validator';
 import { PlaylistRepositoryInterface } from '../repositories/PlaylistRepositoryInterface';
 import { VideoRepositoryInterface } from '../repositories/VideoRepositoryInterface';
 
@@ -21,42 +18,32 @@ export type AddVideoInPlaylistInput = {
 export type AddVideoToPlaylistDependencies = {
   playlistRepository: PlaylistRepositoryInterface;
   videoRepository: VideoRepositoryInterface;
-  videoInPlaylistValidator: Validator;
-  idGenerator: IDGenerator;
   videoInPlaylistFactory: FactoryInterface<
     VideoInPlaylistAttributes,
-    VideoInPlaylistDependencies,
     VideoInPlaylist
   >;
 };
 
 export class AddVideoToPlaylistUsecase {
-  constructor(private dependencies: AddVideoToPlaylistDependencies) {}
+  constructor(private readonly dependencies: AddVideoToPlaylistDependencies) {}
 
   public async execute(input: AddVideoInPlaylistInput) {
-    const attributes: VideoInPlaylistAttributes = {
+    const { playlistRepository, videoInPlaylistFactory, videoRepository } =
+      this.dependencies;
+
+    const videoInPlaylist = videoInPlaylistFactory.create({
       id_playlist: input.id_playlist,
       id_referenced_video: input.id_referenced_video
-    };
+    });
 
-    const dependencies: VideoInPlaylistDependencies = {
-      idGenerator: this.dependencies.idGenerator,
-      validator: this.dependencies.videoInPlaylistValidator
-    };
-
-    const videoInPlaylist = this.dependencies.videoInPlaylistFactory.create(
-      attributes,
-      dependencies
-    );
-
-    const playlistFound = await this.dependencies.playlistRepository.findById(
+    const playlistFound = await playlistRepository.findById(
       videoInPlaylist.playlistId
     );
 
     if (!playlistFound)
       throw new NotFoundError(videoInPlaylist.playlistId, 'Playlist');
 
-    const videoFound = await this.dependencies.videoRepository.findById(
+    const videoFound = await videoRepository.findById(
       videoInPlaylist.referencedVideoId
     );
 
@@ -71,7 +58,7 @@ export class AddVideoToPlaylistUsecase {
         'Channel can only add video to own playlist.'
       );
 
-    let cantAddVideoToPlaylist = null;
+    let cantAddVideoToPlaylist = true;
 
     const playlistIsBuyable = playlistFound.price > 0;
     const playlistAndVideoOwnerIsNotSame =
@@ -99,8 +86,6 @@ export class AddVideoToPlaylistUsecase {
         "Can't add a third-party private video to your own playlist."
       );
 
-    await this.dependencies.playlistRepository.addVideo(
-      videoInPlaylist.getAttributes()
-    );
+    await playlistRepository.addVideo(videoInPlaylist.getAttributes());
   }
 }
