@@ -30,7 +30,15 @@ export class CreatePlaylist {
   constructor(private dependencies: CreatePlaylistDependencies) {}
 
   public async execute(input: CreatePlaylistInput): Promise<void> {
-    const channelExists = await this.dependencies.channelRepository.findById(
+    const {
+      channelRepository,
+      playlistFactory,
+      playlistRepository,
+      idGenerator,
+      playlistValidator
+    } = this.dependencies;
+
+    const channelExists = await channelRepository.findById(
       input.id_authenticated_channel
     );
 
@@ -45,14 +53,14 @@ export class CreatePlaylist {
     delete playlistAttributes.id_authenticated_channel;
 
     const playlistDependencies = {
-      idGenerator: this.dependencies.idGenerator,
-      validator: this.dependencies.playlistValidator
+      idGenerator: idGenerator,
+      validator: playlistValidator
     };
-    const playlist = this.dependencies.playlistFactory.create(
+    const playlist = playlistFactory.create(
       playlistAttributes,
       playlistDependencies
     );
 
-    await this.dependencies.playlistRepository.create(playlist.getAttributes());
+    await playlistRepository.create(playlist.getAttributes());
   }
 }

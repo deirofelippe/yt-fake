@@ -19,7 +19,7 @@ import { VideoRepositoryMemory } from '../../../infra/repositories/memory/VideoR
 import { MemoryDatabase } from '../../MemoryDatabase';
 
 describe('BuyItemUsecase', () => {
-  describe.only('Adicionar nova order', () => {
+  describe('Adicionar nova order', () => {
     const memoryDatabase = new MemoryDatabase();
     const idGenerator = new CryptoIDGenerator();
     const videoRepository = new VideoRepositoryMemory(memoryDatabase);
