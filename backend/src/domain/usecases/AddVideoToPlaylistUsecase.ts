@@ -50,8 +50,9 @@ export class AddVideoToPlaylistUsecase {
     if (!videoFound)
       throw new NotFoundError(videoInPlaylist.referencedVideoId, 'Video');
 
-    const notOwnsThePlaylist =
-      input.id_authenticated_channel !== playlistFound.id_channel;
+    const notOwnsThePlaylist = playlistFound.channelsIsNotTheSame(
+      input.id_authenticated_channel
+    );
 
     if (notOwnsThePlaylist)
       throw new NotAuthorizedError(
@@ -60,27 +61,25 @@ export class AddVideoToPlaylistUsecase {
 
     let cantAddVideoToPlaylist = true;
 
-    const playlistIsBuyable = playlistFound.price > 0;
-    const playlistAndVideoOwnerIsNotSame =
-      playlistFound.id_channel !== videoFound.id_channel;
+    const playlistAndVideoOwnerIsNotSame = playlistFound.channelsIsNotTheSame(
+      videoFound.id_channel
+    );
     cantAddVideoToPlaylist =
-      playlistIsBuyable && playlistAndVideoOwnerIsNotSame;
+      playlistFound.isNotFree() && playlistAndVideoOwnerIsNotSame;
 
     if (cantAddVideoToPlaylist)
       throw new NotAuthorizedError(
         "Can't add a third-party video to your own buyable playlist."
       );
 
-    const playlistIsRegular = playlistFound.price === 0;
-    const videoIsBuyable = videoFound.price > 0;
-    cantAddVideoToPlaylist = playlistIsRegular && videoIsBuyable;
+    const playlistIsFree = playlistFound.isFree();
+    cantAddVideoToPlaylist = playlistIsFree && videoFound.isNotFree();
     if (cantAddVideoToPlaylist)
       throw new NotAuthorizedError(
         "Can't add a third-party buyable video to your own playlist."
       );
 
-    const videoIsPrivate = videoFound.visibility === VideoVisibility.PRIVATE;
-    cantAddVideoToPlaylist = playlistIsRegular && videoIsPrivate;
+    cantAddVideoToPlaylist = playlistIsFree && videoFound.isPrivate();
     if (cantAddVideoToPlaylist)
       throw new NotAuthorizedError(
         "Can't add a third-party private video to your own playlist."
