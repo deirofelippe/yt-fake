@@ -1,5 +1,4 @@
 import { IDGenerator } from '../libs/IDGenerator';
-import { Validator } from '../libs/Validator';
 
 export enum VideoVisibility {
   PUBLIC = 'public',
@@ -21,7 +20,6 @@ export type VideoAttributes = {
 };
 
 export type VideoDependencies = {
-  validator: Validator;
   idGenerator: IDGenerator;
 };
 
@@ -40,6 +38,7 @@ export class Video {
   public static create(attributes: VideoAttributes) {
     return new Video(attributes);
   }
+
   /**
    * Retorna os atributos de vídeo.
    * @returns VideoAttributes
@@ -47,29 +46,37 @@ export class Video {
   public getAttributes(): VideoAttributes {
     return this.attributes;
   }
+
+  get id_channel() {
+    return this.attributes.id_channel;
+  }
+
   /**
-   * Verifica se a visibilidade do vídeo é publica.
+   * Verifica se a visibility do vídeo é publica.
    * @returns boolean
    */
   public isPublic() {
     return this.attributes.visibility === VideoVisibility.PUBLIC;
   }
+
   /**
-   * Verifica se a visibilidade do vídeo é privada.
+   * Verifica se a visibility do vídeo é privada.
    * @returns boolean
    */
   public isPrivate() {
-    return this.attributes.visibility === VideoVisibility.PUBLIC;
+    return this.attributes.visibility === VideoVisibility.PRIVATE;
   }
+
   /**
-   * Verifica se o preço é zero.
+   * Verifica se o price é zero.
    * @returns boolean
    */
   public isFree() {
     return this.attributes.price === 0;
   }
+
   /**
-   * Verifica se o maior que zero.
+   * Verifica se o price é maior que zero.
    * @returns boolean
    */
   public isNotFree() {

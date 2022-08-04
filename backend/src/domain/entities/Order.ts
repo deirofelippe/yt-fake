@@ -1,6 +1,5 @@
 import { CloneObject } from '../../utils/CloneObject';
 import { IDGenerator } from '../libs/IDGenerator';
-import { BuyItemInput } from '../usecases/BuyItemUsecase';
 
 export type OrderAttributes = {
   id: string;
@@ -26,6 +25,9 @@ export class Order {
 
   get id() {
     return this.attributes.id;
+  }
+  public getOrderWithItems(): OrderAttributes {
+    return CloneObject.clone(this.attributes);
   }
   public getOrder(): Omit<OrderAttributes, 'items'> {
     const order = CloneObject.clone(this.attributes);
