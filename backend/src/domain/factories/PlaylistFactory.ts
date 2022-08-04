@@ -5,9 +5,9 @@ import {
   Playlist
 } from '../entities/Playlist';
 import { CreatePlaylistUsecaseInput } from '../usecases/CreatePlaylistUsecase';
-import { FactoryInterface } from './FactoryInterface';
+import { EntityFactoryInterface } from './EntityFactoryInterface';
 
-export class PlaylistFactory implements FactoryInterface<Playlist> {
+export class PlaylistFactory implements EntityFactoryInterface<Playlist> {
   constructor(private readonly dependencies: PlaylistDependencies) {}
   recreate(attributes: PlaylistAttributes): Playlist {
     return Playlist.create(attributes);

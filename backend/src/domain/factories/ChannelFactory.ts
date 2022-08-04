@@ -3,9 +3,9 @@ import {
   ChannelDependencies,
   Channel
 } from '../entities/Channel';
-import { FactoryInterface } from './FactoryInterface';
+import { EntityFactoryInterface } from './EntityFactoryInterface';
 
-export class ChannelFactory implements FactoryInterface<Channel> {
+export class ChannelFactory implements EntityFactoryInterface<Channel> {
   constructor(private readonly dependencies?: ChannelDependencies) {}
   recreate(attributes: ChannelAttributes): Channel {
     if (!attributes.id)

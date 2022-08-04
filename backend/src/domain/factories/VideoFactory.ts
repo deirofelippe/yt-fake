@@ -1,7 +1,7 @@
 import { VideoAttributes, VideoDependencies, Video } from '../entities/Video';
-import { FactoryInterface } from './FactoryInterface';
+import { EntityFactoryInterface } from './EntityFactoryInterface';
 
-export class VideoFactory implements FactoryInterface<Video> {
+export class VideoFactory implements EntityFactoryInterface<Video> {
   constructor(private readonly dependencies?: VideoDependencies) {}
   recreate(attributes: VideoAttributes): Video {
     if (!attributes.id)

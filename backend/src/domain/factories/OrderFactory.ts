@@ -5,9 +5,9 @@ import {
   OrderItemAttributes
 } from '../entities/Order';
 import { BuyItemUsecaseInput } from '../usecases/BuyItemUsecase';
-import { FactoryInterface } from './FactoryInterface';
+import { EntityFactoryInterface } from './EntityFactoryInterface';
 
-export class OrderFactory implements FactoryInterface<Order> {
+export class OrderFactory implements EntityFactoryInterface<Order> {
   constructor(private readonly dependencies: OrderDependencies) {}
   recreate(attributes: OrderAttributes): Order {
     if (!attributes.id)
