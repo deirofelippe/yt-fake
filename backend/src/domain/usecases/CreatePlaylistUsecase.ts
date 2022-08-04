@@ -4,20 +4,25 @@ import { FactoryInterface } from '../factories/FactoryInterface';
 import { ChannelRepositoryInterface } from '../repositories/ChannelRepositoryInterface';
 import { PlaylistRepositoryInterface } from '../repositories/PlaylistRepositoryInterface';
 
-export type CreatePlaylistInput = Omit<PlaylistAttributes, 'id_channel'> & {
+export type CreatePlaylistUsecaseInput = Omit<
+  PlaylistAttributes,
+  'id_channel' | 'id'
+> & {
   id_authenticated_channel: string;
 };
 
-export type CreatePlaylistDependencies = {
+export type CreatePlaylistUsecaseDependencies = {
   playlistRepository: PlaylistRepositoryInterface;
   channelRepository: ChannelRepositoryInterface;
-  playlistFactory: FactoryInterface<PlaylistAttributes, Playlist>;
+  playlistFactory: FactoryInterface<Playlist>;
 };
 
 export class CreatePlaylistUsecase {
-  constructor(private readonly dependencies: CreatePlaylistDependencies) {}
+  constructor(
+    private readonly dependencies: CreatePlaylistUsecaseDependencies
+  ) {}
 
-  public async execute(input: CreatePlaylistInput): Promise<void> {
+  public async execute(input: CreatePlaylistUsecaseInput): Promise<void> {
     const { channelRepository, playlistFactory, playlistRepository } =
       this.dependencies;
 
@@ -29,13 +34,7 @@ export class CreatePlaylistUsecase {
       throw new NotFoundError(input.id_authenticated_channel, 'Channel');
     }
 
-    const playlistAttributes = {
-      ...input,
-      id_channel: input.id_authenticated_channel
-    };
-    delete playlistAttributes.id_authenticated_channel;
-
-    const playlist = playlistFactory.create(playlistAttributes);
+    const playlist = playlistFactory.create(input);
 
     await playlistRepository.create(playlist.getAttributes());
   }
