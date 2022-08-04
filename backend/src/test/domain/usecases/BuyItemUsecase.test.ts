@@ -1,4 +1,4 @@
-import { describe, expect, test } from '@jest/globals';
+import { OrderAttributes } from '../../../domain/entities/Order';
 import {
   PlaylistAttributes,
   PlaylistVisibility
@@ -8,13 +8,12 @@ import {
   VideoVisibility
 } from '../../../domain/entities/Video';
 import { OrderFactory } from '../../../domain/factories/OrderFactory';
+import { PlaylistFactory } from '../../../domain/factories/PlaylistFactory';
+import { VideoFactory } from '../../../domain/factories/VideoFactory';
 import { IDGenerator } from '../../../domain/libs/IDGenerator';
-import { OrderRepositoryInterface } from '../../../domain/repositories/OrderRepositoryInterface';
-import { PlaylistRepositoryInterface } from '../../../domain/repositories/PlaylistRepositoryInterface';
-import { VideoRepositoryInterface } from '../../../domain/repositories/VideoRepositoryInterface';
 import {
-  BuyItemInput,
-  BuyItemUsecase
+  BuyItemUsecase,
+  BuyItemUsecaseInput
 } from '../../../domain/usecases/BuyItemUsecase';
 import { CryptoIDGenerator } from '../../../infra/libs/CryptoIDGenerator';
 import { OrderRepositoryMemory } from '../../../infra/repositories/memory/OrderRepositoryMemory';
@@ -25,11 +24,26 @@ import { MemoryDatabase } from '../../MemoryDatabase';
 describe('BuyItemUsecase', () => {
   describe('Comprar items', () => {
     const memoryDatabase = new MemoryDatabase();
-    const videoRepository = new VideoRepositoryMemory(memoryDatabase);
-    const playlistRepository = new PlaylistRepositoryMemory(memoryDatabase);
-    const orderRepository = new OrderRepositoryMemory(memoryDatabase);
     const idGenerator = new CryptoIDGenerator();
     const orderFactory = new OrderFactory({ idGenerator });
+    const videoFactory = new VideoFactory({
+      idGenerator
+    });
+    const playlistFactory = new PlaylistFactory({
+      idGenerator
+    });
+    const videoRepository = new VideoRepositoryMemory(
+      memoryDatabase,
+      videoFactory
+    );
+    const playlistRepository = new PlaylistRepositoryMemory(
+      memoryDatabase,
+      playlistFactory
+    );
+    const orderRepository = new OrderRepositoryMemory(
+      memoryDatabase,
+      orderFactory
+    );
 
     const createBuyItemUsecase = (): BuyItemUsecase => {
       return new BuyItemUsecase({
@@ -65,7 +79,7 @@ describe('BuyItemUsecase', () => {
       };
       await playlistRepository.create(playlist);
 
-      const input: BuyItemInput = {
+      const input: BuyItemUsecaseInput = {
         id_authenticated_channel: '003',
         items: [
           { id: video.id, type: 'video' },
@@ -92,32 +106,27 @@ describe('BuyItemUsecase', () => {
       const order = await orderRepository.findAllOrders(
         input.id_authenticated_channel
       );
-      const orderItems = await orderRepository.findAllOrderItems(id_order_mock);
 
-      const expectedOrders = [
-        {
-          id: '001',
-          id_channel: input.id_authenticated_channel
-        }
-      ];
+      const expectedOrders: OrderAttributes = {
+        id: '001',
+        id_channel: input.id_authenticated_channel,
+        items: [
+          {
+            id_purchased_item: input.items[0].id,
+            type: input.items[0].type,
+            id_order: id_order_mock,
+            id: '001'
+          },
+          {
+            id_purchased_item: input.items[1].id,
+            type: input.items[1].type,
+            id_order: id_order_mock,
+            id: '001'
+          }
+        ]
+      };
 
-      const expectedOrderItems = [
-        {
-          id_purchased_item: input.items[0].id,
-          type: input.items[0].type,
-          id_order: id_order_mock,
-          id: '001'
-        },
-        {
-          id_purchased_item: input.items[1].id,
-          type: input.items[1].type,
-          id_order: id_order_mock,
-          id: '001'
-        }
-      ];
-
-      expect(order).toEqual(expectedOrders);
-      expect(orderItems).toEqual(expectedOrderItems);
+      expect(order[0].getOrderWithItems()).toEqual(expectedOrders);
     });
   });
 });
