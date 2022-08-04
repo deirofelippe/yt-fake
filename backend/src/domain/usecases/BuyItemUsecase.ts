@@ -10,23 +10,22 @@ export type Item = {
   id: string;
   type: 'video' | 'playlist';
 };
-export type BuyItemInput = {
+export type BuyItemUsecaseInput = {
   id_authenticated_channel: string;
   items: Item[];
 };
 
-export type BuyItemDependencies = {
+export type BuyItemUsecaseDependencies = {
   playlistRepository: PlaylistRepositoryInterface;
   videoRepository: VideoRepositoryInterface;
   orderRepository: OrderRepositoryInterface;
-  // buyItemValidator: BuyItemValidator;
-  orderFactory: FactoryInterface<BuyItemInput, Order>;
+  orderFactory: FactoryInterface<Order>;
 };
 
 export class BuyItemUsecase {
-  constructor(private readonly dependencies: BuyItemDependencies) {}
+  constructor(private readonly dependencies: BuyItemUsecaseDependencies) {}
 
-  public async execute(input: BuyItemInput) {
+  public async execute(input: BuyItemUsecaseInput) {
     const {
       videoRepository,
       playlistRepository,
