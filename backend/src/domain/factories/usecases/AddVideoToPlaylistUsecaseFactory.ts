@@ -27,14 +27,14 @@ export class AddVideoToPlaylistUsecaseFactory
   create(input: AddVideoToPlaylistUsecaseInput) {
     const {
       factory: { validator },
-      usecase: { playlistRepository, videoInPlaylistFactory, videoRepository }
+      usecase: { playlistRepository, idGenerator, videoRepository }
     } = this.dependencies;
 
     validator.execute(input);
 
     return new AddVideoToPlaylistUsecase({
       playlistRepository,
-      videoInPlaylistFactory,
+      idGenerator,
       videoRepository
     });
   }
