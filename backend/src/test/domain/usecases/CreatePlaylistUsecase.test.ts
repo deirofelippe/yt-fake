@@ -1,30 +1,37 @@
-import { ChannelAttributes, Channel } from '../../../domain/entities/Channel';
+import { ChannelAttributes } from '../../../domain/entities/Channel';
 import {
   PlaylistAttributes,
   PlaylistVisibility
 } from '../../../domain/entities/Playlist';
+import { ChannelFactory } from '../../../domain/factories/ChannelFactory';
 import { PlaylistFactory } from '../../../domain/factories/PlaylistFactory';
 import {
   CreatePlaylistUsecase,
-  CreatePlaylistInput
+  CreatePlaylistUsecaseInput
 } from '../../../domain/usecases/CreatePlaylistUsecase';
 import { NotFoundError } from '../../../errors/NotFoundError';
 import { CryptoIDGenerator } from '../../../infra/libs/CryptoIDGenerator';
-import { channelJoiSchema } from '../../../infra/libs/joi/ChannelJoiSchema';
-import { JoiValidator } from '../../../infra/libs/joi/JoiValidator';
-import { playlistJoiSchema } from '../../../infra/libs/joi/PlaylistJoiSchema';
 import { ChannelRepositoryMemory } from '../../../infra/repositories/memory/ChannelRepositoryMemory';
 import { PlaylistRepositoryMemory } from '../../../infra/repositories/memory/PlaylistRepositoryMemory';
 import { MemoryDatabase } from '../../MemoryDatabase';
 
 describe('CreatePlaylistUsecase', () => {
   const memoryDatabase = new MemoryDatabase();
-  const playlistRepository = new PlaylistRepositoryMemory(memoryDatabase);
-  const channelRepository = new ChannelRepositoryMemory(memoryDatabase);
-  const channelValidator = new JoiValidator(channelJoiSchema);
   const idGenerator = new CryptoIDGenerator();
-  const validator = new JoiValidator(playlistJoiSchema);
-  const playlistFactory = new PlaylistFactory({ idGenerator, validator });
+  const playlistFactory = new PlaylistFactory({
+    idGenerator
+  });
+  const playlistRepository = new PlaylistRepositoryMemory(
+    memoryDatabase,
+    playlistFactory
+  );
+  const channelFactory = new ChannelFactory({
+    idGenerator
+  });
+  const channelRepository = new ChannelRepositoryMemory(
+    memoryDatabase,
+    channelFactory
+  );
 
   const createPlaylistUsecase = (): CreatePlaylistUsecase => {
     return new CreatePlaylistUsecase({
@@ -58,16 +65,11 @@ describe('CreatePlaylistUsecase', () => {
     });
 
     test('Deve ser criada a playlist.', async () => {
-      const channelEntity = new Channel(channel, {
-        idGenerator,
-        validator: channelValidator
-      });
-
-      await channelRepository.create(channelEntity.getAttributes());
+      await channelRepository.create(channel);
 
       const createPlaylist = createPlaylistUsecase();
 
-      const input: CreatePlaylistInput = {
+      const input: CreatePlaylistUsecaseInput = {
         ...playlist,
         id_authenticated_channel: playlist.id_channel
       };
@@ -76,11 +78,13 @@ describe('CreatePlaylistUsecase', () => {
       const playlists = await playlistRepository.findAll();
 
       expect(playlists).toHaveLength(1);
-      expect(playlists[0]).toEqual(expect.objectContaining({ ...playlist }));
+      expect(playlists[0].getAttributes()).toEqual(
+        expect.objectContaining({ ...playlist })
+      );
     });
 
     test('Deve lançar erro ao criar playlist com channel inexistente.', async () => {
-      const input: CreatePlaylistInput = {
+      const input: CreatePlaylistUsecaseInput = {
         ...playlist,
         id_authenticated_channel: '63102cbb-ef58-459d-b583-4fe4a7ad3335'
       };
