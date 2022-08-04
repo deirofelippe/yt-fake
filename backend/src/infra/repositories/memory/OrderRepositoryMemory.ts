@@ -3,14 +3,14 @@ import {
   OrderAttributes,
   OrderItemAttributes
 } from '../../../domain/entities/Order';
-import { FactoryInterface } from '../../../domain/factories/FactoryInterface';
+import { EntityFactoryInterface } from '../../../domain/factories/entities/EntityFactoryInterface';
 import { OrderRepositoryInterface } from '../../../domain/repositories/OrderRepositoryInterface';
 import { MemoryDatabase } from '../../../test/MemoryDatabase';
 
 export class OrderRepositoryMemory implements OrderRepositoryInterface {
   constructor(
     private readonly memoryDatabase: MemoryDatabase,
-    private readonly orderFactory: FactoryInterface<Order>
+    private readonly orderFactory: EntityFactoryInterface<Order>
   ) {}
 
   async findAllOrders(id_channel: string): Promise<[] | Order[]> {

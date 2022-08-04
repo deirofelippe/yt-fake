@@ -2,7 +2,7 @@ import {
   Playlist,
   PlaylistAttributes
 } from '../../../domain/entities/Playlist';
-import { FactoryInterface } from '../../../domain/factories/FactoryInterface';
+import { EntityFactoryInterface } from '../../../domain/factories/entities/EntityFactoryInterface';
 import { PlaylistRepositoryInterface } from '../../../domain/repositories/PlaylistRepositoryInterface';
 import { VideoInPlaylistAttributes } from '../../../domain/usecases/AddVideoToPlaylistUsecase';
 import { MemoryDatabase } from '../../../test/MemoryDatabase';
@@ -10,7 +10,7 @@ import { MemoryDatabase } from '../../../test/MemoryDatabase';
 export class PlaylistRepositoryMemory implements PlaylistRepositoryInterface {
   constructor(
     private readonly memoryDatabase: MemoryDatabase,
-    private readonly playlistFactory: FactoryInterface<Playlist>
+    private readonly playlistFactory: EntityFactoryInterface<Playlist>
   ) {}
 
   async findPlaylistsByIds(ids: string): Promise<Playlist[] | []> {

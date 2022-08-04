@@ -1,12 +1,12 @@
 import { Channel, ChannelAttributes } from '../../../domain/entities/Channel';
-import { FactoryInterface } from '../../../domain/factories/FactoryInterface';
+import { EntityFactoryInterface } from '../../../domain/factories/entities/EntityFactoryInterface';
 import { ChannelRepositoryInterface } from '../../../domain/repositories/ChannelRepositoryInterface';
 import { MemoryDatabase } from '../../../test/MemoryDatabase';
 
 export class ChannelRepositoryMemory implements ChannelRepositoryInterface {
   constructor(
     private readonly memoryDatabase: MemoryDatabase,
-    private readonly channelFactory: FactoryInterface<Channel>
+    private readonly channelFactory: EntityFactoryInterface<Channel>
   ) {}
 
   async findAll(): Promise<Channel[] | []> {

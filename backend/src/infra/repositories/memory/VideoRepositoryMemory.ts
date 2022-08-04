@@ -1,5 +1,5 @@
 import { Video, VideoAttributes } from '../../../domain/entities/Video';
-import { FactoryInterface } from '../../../domain/factories/FactoryInterface';
+import { EntityFactoryInterface } from '../../../domain/factories/entities/EntityFactoryInterface';
 import {
   FindAllVideosOutput,
   VideoRepositoryInterface
@@ -9,7 +9,7 @@ import { MemoryDatabase } from '../../../test/MemoryDatabase';
 export class VideoRepositoryMemory implements VideoRepositoryInterface {
   constructor(
     private readonly memoryDatabase: MemoryDatabase,
-    private readonly videoFactory: FactoryInterface<Video>
+    private readonly videoFactory: EntityFactoryInterface<Video>
   ) {}
 
   async findVideosByIds(ids: string): Promise<Video[] | []> {
