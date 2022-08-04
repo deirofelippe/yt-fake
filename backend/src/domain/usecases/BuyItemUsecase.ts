@@ -1,6 +1,6 @@
 import { Order } from '../entities/Order';
-import { PlaylistAttributes, Playlist } from '../entities/Playlist';
-import { VideoAttributes, Video } from '../entities/Video';
+import { Playlist } from '../entities/Playlist';
+import { Video } from '../entities/Video';
 import { FactoryInterface } from '../factories/FactoryInterface';
 import { OrderRepositoryInterface } from '../repositories/OrderRepositoryInterface';
 import { PlaylistRepositoryInterface } from '../repositories/PlaylistRepositoryInterface';
@@ -52,28 +52,26 @@ export class BuyItemUsecase {
     }
 
     let videosIds: string = '',
-      videosFound: VideoAttributes[] = [];
+      videosFound: Video[] = [];
     if (videos.length > 0) {
       videosIds = videos.map((item) => item.id).join(',');
       videosFound = await videoRepository.findVideosByIds(videosIds);
-      const canBuyVideos = videosFound.every((video) => {
-        const videoEntity = Video.create(video);
-        return videoEntity.isNotFree() && videoEntity.isPublic();
-      });
+      const canBuyVideos = videosFound.every(
+        (video) => video.isNotFree() && video.isPublic()
+      );
       if (!canBuyVideos) throw new Error('Algum video nao pode ser comprado.');
     }
 
     let playlistsIds: string = '',
-      playlistsFound: PlaylistAttributes[] = [];
+      playlistsFound: Playlist[] = [];
     if (playlists.length > 0) {
       playlistsIds = playlists.map((item) => item.id).join(',');
       playlistsFound = await playlistRepository.findPlaylistsByIds(
         playlistsIds
       );
-      const canBuyPlaylists = playlistsFound.every((playlist) => {
-        const playlistEntity = Playlist.create(playlist);
-        return playlistEntity.isNotFree() && playlistEntity.isPublic();
-      });
+      const canBuyPlaylists = playlistsFound.every(
+        (playlist) => playlist.isNotFree() && playlist.isPublic()
+      );
       if (!canBuyPlaylists)
         throw new Error('Alguma playlist nao pode ser comprada.');
     }
