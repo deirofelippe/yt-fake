@@ -4,13 +4,20 @@ import {
   OrderAttributes,
   OrderItemAttributes
 } from '../entities/Order';
-import { BuyItemInput } from '../usecases/BuyItemUsecase';
+import { BuyItemUsecaseInput } from '../usecases/BuyItemUsecase';
 import { FactoryInterface } from './FactoryInterface';
 
-export class OrderFactory implements FactoryInterface<BuyItemInput, Order> {
+export class OrderFactory implements FactoryInterface<Order> {
   constructor(private readonly dependencies: OrderDependencies) {}
+  recreate(attributes: OrderAttributes): Order {
+    if (!attributes.id)
+      throw Error(
+        'MountExisting da factory precisa de dados já cadastrados no banco.'
+      );
 
-  create(attributes: BuyItemInput) {
+    return Order.create(attributes);
+  }
+  create(attributes: BuyItemUsecaseInput) {
     const { idGenerator } = this.dependencies;
 
     const id_order = idGenerator.generate();
