@@ -1,10 +1,10 @@
-import { CloneObject } from '../../utils/CloneObject';
+import { CloneObject } from '../../../utils/CloneObject';
 import {
-  PlaylistAttributes,
+  Playlist,
   PlaylistDependencies,
-  Playlist
-} from '../entities/Playlist';
-import { CreatePlaylistUsecaseInput } from '../usecases/CreatePlaylistUsecase';
+  PlaylistAttributes
+} from '../../entities/Playlist';
+import { CreatePlaylistUsecaseInput } from '../../usecases/CreatePlaylistUsecase';
 import { EntityFactoryInterface } from './EntityFactoryInterface';
 
 export class PlaylistFactory implements EntityFactoryInterface<Playlist> {

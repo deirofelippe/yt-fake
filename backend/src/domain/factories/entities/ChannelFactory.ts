@@ -1,8 +1,8 @@
 import {
-  ChannelAttributes,
+  Channel,
   ChannelDependencies,
-  Channel
-} from '../entities/Channel';
+  ChannelAttributes
+} from '../../entities/Channel';
 import { EntityFactoryInterface } from './EntityFactoryInterface';
 
 export class ChannelFactory implements EntityFactoryInterface<Channel> {

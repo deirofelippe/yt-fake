@@ -3,8 +3,8 @@ import {
   PlaylistAttributes,
   PlaylistVisibility
 } from '../../../domain/entities/Playlist';
-import { ChannelFactory } from '../../../domain/factories/ChannelFactory';
-import { PlaylistFactory } from '../../../domain/factories/PlaylistFactory';
+import { ChannelFactory } from '../../../domain/factories/entities/ChannelFactory';
+import { PlaylistFactory } from '../../../domain/factories/entities/PlaylistFactory';
 import {
   CreatePlaylistUsecase,
   CreatePlaylistUsecaseInput

@@ -1,4 +1,8 @@
-import { VideoAttributes, VideoDependencies, Video } from '../entities/Video';
+import {
+  Video,
+  VideoDependencies,
+  VideoAttributes
+} from '../../entities/Video';
 import { EntityFactoryInterface } from './EntityFactoryInterface';
 
 export class VideoFactory implements EntityFactoryInterface<Video> {

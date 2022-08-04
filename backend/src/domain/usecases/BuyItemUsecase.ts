@@ -1,7 +1,7 @@
 import { Order } from '../entities/Order';
 import { Playlist } from '../entities/Playlist';
 import { Video } from '../entities/Video';
-import { FactoryInterface } from '../factories/FactoryInterface';
+import { EntityFactoryInterface } from '../factories/entities/EntityFactoryInterface';
 import { OrderRepositoryInterface } from '../repositories/OrderRepositoryInterface';
 import { PlaylistRepositoryInterface } from '../repositories/PlaylistRepositoryInterface';
 import { VideoRepositoryInterface } from '../repositories/VideoRepositoryInterface';
@@ -19,7 +19,7 @@ export type BuyItemUsecaseDependencies = {
   playlistRepository: PlaylistRepositoryInterface;
   videoRepository: VideoRepositoryInterface;
   orderRepository: OrderRepositoryInterface;
-  orderFactory: FactoryInterface<Order>;
+  orderFactory: EntityFactoryInterface<Order>;
 };
 
 export class BuyItemUsecase {

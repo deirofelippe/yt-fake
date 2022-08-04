@@ -7,9 +7,9 @@ import {
   VideoAttributes,
   VideoVisibility
 } from '../../../domain/entities/Video';
-import { OrderFactory } from '../../../domain/factories/OrderFactory';
-import { PlaylistFactory } from '../../../domain/factories/PlaylistFactory';
-import { VideoFactory } from '../../../domain/factories/VideoFactory';
+import { OrderFactory } from '../../../domain/factories/entities/OrderFactory';
+import { PlaylistFactory } from '../../../domain/factories/entities/PlaylistFactory';
+import { VideoFactory } from '../../../domain/factories/entities/VideoFactory';
 import { IDGenerator } from '../../../domain/libs/IDGenerator';
 import {
   BuyItemUsecase,

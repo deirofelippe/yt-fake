@@ -6,8 +6,8 @@ import {
   VideoAttributes,
   VideoVisibility
 } from '../../../domain/entities/Video';
-import { PlaylistFactory } from '../../../domain/factories/PlaylistFactory';
-import { VideoFactory } from '../../../domain/factories/VideoFactory';
+import { PlaylistFactory } from '../../../domain/factories/entities/PlaylistFactory';
+import { VideoFactory } from '../../../domain/factories/entities/VideoFactory';
 import {
   AddVideoToPlaylistUsecase,
   AddVideoToPlaylistUsecaseInput

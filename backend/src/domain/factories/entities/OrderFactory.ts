@@ -1,10 +1,10 @@
 import {
-  OrderDependencies,
   Order,
+  OrderDependencies,
   OrderAttributes,
   OrderItemAttributes
-} from '../entities/Order';
-import { BuyItemUsecaseInput } from '../usecases/BuyItemUsecase';
+} from '../../entities/Order';
+import { BuyItemUsecaseInput } from '../../usecases/BuyItemUsecase';
 import { EntityFactoryInterface } from './EntityFactoryInterface';
 
 export class OrderFactory implements EntityFactoryInterface<Order> {

@@ -1,6 +1,6 @@
 import { NotFoundError } from '../../errors/NotFoundError';
 import { Playlist, PlaylistAttributes } from '../entities/Playlist';
-import { FactoryInterface } from '../factories/FactoryInterface';
+import { EntityFactoryInterface } from '../factories/entities/EntityFactoryInterface';
 import { ChannelRepositoryInterface } from '../repositories/ChannelRepositoryInterface';
 import { PlaylistRepositoryInterface } from '../repositories/PlaylistRepositoryInterface';
 
@@ -14,7 +14,7 @@ export type CreatePlaylistUsecaseInput = Omit<
 export type CreatePlaylistUsecaseDependencies = {
   playlistRepository: PlaylistRepositoryInterface;
   channelRepository: ChannelRepositoryInterface;
-  playlistFactory: FactoryInterface<Playlist>;
+  playlistFactory: EntityFactoryInterface<Playlist>;
 };
 
 export class CreatePlaylistUsecase {
