@@ -6,34 +6,39 @@ import {
   VideoAttributes,
   VideoVisibility
 } from '../../../domain/entities/Video';
-import { VideoInPlaylist } from '../../../domain/entities/VideoInPlaylist';
-import { VideoInPlaylistFactory } from '../../../domain/factories/VideoInPlaylistFactory';
+import { PlaylistFactory } from '../../../domain/factories/PlaylistFactory';
+import { VideoFactory } from '../../../domain/factories/VideoFactory';
 import {
-  AddVideoInPlaylistInput,
-  AddVideoToPlaylistUsecase
+  AddVideoToPlaylistUsecase,
+  AddVideoToPlaylistUsecaseInput
 } from '../../../domain/usecases/AddVideoToPlaylistUsecase';
 import { FieldsValidationError } from '../../../errors/FieldsValidationError';
 import { CryptoIDGenerator } from '../../../infra/libs/CryptoIDGenerator';
-import { JoiValidator } from '../../../infra/libs/joi/JoiValidator';
-import { videoInPlaylistJoiSchema } from '../../../infra/libs/joi/VideoInPlaylistJoiSchema';
 import { PlaylistRepositoryMemory } from '../../../infra/repositories/memory/PlaylistRepositoryMemory';
 import { VideoRepositoryMemory } from '../../../infra/repositories/memory/VideoRepositoryMemory';
 import { MemoryDatabase } from '../../MemoryDatabase';
 
 describe('AddVideoToPlaylistUsecase', () => {
   const memoryDatabase = new MemoryDatabase();
-  const playlistRepository = new PlaylistRepositoryMemory(memoryDatabase);
-  const videoRepository = new VideoRepositoryMemory(memoryDatabase);
   const idGenerator = new CryptoIDGenerator();
-  const validator = new JoiValidator(videoInPlaylistJoiSchema);
-  const videoInPlaylistFactory = new VideoInPlaylistFactory({
-    idGenerator,
-    validator
+  const videoFactory = new VideoFactory({
+    idGenerator
   });
+  const playlistFactory = new PlaylistFactory({
+    idGenerator
+  });
+  const videoRepository = new VideoRepositoryMemory(
+    memoryDatabase,
+    videoFactory
+  );
+  const playlistRepository = new PlaylistRepositoryMemory(
+    memoryDatabase,
+    playlistFactory
+  );
 
   const createAddVideoToPlaylistUsecase = (): AddVideoToPlaylistUsecase => {
     return new AddVideoToPlaylistUsecase({
-      videoInPlaylistFactory,
+      idGenerator,
       playlistRepository,
       videoRepository
     });
@@ -42,7 +47,7 @@ describe('AddVideoToPlaylistUsecase', () => {
   describe('Adicionar video na playlist', () => {
     describe('Validations', () => {
       test('Error campo "id_reference_video" e "id_playlist"', async () => {
-        const input: AddVideoInPlaylistInput = {
+        const input: AddVideoToPlaylistUsecaseInput = {
           id_referenced_video: '$',
           id_authenticated_channel: '002',
           id_playlist: ''
@@ -72,7 +77,7 @@ describe('AddVideoToPlaylistUsecase', () => {
 
     let video: VideoAttributes;
     let playlist: PlaylistAttributes;
-    let input: AddVideoInPlaylistInput;
+    let input: AddVideoToPlaylistUsecaseInput;
 
     beforeEach(() => {
       memoryDatabase.clear();
@@ -107,7 +112,7 @@ describe('AddVideoToPlaylistUsecase', () => {
       };
     });
 
-    test('Deve ser adicionado um vídeo de terceiro na playlist', async () => {
+    test('Deve ser adicionado um video de terceiro na playlist', async () => {
       video.id_channel = '002';
       input.id_authenticated_channel = '001';
 
@@ -128,7 +133,7 @@ describe('AddVideoToPlaylistUsecase', () => {
       expect(playlistVideos).toEqual(expectedArray);
     });
 
-    test('Deve ser adicionado dois vídeos proprios na playlist', async () => {
+    test('Deve ser adicionado dois videos proprios na playlist', async () => {
       const channel = {
         id: '000'
       };
@@ -153,12 +158,12 @@ describe('AddVideoToPlaylistUsecase', () => {
         title: 'Curso de Fullcycle Development'
       };
 
-      const input1: AddVideoInPlaylistInput = {
+      const input1: AddVideoToPlaylistUsecaseInput = {
         id_referenced_video: video1.id,
         id_authenticated_channel: channel.id,
         id_playlist: playlist.id
       };
-      const input2: AddVideoInPlaylistInput = {
+      const input2: AddVideoToPlaylistUsecaseInput = {
         id_referenced_video: video2.id,
         id_authenticated_channel: channel.id,
         id_playlist: playlist.id
@@ -188,18 +193,9 @@ describe('AddVideoToPlaylistUsecase', () => {
 
     test('Deve lançar erro ao buscar playlist inexistente.', async () => {
       input.id_playlist = '003';
-      const videoInPlaylistMock = VideoInPlaylist.create({
-        id_playlist: input.id_playlist,
-        id_referenced_video: input.id_referenced_video
-      });
-      const videoInPlaylistFactoryMock = new VideoInPlaylistFactory({
-        idGenerator,
-        validator
-      });
-      videoInPlaylistFactoryMock.create = () => videoInPlaylistMock;
 
       const addVideoInPlaylist = new AddVideoToPlaylistUsecase({
-        videoInPlaylistFactory: videoInPlaylistFactoryMock,
+        idGenerator,
         playlistRepository,
         videoRepository
       });
@@ -212,16 +208,6 @@ describe('AddVideoToPlaylistUsecase', () => {
     });
 
     test('Deve lançar erro ao buscar video inexistente.', async () => {
-      const videoInPlaylistMock = VideoInPlaylist.create({
-        id_playlist: input.id_playlist,
-        id_referenced_video: input.id_referenced_video
-      });
-      const videoInPlaylistFactoryMock = new VideoInPlaylistFactory({
-        idGenerator,
-        validator
-      });
-      videoInPlaylistFactoryMock.create = () => videoInPlaylistMock;
-
       const mockReturnPlaylist: PlaylistAttributes = {
         id_channel: '0',
         title: 'a',
@@ -229,16 +215,21 @@ describe('AddVideoToPlaylistUsecase', () => {
       };
 
       const mockPlaylistRepository = new PlaylistRepositoryMemory(
-        memoryDatabase
+        memoryDatabase,
+        playlistFactory
       );
-      mockPlaylistRepository.findById = async (id) => mockReturnPlaylist;
+      mockPlaylistRepository.findById = async (id) =>
+        playlistFactory.recreate(mockReturnPlaylist);
 
-      const mockVideoRepository = new VideoRepositoryMemory(memoryDatabase);
+      const mockVideoRepository = new VideoRepositoryMemory(
+        memoryDatabase,
+        videoFactory
+      );
       mockVideoRepository.findById = async (id) => undefined;
 
       const addVideoInPlaylist = new AddVideoToPlaylistUsecase({
-        videoInPlaylistFactory: videoInPlaylistFactoryMock,
         playlistRepository: mockPlaylistRepository,
+        idGenerator,
         videoRepository: mockVideoRepository
       });
 
@@ -309,11 +300,7 @@ describe('AddVideoToPlaylistUsecase', () => {
       await playlistRepository.create(playlist);
       await videoRepository.create(video);
 
-      const addVideoInPlaylist = new AddVideoToPlaylistUsecase({
-        videoInPlaylistFactory,
-        playlistRepository,
-        videoRepository
-      });
+      const addVideoInPlaylist = createAddVideoToPlaylistUsecase();
       const execute = async () => await addVideoInPlaylist.execute(input);
 
       await expect(execute).rejects.toThrowError(
