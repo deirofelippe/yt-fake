@@ -1,7 +1,7 @@
-import { ChannelAttributes } from '../entities/Channel';
+import { Channel, ChannelAttributes } from '../entities/Channel';
 
 export interface ChannelRepositoryInterface {
-  findAll(): Promise<ChannelAttributes[] | []>;
-  findById(id: string): Promise<ChannelAttributes | undefined>;
+  findAll(): Promise<Channel[] | []>;
+  findById(id: string): Promise<Channel | undefined>;
   create(channel: ChannelAttributes): Promise<void>;
 }

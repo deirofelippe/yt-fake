@@ -1,10 +1,10 @@
-import { VideoAttributes } from '../entities/Video';
+import { Video, VideoAttributes } from '../entities/Video';
 
 export interface VideoRepositoryInterface {
-  findAll(): Promise<VideoAttributes[] | []>;
-  findById(id: string): Promise<VideoAttributes | undefined>;
+  findAll(): Promise<Video[] | []>;
+  findById(id: string): Promise<Video | undefined>;
   create(video: VideoAttributes): Promise<void>;
-  findVideosByIds(ids: string): Promise<VideoAttributes[] | []>;
+  findVideosByIds(ids: string): Promise<Video[] | []>;
   findAllVideosByPlaylist(id_playlist: string): Promise<FindAllVideosOutput>;
 }
 
