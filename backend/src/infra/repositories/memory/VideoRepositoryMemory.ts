@@ -1,4 +1,5 @@
-import { VideoAttributes } from '../../../domain/entities/Video';
+import { Video, VideoAttributes } from '../../../domain/entities/Video';
+import { FactoryInterface } from '../../../domain/factories/FactoryInterface';
 import {
   FindAllVideosOutput,
   VideoRepositoryInterface
@@ -6,9 +7,12 @@ import {
 import { MemoryDatabase } from '../../../test/MemoryDatabase';
 
 export class VideoRepositoryMemory implements VideoRepositoryInterface {
-  constructor(private memoryDatabase: MemoryDatabase) {}
+  constructor(
+    private readonly memoryDatabase: MemoryDatabase,
+    private readonly videoFactory: FactoryInterface<Video>
+  ) {}
 
-  async findVideosByIds(ids: string): Promise<VideoAttributes[] | []> {
+  async findVideosByIds(ids: string): Promise<Video[] | []> {
     let videosFound: VideoAttributes[] = [];
     ids.split(',').forEach((id) => {
       const videoFound = this.memoryDatabase.videos.find(
@@ -19,26 +23,28 @@ export class VideoRepositoryMemory implements VideoRepositoryInterface {
       }
       videosFound.push(videoFound);
     });
-    return videosFound;
+    return videosFound.map((video) => this.videoFactory.recreate(video));
   }
 
-  async findAll(): Promise<VideoAttributes[] | []> {
-    return Promise.resolve(this.memoryDatabase.videos);
+  async findAll(): Promise<Video[] | []> {
+    return this.memoryDatabase.videos.map((video) =>
+      this.videoFactory.recreate(video)
+    );
   }
 
-  async findById(id: string): Promise<VideoAttributes | undefined> {
+  async findById(id: string): Promise<Video | undefined> {
     const videoFound = this.memoryDatabase.videos.find(
       (video) => video.id === id
     );
 
-    return Promise.resolve(videoFound);
+    if (!videoFound) return undefined;
+
+    return this.videoFactory.recreate(videoFound);
   }
   async create(video: VideoAttributes): Promise<void> {
-    Promise.resolve(
-      this.memoryDatabase.videos.push({
-        ...video
-      })
-    );
+    this.memoryDatabase.videos.push({
+      ...video
+    });
   }
   async findAllVideosByPlaylist(
     id_playlist: string
@@ -62,6 +68,6 @@ export class VideoRepositoryMemory implements VideoRepositoryInterface {
       });
     }
 
-    return Promise.resolve(videosInPlaylist);
+    return videosInPlaylist;
   }
 }
