@@ -173,5 +173,58 @@ describe('BuyItemUsecase', () => {
 
       expect(orders[0].getOrderWithItems()).toEqual(expectedOrder);
     });
+
+    test('Deve ser comprado somente um video', async () => {
+      const video: VideoAttributes = {
+        video: 's3//amazon',
+        thumbnail: 'devops.png',
+        description: 'Aulão sobre as principais ferramentas.',
+        dislikes: 5,
+        likes: 1000,
+        views: 2000,
+        id: '001',
+        id_channel: '002',
+        title: 'DevOps',
+        price: 300,
+        visibility: PlaylistVisibility.PUBLIC
+      };
+      await videoRepository.create(video);
+
+      const input: BuyItemUsecaseInput = {
+        id_authenticated_channel: '003',
+        items: [{ id: video.id, type: ItemType.VIDEO }]
+      };
+
+      const mock_id = '001';
+      const mockOrderFactory = new OrderFactory({
+        idGenerator: { generate: () => mock_id }
+      });
+      const buyItem = new BuyItemUsecase({
+        orderRepository,
+        orderFactory: mockOrderFactory,
+        playlistRepository,
+        videoRepository
+      });
+      await buyItem.execute(input);
+
+      const orders = await orderRepository.findAllOrders(
+        input.id_authenticated_channel
+      );
+
+      const expectedOrder = {
+        id: mock_id,
+        id_channel: input.id_authenticated_channel,
+        items: [
+          {
+            id_purchased_item: input.items[0].id,
+            type: input.items[0].type,
+            id_order: mock_id,
+            id: mock_id
+          }
+        ]
+      };
+
+      expect(orders[0].getOrderWithItems()).toEqual(expectedOrder);
+    });
   });
 });
