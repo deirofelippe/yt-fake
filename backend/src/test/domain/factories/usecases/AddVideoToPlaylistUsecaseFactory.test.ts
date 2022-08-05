@@ -1,37 +1,24 @@
-import { PlaylistFactory } from '../../../../domain/factories/entities/PlaylistFactory';
-import { VideoFactory } from '../../../../domain/factories/entities/VideoFactory';
 import { AddVideoToPlaylistUsecaseFactory } from '../../../../domain/factories/usecases/AddVideoToPlaylistUsecaseFactory';
-import { validationMessages as messages } from '../../../../domain/libs/ValidationMessages';
+import { IDGenerator } from '../../../../domain/libs/IDGenerator';
+import { PlaylistRepositoryInterface } from '../../../../domain/repositories/PlaylistRepositoryInterface';
+import { VideoRepositoryInterface } from '../../../../domain/repositories/VideoRepositoryInterface';
 import { FieldsValidationError } from '../../../../errors/FieldsValidationError';
-import { CryptoIDGenerator } from '../../../../infra/libs/CryptoIDGenerator';
 import { addVideoToPlaylistJoiSchema } from '../../../../infra/libs/joi/AddVideoToPlaylistJoiSchema';
 import { JoiValidator } from '../../../../infra/libs/joi/JoiValidator';
-import { PlaylistRepositoryMemory } from '../../../../infra/repositories/memory/PlaylistRepositoryMemory';
-import { VideoRepositoryMemory } from '../../../../infra/repositories/memory/VideoRepositoryMemory';
-import { MemoryDatabase } from '../../../MemoryDatabase';
 
 describe('AddVideoToPlaylistUsecaseFactory', () => {
-  const memoryDatabase = new MemoryDatabase();
-  const idGenerator = new CryptoIDGenerator();
-  const playlistFactory = new PlaylistFactory({
-    idGenerator
-  });
-  const playlistRepository = new PlaylistRepositoryMemory(
-    memoryDatabase,
-    playlistFactory
-  );
-  const videoFactory = new VideoFactory({
-    idGenerator
-  });
-  const videoRepository = new VideoRepositoryMemory(
-    memoryDatabase,
-    videoFactory
-  );
+  const mockIdGenerator = {} as IDGenerator;
+  const mockPlaylistRepository = {} as PlaylistRepositoryInterface;
+  const mockVideoRepository = {} as VideoRepositoryInterface;
   const validator = new JoiValidator(addVideoToPlaylistJoiSchema);
   const addVideoToPlaylistUsecaseFactory = new AddVideoToPlaylistUsecaseFactory(
     {
       factory: { validator },
-      usecase: { idGenerator, videoRepository, playlistRepository }
+      usecase: {
+        idGenerator: mockIdGenerator,
+        videoRepository: mockVideoRepository,
+        playlistRepository: mockPlaylistRepository
+      }
     }
   );
 
@@ -53,9 +40,9 @@ describe('AddVideoToPlaylistUsecaseFactory', () => {
       };
 
       const expectedError = [
-        { field: 'id_authenticated_channel', message: messages.required },
-        { field: 'id_referenced_video', message: messages.empty },
-        { field: 'id_playlist', message: messages.empty }
+        { field: 'id_authenticated_channel', message: 'É obrigatório.' },
+        { field: 'id_referenced_video', message: 'Deve ser preenchido.' },
+        { field: 'id_playlist', message: 'Deve ser preenchido.' }
       ];
 
       try {

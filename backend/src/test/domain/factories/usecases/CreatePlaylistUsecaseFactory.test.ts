@@ -1,37 +1,27 @@
-import { PlaylistVisibility } from '../../../../domain/entities/Playlist';
-import { ChannelFactory } from '../../../../domain/factories/entities/ChannelFactory';
-import { PlaylistFactory } from '../../../../domain/factories/entities/PlaylistFactory';
+import {
+  Playlist,
+  PlaylistVisibility
+} from '../../../../domain/entities/Playlist';
+import { EntityFactoryInterface } from '../../../../domain/factories/entities/EntityFactoryInterface';
 import { CreatePlaylistUsecaseFactory } from '../../../../domain/factories/usecases/CreatePlaylistUsecaseFactory';
-import { validationMessages as messages } from '../../../../domain/libs/ValidationMessages';
+import { ChannelRepositoryInterface } from '../../../../domain/repositories/ChannelRepositoryInterface';
+import { PlaylistRepositoryInterface } from '../../../../domain/repositories/PlaylistRepositoryInterface';
 import { FieldsValidationError } from '../../../../errors/FieldsValidationError';
-import { CryptoIDGenerator } from '../../../../infra/libs/CryptoIDGenerator';
 import { createPlaylistJoiSchema } from '../../../../infra/libs/joi/CreatePlaylistJoiSchema';
 import { JoiValidator } from '../../../../infra/libs/joi/JoiValidator';
-import { ChannelRepositoryMemory } from '../../../../infra/repositories/memory/ChannelRepositoryMemory';
-import { PlaylistRepositoryMemory } from '../../../../infra/repositories/memory/PlaylistRepositoryMemory';
-import { MemoryDatabase } from '../../../MemoryDatabase';
 
 describe('CreatePlaylistUsecaseFactory', () => {
-  const memoryDatabase = new MemoryDatabase();
-  const idGenerator = new CryptoIDGenerator();
-  const playlistFactory = new PlaylistFactory({
-    idGenerator
-  });
-  const playlistRepository = new PlaylistRepositoryMemory(
-    memoryDatabase,
-    playlistFactory
-  );
-  const channelFactory = new ChannelFactory({
-    idGenerator
-  });
-  const channelRepository = new ChannelRepositoryMemory(
-    memoryDatabase,
-    channelFactory
-  );
+  const mockPlaylistFactory = {} as EntityFactoryInterface<Playlist>;
+  const mockPlaylistRepository = {} as PlaylistRepositoryInterface;
+  const mockChannelRepository = {} as ChannelRepositoryInterface;
   const validator = new JoiValidator(createPlaylistJoiSchema);
   const createPlaylistUsecaseFactory = new CreatePlaylistUsecaseFactory({
     factory: { validator },
-    usecase: { channelRepository, playlistFactory, playlistRepository }
+    usecase: {
+      channelRepository: mockChannelRepository,
+      playlistFactory: mockPlaylistFactory,
+      playlistRepository: mockPlaylistRepository
+    }
   });
 
   describe('Validar input', () => {

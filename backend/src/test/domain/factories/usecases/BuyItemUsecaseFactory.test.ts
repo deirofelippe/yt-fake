@@ -1,48 +1,27 @@
-import { OrderFactory } from '../../../../domain/factories/entities/OrderFactory';
-import { PlaylistFactory } from '../../../../domain/factories/entities/PlaylistFactory';
-import { VideoFactory } from '../../../../domain/factories/entities/VideoFactory';
+import { Order } from '../../../../domain/entities/Order';
+import { EntityFactoryInterface } from '../../../../domain/factories/entities/EntityFactoryInterface';
 import { BuyItemUsecaseFactory } from '../../../../domain/factories/usecases/BuyItemUsecaseFactory';
+import { OrderRepositoryInterface } from '../../../../domain/repositories/OrderRepositoryInterface';
+import { PlaylistRepositoryInterface } from '../../../../domain/repositories/PlaylistRepositoryInterface';
+import { VideoRepositoryInterface } from '../../../../domain/repositories/VideoRepositoryInterface';
 import { FieldsValidationError } from '../../../../errors/FieldsValidationError';
-import { CryptoIDGenerator } from '../../../../infra/libs/CryptoIDGenerator';
 import { buyItemJoiSchema } from '../../../../infra/libs/joi/BuyItemJoiSchema';
 import { JoiValidator } from '../../../../infra/libs/joi/JoiValidator';
-import { OrderRepositoryMemory } from '../../../../infra/repositories/memory/OrderRepositoryMemory';
-import { PlaylistRepositoryMemory } from '../../../../infra/repositories/memory/PlaylistRepositoryMemory';
-import { VideoRepositoryMemory } from '../../../../infra/repositories/memory/VideoRepositoryMemory';
-import { MemoryDatabase } from '../../../MemoryDatabase';
 
 describe('BuyItemUsecaseFactory', () => {
-  const memoryDatabase = new MemoryDatabase();
-  const idGenerator = new CryptoIDGenerator();
-  const playlistFactory = new PlaylistFactory({
-    idGenerator
-  });
-  const playlistRepository = new PlaylistRepositoryMemory(
-    memoryDatabase,
-    playlistFactory
-  );
-  const videoFactory = new VideoFactory({
-    idGenerator
-  });
-  const videoRepository = new VideoRepositoryMemory(
-    memoryDatabase,
-    videoFactory
-  );
-  const orderFactory = new OrderFactory({
-    idGenerator
-  });
-  const orderRepository = new OrderRepositoryMemory(
-    memoryDatabase,
-    orderFactory
-  );
+  const mockPlaylistRepository = {} as PlaylistRepositoryInterface;
+  const mockOrderFactory = {} as EntityFactoryInterface<Order>;
+  const mockVideoRepository = {} as VideoRepositoryInterface;
+  const mockOrderRepository = {} as OrderRepositoryInterface;
+
   const validator = new JoiValidator(buyItemJoiSchema);
   const buyItemUsecaseFactory = new BuyItemUsecaseFactory({
     factory: { validator },
     usecase: {
-      orderFactory,
-      orderRepository,
-      playlistRepository,
-      videoRepository
+      orderFactory: mockOrderFactory,
+      orderRepository: mockOrderRepository,
+      playlistRepository: mockPlaylistRepository,
+      videoRepository: mockVideoRepository
     }
   });
 
