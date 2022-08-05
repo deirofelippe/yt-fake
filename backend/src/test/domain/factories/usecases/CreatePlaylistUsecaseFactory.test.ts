@@ -2,6 +2,7 @@ import { PlaylistVisibility } from '../../../../domain/entities/Playlist';
 import { ChannelFactory } from '../../../../domain/factories/entities/ChannelFactory';
 import { PlaylistFactory } from '../../../../domain/factories/entities/PlaylistFactory';
 import { CreatePlaylistUsecaseFactory } from '../../../../domain/factories/usecases/CreatePlaylistUsecaseFactory';
+import { validationMessages as messages } from '../../../../domain/libs/ValidationMessages';
 import { FieldsValidationError } from '../../../../errors/FieldsValidationError';
 import { CryptoIDGenerator } from '../../../../infra/libs/CryptoIDGenerator';
 import { createPlaylistJoiSchema } from '../../../../infra/libs/joi/CreatePlaylistJoiSchema';
@@ -59,18 +60,18 @@ describe('CreatePlaylistUsecaseFactory', () => {
       const expectedError = [
         {
           field: 'id_authenticated_channel',
-          message: 'Deve conter letras'
+          message: 'Deve conter letras.'
         },
-        { field: 'title', message: 'Deve conter letras' },
+        { field: 'title', message: 'Deve conter letras.' },
         {
           field: 'price',
-          message: 'Deve ser maior que 0 ou 0'
+          message: 'Deve ser maior que 0 ou 0.'
         },
         {
           field: 'visibility',
-          message: 'Deve ser "publico" ou "privado"'
+          message: 'Deve ser "publico" ou "privado".'
         },
-        { field: 'description', message: 'Deve conter letras' }
+        { field: 'description', message: 'Deve conter letras.' }
       ];
 
       try {
