@@ -61,7 +61,7 @@ describe('BuyItemUsecase', () => {
 
     //video e playlist inexistente, video e playlist privados ou gratuitos, ja comprado, playlist e video n pode ser da propria pessoa
     //gera url do pagseguro
-    test('Deve ser adicionado no banco order e orderItem de um video e uma playlist', async () => {
+    test('Deve ser comprado somente um video e uma playlist', async () => {
       const video: VideoAttributes = {
         id: '000',
         id_channel: '001',
@@ -127,7 +127,7 @@ describe('BuyItemUsecase', () => {
       expect(order[0].getOrderWithItems()).toEqual(expectedOrders);
     });
 
-    test('Deve ser adicionado no banco order e orderItem de um playlist', async () => {
+    test('Deve ser comprado somente uma playlist', async () => {
       const playlist: PlaylistAttributes = {
         id: '001',
         id_channel: '002',
