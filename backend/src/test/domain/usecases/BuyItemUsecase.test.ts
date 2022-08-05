@@ -58,7 +58,8 @@ describe('BuyItemUsecase', () => {
       memoryDatabase.clear();
     });
 
-    //video e playlist inexistente, video e playlist privados ou gratuitos, validacao, ja comprado, playlist e video n pode ser da propria pessoa
+    //video e playlist inexistente, video e playlist privados ou gratuitos, ja comprado, playlist e video n pode ser da propria pessoa
+    //gera url do pagseguro
     test('Deve ser adicionado no banco order e orderItem de um video e uma playlist', async () => {
       const video: VideoAttributes = {
         id: '000',
@@ -127,6 +128,53 @@ describe('BuyItemUsecase', () => {
       };
 
       expect(order[0].getOrderWithItems()).toEqual(expectedOrders);
+    });
+
+    test('Deve ser adicionado no banco order e orderItem de um playlist', async () => {
+      const playlist: PlaylistAttributes = {
+        id: '001',
+        id_channel: '002',
+        title: 'DevOps',
+        price: 300,
+        visibility: PlaylistVisibility.PUBLIC
+      };
+      await playlistRepository.create(playlist);
+
+      const input: BuyItemUsecaseInput = {
+        id_authenticated_channel: '003',
+        items: [{ id: playlist.id, type: ItemType.PLAYLIST }]
+      };
+
+      const mock_id = '001';
+      const mockOrderFactory = new OrderFactory({
+        idGenerator: { generate: () => mock_id }
+      });
+      const buyItem = new BuyItemUsecase({
+        orderRepository,
+        orderFactory: mockOrderFactory,
+        playlistRepository,
+        videoRepository
+      });
+      await buyItem.execute(input);
+
+      const orders = await orderRepository.findAllOrders(
+        input.id_authenticated_channel
+      );
+
+      const expectedOrder = {
+        id: mock_id,
+        id_channel: input.id_authenticated_channel,
+        items: [
+          {
+            id_purchased_item: input.items[0].id,
+            type: input.items[0].type,
+            id_order: mock_id,
+            id: mock_id
+          }
+        ]
+      };
+
+      expect(orders[0].getOrderWithItems()).toEqual(expectedOrder);
     });
   });
 });
