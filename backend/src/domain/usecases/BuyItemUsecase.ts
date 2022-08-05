@@ -6,9 +6,13 @@ import { OrderRepositoryInterface } from '../repositories/OrderRepositoryInterfa
 import { PlaylistRepositoryInterface } from '../repositories/PlaylistRepositoryInterface';
 import { VideoRepositoryInterface } from '../repositories/VideoRepositoryInterface';
 
+export enum ItemType {
+  VIDEO = 'video',
+  PLAYLIST = 'playlist'
+}
 export type Item = {
   id: string;
-  type: 'video' | 'playlist';
+  type: ItemType;
 };
 export type BuyItemUsecaseInput = {
   id_authenticated_channel: string;
