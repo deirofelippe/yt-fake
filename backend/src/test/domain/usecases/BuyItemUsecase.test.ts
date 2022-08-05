@@ -13,7 +13,8 @@ import { VideoFactory } from '../../../domain/factories/entities/VideoFactory';
 import { IDGenerator } from '../../../domain/libs/IDGenerator';
 import {
   BuyItemUsecase,
-  BuyItemUsecaseInput
+  BuyItemUsecaseInput,
+  ItemType
 } from '../../../domain/usecases/BuyItemUsecase';
 import { CryptoIDGenerator } from '../../../infra/libs/CryptoIDGenerator';
 import { OrderRepositoryMemory } from '../../../infra/repositories/memory/OrderRepositoryMemory';
@@ -83,24 +84,20 @@ describe('BuyItemUsecase', () => {
       const input: BuyItemUsecaseInput = {
         id_authenticated_channel: '003',
         items: [
-          { id: video.id, type: 'video' },
-          { id: playlist.id, type: 'playlist' }
+          { id: video.id, type: ItemType.VIDEO },
+          { id: playlist.id, type: ItemType.PLAYLIST }
         ]
       };
 
-      const id_mock = '001';
-      const id_order_mock = id_mock;
-      const idGeneratorMock: IDGenerator = {
-        generate: () => id_mock
-      };
-      const orderFactoryMock = new OrderFactory({
-        idGenerator: idGeneratorMock
+      const mock_id = '001';
+      const mockOrderFactory = new OrderFactory({
+        idGenerator: { generate: () => mock_id }
       });
       const buyItem = new BuyItemUsecase({
         orderRepository,
         playlistRepository,
         videoRepository,
-        orderFactory: orderFactoryMock
+        orderFactory: mockOrderFactory
       });
       await buyItem.execute(input);
 
@@ -109,20 +106,20 @@ describe('BuyItemUsecase', () => {
       );
 
       const expectedOrders: OrderAttributes = {
-        id: '001',
+        id: mock_id,
         id_channel: input.id_authenticated_channel,
         items: [
           {
             id_purchased_item: input.items[0].id,
             type: input.items[0].type,
-            id_order: id_order_mock,
-            id: '001'
+            id_order: mock_id,
+            id: mock_id
           },
           {
             id_purchased_item: input.items[1].id,
             type: input.items[1].type,
-            id_order: id_order_mock,
-            id: '001'
+            id_order: mock_id,
+            id: mock_id
           }
         ]
       };
