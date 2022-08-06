@@ -60,6 +60,7 @@ export class BuyItemUsecase {
       buyerOwnsTheVideo: boolean = false,
       cantBuyVideos: boolean = false;
 
+    //verificar se encontrou todos os videos no if
     if (videos.length > 0) {
       videosIds = videos.map((item) => item.id).join(',');
       videosFound = await videoRepository.findVideosByIds(videosIds);
@@ -71,16 +72,22 @@ export class BuyItemUsecase {
     }
 
     let playlistsIds: string = '',
-      playlistsFound: Playlist[] = [];
+      playlistsFound: Playlist[] = [],
+      buyerOwnsThePlaylist: boolean = false,
+      cantBuyPlaylists: boolean = false;
+
     if (playlists.length > 0) {
       playlistsIds = playlists.map((item) => item.id).join(',');
       playlistsFound = await playlistRepository.findPlaylistsByIds(
         playlistsIds
       );
-      const canBuyPlaylists = playlistsFound.every(
-        (playlist) => playlist.isNotFree() && playlist.isPublic()
-      );
-      if (!canBuyPlaylists)
+      cantBuyPlaylists = playlistsFound.some((playlist) => {
+        buyerOwnsThePlaylist = playlist.isFromTheSameChannel(id_buyer_channel);
+        return (
+          playlist.isFree() || playlist.isPrivate() || buyerOwnsThePlaylist
+        );
+      });
+      if (cantBuyPlaylists)
         throw new Error('Alguma playlist nao pode ser comprada.');
     }
 
