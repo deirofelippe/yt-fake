@@ -107,11 +107,14 @@ export class BuyItemUsecase {
       throw new Error('Alguma playlist não foi encontrado.');
 
     let buyerOwnsThePlaylist = false;
-    const cantBuyPlaylists = playlistsFound.some((playlist) => {
+    playlistsFound.forEach((playlist) => {
       buyerOwnsThePlaylist = playlist.isFromTheSameChannel(id_buyer_channel);
-      return playlist.isFree() || playlist.isPrivate() || buyerOwnsThePlaylist;
+      if (buyerOwnsThePlaylist)
+        throw new Error('O comprador é o dono da playlist que quer comprar.');
+
+      if (playlist.isFree()) throw new Error('A playlist é gratuita.');
+
+      if (playlist.isPrivate()) throw new Error('A playlist é privada.');
     });
-    if (cantBuyPlaylists)
-      throw new Error('Alguma playlist nao pode ser comprada.');
   }
 }
