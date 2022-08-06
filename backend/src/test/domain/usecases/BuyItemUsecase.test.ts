@@ -55,8 +55,23 @@ describe('BuyItemUsecase', () => {
       });
     };
 
+    let video: VideoAttributes;
+
     beforeEach(() => {
       memoryDatabase.clear();
+      video = {
+        video: 's3//amazon',
+        thumbnail: 'devops.png',
+        description: 'Aulão sobre as principais ferramentas.',
+        dislikes: 5,
+        likes: 1000,
+        views: 2000,
+        id: '001',
+        id_channel: '002',
+        title: 'DevOps',
+        price: 300,
+        visibility: VideoVisibility.PUBLIC
+      };
     });
 
     test('Deve ser comprado somente um video e uma playlist', async () => {
@@ -247,7 +262,7 @@ describe('BuyItemUsecase', () => {
       );
     });
 
-    test.only('Deve lançar erro por não ter items no input para comprar', async () => {
+    test('Deve lançar erro por não ter items no input para comprar', async () => {
       const buyItem = new BuyItemUsecase({
         orderRepository,
         orderFactory,
@@ -296,7 +311,22 @@ describe('BuyItemUsecase', () => {
       );
     });
 
-    test.todo('Deve lançar erro ao verificar que um video é privado');
+    test('Deve lançar erro ao verificar que um video é privado', async () => {
+      video.visibility = VideoVisibility.PRIVATE;
+
+      await videoRepository.create(video);
+
+      const input: BuyItemUsecaseInput = {
+        id_authenticated_channel: '003',
+        items: [{ id: video.id, type: ItemType.VIDEO }]
+      };
+
+      const buyItem = createBuyItemUsecase();
+
+      const execute = async () => await buyItem.execute(input);
+      await expect(execute).rejects.toThrow(new Error('O video é privado.'));
+    });
+
     test.todo('Deve lançar erro ao verificar que um video é gratuito');
     test.todo(
       'Deve lançar erro ao verificar que um video é do próprio canal comprador'
