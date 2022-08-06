@@ -64,6 +64,8 @@ export class BuyItemUsecase {
     if (videos.length > 0) {
       videosIds = videos.map((item) => item.id).join(',');
       videosFound = await videoRepository.findVideosByIds(videosIds);
+      if (videosFound.length !== videos.length)
+        throw new Error('Algum video não foi encontrado.');
       cantBuyVideos = videosFound.some((video) => {
         buyerOwnsTheVideo = video.isFromTheSameChannel(id_buyer_channel);
         return video.isFree() || video.isPrivate() || buyerOwnsTheVideo;
@@ -81,6 +83,8 @@ export class BuyItemUsecase {
       playlistsFound = await playlistRepository.findPlaylistsByIds(
         playlistsIds
       );
+      if (playlistsFound.length !== playlists.length)
+        throw new Error('Alguma playlist não foi encontrado.');
       cantBuyPlaylists = playlistsFound.some((playlist) => {
         buyerOwnsThePlaylist = playlist.isFromTheSameChannel(id_buyer_channel);
         return (
@@ -90,11 +94,6 @@ export class BuyItemUsecase {
       if (cantBuyPlaylists)
         throw new Error('Alguma playlist nao pode ser comprada.');
     }
-
-    const totalLength = videosFound.length + playlistsFound.length;
-
-    if (totalLength !== items.length)
-      throw new Error('Algum item não foi encontrado.');
 
     const order = orderFactory.create(input);
 
