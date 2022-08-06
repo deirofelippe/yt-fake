@@ -323,9 +323,23 @@ describe('BuyItemUsecase', () => {
       await expect(execute).rejects.toThrow(new Error('O video é gratuito.'));
     });
 
-    test.todo(
-      'Deve lançar erro ao verificar que um video é do próprio canal comprador'
-    );
+    test('Deve lançar erro ao comprador tentar comprar o proprio video', async () => {
+      video.id_channel = '003';
+
+      await videoRepository.create(video);
+
+      const input: BuyItemUsecaseInput = {
+        id_authenticated_channel: '003',
+        items: [{ id: video.id, type: ItemType.VIDEO }]
+      };
+
+      const buyItem = createBuyItemUsecase();
+
+      const execute = async () => await buyItem.execute(input);
+      await expect(execute).rejects.toThrow(
+        new Error('O comprador é o dono do video que quer comprar.')
+      );
+    });
     test.todo(
       'Deve lançar erro ao verificar que um video já foi comprado pelo comprador'
     );
