@@ -55,49 +55,64 @@ export class BuyItemUsecase {
       }
     }
 
-    let videosIds: string = '',
-      videosFound: Video[] = [],
-      buyerOwnsTheVideo: boolean = false,
-      cantBuyVideos: boolean = false;
-
-    //verificar se encontrou todos os videos no if
-    if (videos.length > 0) {
-      videosIds = videos.map((item) => item.id).join(',');
-      videosFound = await videoRepository.findVideosByIds(videosIds);
-      if (videosFound.length !== videos.length)
-        throw new Error('Algum video não foi encontrado.');
-      cantBuyVideos = videosFound.some((video) => {
-        buyerOwnsTheVideo = video.isFromTheSameChannel(id_buyer_channel);
-        return video.isFree() || video.isPrivate() || buyerOwnsTheVideo;
-      });
-      if (cantBuyVideos) throw new Error('Algum video nao pode ser comprado.');
-    }
-
-    let playlistsIds: string = '',
-      playlistsFound: Playlist[] = [],
-      buyerOwnsThePlaylist: boolean = false,
-      cantBuyPlaylists: boolean = false;
-
-    if (playlists.length > 0) {
-      playlistsIds = playlists.map((item) => item.id).join(',');
-      playlistsFound = await playlistRepository.findPlaylistsByIds(
-        playlistsIds
-      );
-      if (playlistsFound.length !== playlists.length)
-        throw new Error('Alguma playlist não foi encontrado.');
-      cantBuyPlaylists = playlistsFound.some((playlist) => {
-        buyerOwnsThePlaylist = playlist.isFromTheSameChannel(id_buyer_channel);
-        return (
-          playlist.isFree() || playlist.isPrivate() || buyerOwnsThePlaylist
-        );
-      });
-      if (cantBuyPlaylists)
-        throw new Error('Alguma playlist nao pode ser comprada.');
-    }
+    await this.throwErrorIfAnyVideoCannotBePurchased(videos, id_buyer_channel);
+    await this.throwErrorIfAnyPlaylistCannotBePurchased(
+      playlists,
+      id_buyer_channel
+    );
 
     const order = orderFactory.create(input);
 
     await orderRepository.createOrder(order.getOrder());
     await orderRepository.createOrderItems(order.getOrderItems());
+  }
+
+  private async throwErrorIfAnyVideoCannotBePurchased(
+    videos: Item[],
+    id_buyer_channel: string
+  ): Promise<never | void> {
+    if (videos.length <= 0) {
+      return;
+    }
+
+    const { videoRepository } = this.dependencies;
+
+    const videosIds = videos.map((item) => item.id).join(',');
+    const videosFound = await videoRepository.findVideosByIds(videosIds);
+    if (videosFound.length !== videos.length)
+      throw new Error('Algum video não foi encontrado.');
+
+    let buyerOwnsTheVideo = false;
+    const cantBuyVideos = videosFound.some((video) => {
+      buyerOwnsTheVideo = video.isFromTheSameChannel(id_buyer_channel);
+      return video.isFree() || video.isPrivate() || buyerOwnsTheVideo;
+    });
+    if (cantBuyVideos) throw new Error('Algum video nao pode ser comprado.');
+  }
+
+  private async throwErrorIfAnyPlaylistCannotBePurchased(
+    playlists: Item[],
+    id_buyer_channel: string
+  ): Promise<never | void> {
+    if (playlists.length <= 0) {
+      return;
+    }
+
+    const { playlistRepository } = this.dependencies;
+
+    const playlistsIds = playlists.map((item) => item.id).join(',');
+    const playlistsFound = await playlistRepository.findPlaylistsByIds(
+      playlistsIds
+    );
+    if (playlistsFound.length !== playlists.length)
+      throw new Error('Alguma playlist não foi encontrado.');
+
+    let buyerOwnsThePlaylist = false;
+    const cantBuyPlaylists = playlistsFound.some((playlist) => {
+      buyerOwnsThePlaylist = playlist.isFromTheSameChannel(id_buyer_channel);
+      return playlist.isFree() || playlist.isPrivate() || buyerOwnsThePlaylist;
+    });
+    if (cantBuyPlaylists)
+      throw new Error('Alguma playlist nao pode ser comprada.');
   }
 }
