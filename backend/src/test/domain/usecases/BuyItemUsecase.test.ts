@@ -247,7 +247,37 @@ describe('BuyItemUsecase', () => {
       );
     });
 
-    test.only('Deve lançar erro ao verificar que um video não existe', async () => {
+    test.only('Deve lançar erro por não ter items no input para comprar', async () => {
+      const buyItem = new BuyItemUsecase({
+        orderRepository,
+        orderFactory,
+        playlistRepository,
+        videoRepository
+      });
+
+      const input1: BuyItemUsecaseInput = {
+        id_authenticated_channel: '003',
+        items: []
+      };
+
+      const input2 = {
+        id_authenticated_channel: '003'
+      } as BuyItemUsecaseInput;
+
+      const execute1 = async () => await buyItem.execute(input1);
+
+      const execute2 = async () => await buyItem.execute(input2);
+
+      await expect(execute1).rejects.toThrow(
+        new Error('Não há itens para ser comprado.')
+      );
+
+      await expect(execute2).rejects.toThrow(
+        new Error('Não há itens para ser comprado.')
+      );
+    });
+
+    test('Deve lançar erro ao verificar que um video não existe', async () => {
       const input: BuyItemUsecaseInput = {
         id_authenticated_channel: '003',
         items: [{ id: '001', type: ItemType.VIDEO }]
@@ -275,7 +305,7 @@ describe('BuyItemUsecase', () => {
       'Deve lançar erro ao verificar que um video já foi comprado pelo comprador'
     );
 
-    test.only('Deve lançar erro ao verificar que uma playlist não existe', async () => {
+    test('Deve lançar erro ao verificar que uma playlist não existe', async () => {
       const input: BuyItemUsecaseInput = {
         id_authenticated_channel: '003',
         items: [{ id: '001', type: ItemType.PLAYLIST }]
