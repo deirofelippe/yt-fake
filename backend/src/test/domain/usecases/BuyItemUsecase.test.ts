@@ -56,9 +56,19 @@ describe('BuyItemUsecase', () => {
     };
 
     let video: VideoAttributes;
+    let playlist: PlaylistAttributes;
 
     beforeEach(() => {
       memoryDatabase.clear();
+
+      playlist = {
+        id: '001',
+        id_channel: '002',
+        title: 'DevOps',
+        price: 300,
+        visibility: PlaylistVisibility.PUBLIC
+      };
+
       video = {
         video: 's3//amazon',
         thumbnail: 'devops.png',
@@ -141,13 +151,6 @@ describe('BuyItemUsecase', () => {
     });
 
     test('Deve ser comprado somente uma playlist', async () => {
-      const playlist: PlaylistAttributes = {
-        id: '001',
-        id_channel: '002',
-        title: 'DevOps',
-        price: 300,
-        visibility: PlaylistVisibility.PUBLIC
-      };
       await playlistRepository.create(playlist);
 
       const input: BuyItemUsecaseInput = {
@@ -188,19 +191,6 @@ describe('BuyItemUsecase', () => {
     });
 
     test('Deve ser comprado somente um video', async () => {
-      const video: VideoAttributes = {
-        video: 's3//amazon',
-        thumbnail: 'devops.png',
-        description: 'Aulão sobre as principais ferramentas.',
-        dislikes: 5,
-        likes: 1000,
-        views: 2000,
-        id: '001',
-        id_channel: '002',
-        title: 'DevOps',
-        price: 300,
-        visibility: PlaylistVisibility.PUBLIC
-      };
       await videoRepository.create(video);
 
       const input: BuyItemUsecaseInput = {
@@ -263,12 +253,7 @@ describe('BuyItemUsecase', () => {
     });
 
     test('Deve lançar erro por não ter items no input para comprar', async () => {
-      const buyItem = new BuyItemUsecase({
-        orderRepository,
-        orderFactory,
-        playlistRepository,
-        videoRepository
-      });
+      const buyItem = createBuyItemUsecase();
 
       const input1: BuyItemUsecaseInput = {
         id_authenticated_channel: '003',
@@ -298,12 +283,7 @@ describe('BuyItemUsecase', () => {
         items: [{ id: '001', type: ItemType.VIDEO }]
       };
 
-      const buyItem = new BuyItemUsecase({
-        orderRepository,
-        orderFactory,
-        playlistRepository,
-        videoRepository
-      });
+      const buyItem = createBuyItemUsecase();
 
       const execute = async () => await buyItem.execute(input);
       await expect(execute).rejects.toThrow(
@@ -341,12 +321,7 @@ describe('BuyItemUsecase', () => {
         items: [{ id: '001', type: ItemType.PLAYLIST }]
       };
 
-      const buyItem = new BuyItemUsecase({
-        orderRepository,
-        orderFactory,
-        playlistRepository,
-        videoRepository
-      });
+      const buyItem = createBuyItemUsecase();
 
       const execute = async () => await buyItem.execute(input);
       await expect(execute).rejects.toThrow(
