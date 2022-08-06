@@ -11,7 +11,7 @@ export type VideoAttributes = {
   title: string;
   video: string;
   thumbnail?: string;
-  visibility?: string;
+  visibility?: VideoVisibility;
   views?: number;
   likes?: number;
   dislikes?: number;
