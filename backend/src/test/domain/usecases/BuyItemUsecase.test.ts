@@ -357,7 +357,23 @@ describe('BuyItemUsecase', () => {
         new Error('Alguma playlist não foi encontrado.')
       );
     });
-    test.todo('Deve lançar erro ao verificar que uma playlist é privada');
+
+    test.only('Deve lançar erro ao verificar que uma playlist é privada', async () => {
+      playlist.visibility = PlaylistVisibility.PRIVATE;
+
+      await playlistRepository.create(playlist);
+
+      const input: BuyItemUsecaseInput = {
+        id_authenticated_channel: '003',
+        items: [{ id: playlist.id, type: ItemType.PLAYLIST }]
+      };
+
+      const buyItem = createBuyItemUsecase();
+
+      const execute = async () => await buyItem.execute(input);
+      await expect(execute).rejects.toThrow(new Error('A playlist é privada.'));
+    });
+
     test.todo('Deve lançar erro ao verificar que uma playlist é gratuita');
     test.todo(
       'Deve lançar erro ao verificar que uma playlist é do próprio canal comprador'
