@@ -30,15 +30,10 @@ export class BuyItemUsecase {
   constructor(private readonly dependencies: BuyItemUsecaseDependencies) {}
 
   public async execute(input: BuyItemUsecaseInput) {
-    const {
-      videoRepository,
-      playlistRepository,
-      orderRepository,
-      orderFactory
-    } = this.dependencies;
+    const { orderRepository, orderFactory } = this.dependencies;
 
     const { id_authenticated_channel: id_buyer_channel } = input;
-    const items = input.items;
+    const items = input.items ?? [];
     if (items.length <= 0) throw new Error('Não há itens para ser comprado.');
 
     const videos: Item[] = [],
@@ -83,11 +78,15 @@ export class BuyItemUsecase {
       throw new Error('Algum video não foi encontrado.');
 
     let buyerOwnsTheVideo = false;
-    const cantBuyVideos = videosFound.some((video) => {
+    videosFound.forEach((video) => {
       buyerOwnsTheVideo = video.isFromTheSameChannel(id_buyer_channel);
-      return video.isFree() || video.isPrivate() || buyerOwnsTheVideo;
+      if (buyerOwnsTheVideo)
+        throw new Error('O comprador é o dono do video que quer comprar.');
+
+      if (video.isFree()) throw new Error('O video é gratuito.');
+
+      if (video.isPrivate()) throw new Error('O video é privado.');
     });
-    if (cantBuyVideos) throw new Error('Algum video nao pode ser comprado.');
   }
 
   private async throwErrorIfAnyPlaylistCannotBePurchased(
