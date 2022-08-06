@@ -247,6 +247,25 @@ describe('BuyItemUsecase', () => {
       );
     });
 
+    test.only('Deve lançar erro ao verificar que um video não existe', async () => {
+      const input: BuyItemUsecaseInput = {
+        id_authenticated_channel: '003',
+        items: [{ id: '001', type: ItemType.VIDEO }]
+      };
+
+      const buyItem = new BuyItemUsecase({
+        orderRepository,
+        orderFactory,
+        playlistRepository,
+        videoRepository
+      });
+
+      const execute = async () => await buyItem.execute(input);
+      await expect(execute).rejects.toThrow(
+        new Error('Algum video não foi encontrado.')
+      );
+    });
+
     test.todo('Deve lançar erro ao verificar que um video é privado');
     test.todo('Deve lançar erro ao verificar que um video é gratuito');
     test.todo(
@@ -255,8 +274,25 @@ describe('BuyItemUsecase', () => {
     test.todo(
       'Deve lançar erro ao verificar que um video já foi comprado pelo comprador'
     );
-    test.todo('Deve lançar erro ao verificar que um video não existe');
 
+    test.only('Deve lançar erro ao verificar que uma playlist não existe', async () => {
+      const input: BuyItemUsecaseInput = {
+        id_authenticated_channel: '003',
+        items: [{ id: '001', type: ItemType.PLAYLIST }]
+      };
+
+      const buyItem = new BuyItemUsecase({
+        orderRepository,
+        orderFactory,
+        playlistRepository,
+        videoRepository
+      });
+
+      const execute = async () => await buyItem.execute(input);
+      await expect(execute).rejects.toThrow(
+        new Error('Alguma playlist não foi encontrado.')
+      );
+    });
     test.todo('Deve lançar erro ao verificar que uma playlist é privada');
     test.todo('Deve lançar erro ao verificar que uma playlist é gratuita');
     test.todo(
@@ -265,6 +301,5 @@ describe('BuyItemUsecase', () => {
     test.todo(
       'Deve lançar erro ao verificar que uma playlist já foi comprada pelo comprador'
     );
-    test.todo('Deve lançar erro ao verificar que uma playlist não existe');
   });
 });
