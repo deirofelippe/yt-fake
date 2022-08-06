@@ -37,6 +37,7 @@ export class BuyItemUsecase {
       orderFactory
     } = this.dependencies;
 
+    const { id_authenticated_channel: id_buyer_channel } = input;
     const items = input.items;
     if (items.length <= 0) throw new Error('Não há itens para ser comprado.');
 
@@ -55,14 +56,18 @@ export class BuyItemUsecase {
     }
 
     let videosIds: string = '',
-      videosFound: Video[] = [];
+      videosFound: Video[] = [],
+      buyerOwnsTheVideo: boolean = false,
+      cantBuyVideos: boolean = false;
+
     if (videos.length > 0) {
       videosIds = videos.map((item) => item.id).join(',');
       videosFound = await videoRepository.findVideosByIds(videosIds);
-      const canBuyVideos = videosFound.every(
-        (video) => video.isNotFree() && video.isPublic()
-      );
-      if (!canBuyVideos) throw new Error('Algum video nao pode ser comprado.');
+      cantBuyVideos = videosFound.some((video) => {
+        buyerOwnsTheVideo = video.isFromTheSameChannel(id_buyer_channel);
+        return video.isFree() || video.isPrivate() || buyerOwnsTheVideo;
+      });
+      if (cantBuyVideos) throw new Error('Algum video nao pode ser comprado.');
     }
 
     let playlistsIds: string = '',
