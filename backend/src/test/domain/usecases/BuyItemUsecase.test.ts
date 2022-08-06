@@ -59,8 +59,6 @@ describe('BuyItemUsecase', () => {
       memoryDatabase.clear();
     });
 
-    //video e playlist inexistente, video e playlist privados ou gratuitos, ja comprado, playlist e video n pode ser da propria pessoa
-    //gera url do pagseguro
     test('Deve ser comprado somente um video e uma playlist', async () => {
       const video: VideoAttributes = {
         id: '000',
@@ -226,5 +224,47 @@ describe('BuyItemUsecase', () => {
 
       expect(orders[0].getOrderWithItems()).toEqual(expectedOrder);
     });
+
+    test('Deve lançar erro ao verificar que nao tem items para comprar no input', async () => {
+      const input: BuyItemUsecaseInput = {
+        id_authenticated_channel: '003',
+        items: []
+      };
+
+      const mockOrderFactory = new OrderFactory({
+        idGenerator
+      });
+      const buyItem = new BuyItemUsecase({
+        orderRepository,
+        orderFactory: mockOrderFactory,
+        playlistRepository,
+        videoRepository
+      });
+
+      const execute = async () => await buyItem.execute(input);
+      await expect(execute).rejects.toThrow(
+        new Error('Não há itens para ser comprado.')
+      );
+    });
+
+    test.todo('Deve lançar erro ao verificar que um video é privado');
+    test.todo('Deve lançar erro ao verificar que um video é gratuito');
+    test.todo(
+      'Deve lançar erro ao verificar que um video é do próprio canal comprador'
+    );
+    test.todo(
+      'Deve lançar erro ao verificar que um video já foi comprado pelo comprador'
+    );
+    test.todo('Deve lançar erro ao verificar que um video não existe');
+
+    test.todo('Deve lançar erro ao verificar que uma playlist é privada');
+    test.todo('Deve lançar erro ao verificar que uma playlist é gratuita');
+    test.todo(
+      'Deve lançar erro ao verificar que uma playlist é do próprio canal comprador'
+    );
+    test.todo(
+      'Deve lançar erro ao verificar que uma playlist já foi comprada pelo comprador'
+    );
+    test.todo('Deve lançar erro ao verificar que uma playlist não existe');
   });
 });
