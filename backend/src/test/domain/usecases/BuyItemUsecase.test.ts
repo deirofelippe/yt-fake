@@ -374,7 +374,7 @@ describe('BuyItemUsecase', () => {
       await expect(execute).rejects.toThrow(new Error('A playlist é privada.'));
     });
 
-    test.only('Deve lançar erro ao verificar que uma playlist é gratuita', async () => {
+    test('Deve lançar erro ao verificar que uma playlist é gratuita', async () => {
       playlist.price = 0;
 
       await playlistRepository.create(playlist);
@@ -391,9 +391,25 @@ describe('BuyItemUsecase', () => {
         new Error('A playlist é gratuita.')
       );
     });
-    test.todo(
-      'Deve lançar erro ao verificar que uma playlist é do próprio canal comprador'
-    );
+
+    test('Deve lançar erro ao verificar que uma playlist é do próprio canal comprador', async () => {
+      playlist.id_channel = '003';
+
+      await playlistRepository.create(playlist);
+
+      const input: BuyItemUsecaseInput = {
+        id_authenticated_channel: '003',
+        items: [{ id: playlist.id, type: ItemType.PLAYLIST }]
+      };
+
+      const buyItem = createBuyItemUsecase();
+
+      const execute = async () => await buyItem.execute(input);
+      await expect(execute).rejects.toThrow(
+        new Error('O comprador é o dono da playlist que quer comprar.')
+      );
+    });
+
     test.todo(
       'Deve lançar erro ao verificar que uma playlist já foi comprada pelo comprador'
     );
