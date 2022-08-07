@@ -26,6 +26,33 @@ export class VideoRepositoryMemory implements VideoRepositoryInterface {
     return videosFound.map((video) => this.videoFactory.recreate(video));
   }
 
+  async findVideosByIdThatWereNotPurchased(
+    videosIds: string,
+    id_buyer_channel: string
+  ) {
+    let videosFound: VideoAttributes[] = [];
+    videosIds.split(',').forEach((id) => {
+      const videoFound = this.memoryDatabase.videos.find(
+        (video) => video.id === id
+      );
+      if (!videoFound) return;
+
+      videosFound.push(videoFound);
+    });
+
+    let videosNotPurchased: any[] = [];
+    videosFound.forEach((video) => {
+      const videoFound = this.memoryDatabase.purchasedItems.find(
+        (purchased) =>
+          purchased.id_channel === id_buyer_channel &&
+          purchased.id_item === video.id
+      );
+      if (videoFound) return;
+      videosNotPurchased.push(video);
+    });
+    return videosNotPurchased.map((video) => this.videoFactory.recreate(video));
+  }
+
   async findAll(): Promise<Video[] | []> {
     return this.memoryDatabase.videos.map((video) =>
       this.videoFactory.recreate(video)

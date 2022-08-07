@@ -6,6 +6,10 @@ export interface VideoRepositoryInterface {
   create(video: VideoAttributes): Promise<void>;
   findVideosByIds(ids: string): Promise<Video[] | []>;
   findAllVideosByPlaylist(id_playlist: string): Promise<FindAllVideosOutput>;
+  findVideosByIdThatWereNotPurchased(
+    videosIds: string,
+    id_buyer_channel: string
+  ): Promise<Video[] | []>;
 }
 
 export type FindAllVideosOutput =
