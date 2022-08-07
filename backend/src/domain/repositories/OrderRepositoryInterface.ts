@@ -4,4 +4,12 @@ export interface OrderRepositoryInterface {
   createOrder(order: Omit<OrderAttributes, 'items'>): Promise<void>;
   createOrderItems(orderItems: OrderItemAttributes[]): Promise<void>;
   findAllOrders(id_channel: string): Promise<Order[] | []>;
+  addItemToPurchasedItems(purchasedItems: PurchasedItem): Promise<void>;
 }
+
+export type PurchasedItem = {
+  id_channel: string;
+  id_item: string;
+  id_order: string;
+  type: 'video' | 'playlist';
+};
