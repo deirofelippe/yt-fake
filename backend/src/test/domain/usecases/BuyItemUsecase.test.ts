@@ -430,8 +430,26 @@ describe('BuyItemUsecase', () => {
       );
     });
 
-    test.todo(
-      'Deve lançar erro ao verificar que uma playlist já foi comprada pelo comprador'
-    );
+    test('Deve lançar erro ao verificar que uma playlist já foi comprada pelo comprador', async () => {
+      const purchasedItem: PurchasedItem = {
+        id_channel: '003',
+        id_item: playlist.id,
+        id_order: '000',
+        type: 'playlist'
+      };
+      await orderRepository.addItemToPurchasedItems(purchasedItem);
+
+      const input: BuyItemUsecaseInput = {
+        id_authenticated_channel: '003',
+        items: [{ id: playlist.id, type: ItemType.PLAYLIST }]
+      };
+
+      const buyItem = createBuyItemUsecase();
+
+      const execute = async () => await buyItem.execute(input);
+      await expect(execute).rejects.toThrow(
+        new Error('Alguma playlist não foi encontrada ou já foi comprada.')
+      );
+    });
   });
 });
