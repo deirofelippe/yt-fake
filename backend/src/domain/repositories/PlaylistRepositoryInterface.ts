@@ -7,4 +7,8 @@ export interface PlaylistRepositoryInterface {
   create(playlist: PlaylistAttributes): Promise<void>;
   addVideo(videoInPlaylist: VideoInPlaylistAttributes): Promise<void>;
   findPlaylistsByIds(ids: string): Promise<Playlist[] | []>;
+  findPlaylistsByIdThatWereNotPurchased(
+    playlistsIds: string,
+    id_buyer_channel: string
+  ): Promise<Playlist[] | []>;
 }
