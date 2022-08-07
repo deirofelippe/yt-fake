@@ -288,7 +288,7 @@ describe('BuyItemUsecase', () => {
 
       const execute = async () => await buyItem.execute(input);
       await expect(execute).rejects.toThrow(
-        new Error('Algum video não foi encontrado.')
+        new Error('Algum video não foi encontrado ou já foi comprado.')
       );
     });
 
@@ -374,7 +374,7 @@ describe('BuyItemUsecase', () => {
 
       const execute = async () => await buyItem.execute(input);
       await expect(execute).rejects.toThrow(
-        new Error('Alguma playlist não foi encontrado.')
+        new Error('Alguma playlist não foi encontrada ou já foi comprada.')
       );
     });
 
