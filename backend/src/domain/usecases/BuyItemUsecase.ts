@@ -102,11 +102,14 @@ export class BuyItemUsecase {
     const { playlistRepository } = this.dependencies;
 
     const playlistsIds = playlists.map((item) => item.id).join(',');
-    const playlistsFound = await playlistRepository.findPlaylistsByIds(
-      playlistsIds
-    );
+
+    const playlistsFound =
+      await playlistRepository.findPlaylistsByIdThatWereNotPurchased(
+        playlistsIds,
+        id_buyer_channel
+      );
     if (playlistsFound.length !== playlists.length)
-      throw new Error('Alguma playlist não foi encontrado.');
+      throw new Error('Alguma playlist não foi encontrada ou já foi comprada.');
 
     let buyerOwnsThePlaylist = false;
     playlistsFound.forEach((playlist) => {
