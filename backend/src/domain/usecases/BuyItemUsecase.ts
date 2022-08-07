@@ -1,6 +1,4 @@
 import { Order } from '../entities/Order';
-import { Playlist } from '../entities/Playlist';
-import { Video } from '../entities/Video';
 import { EntityFactoryInterface } from '../factories/entities/EntityFactoryInterface';
 import { OrderRepositoryInterface } from '../repositories/OrderRepositoryInterface';
 import { PlaylistRepositoryInterface } from '../repositories/PlaylistRepositoryInterface';
@@ -73,9 +71,13 @@ export class BuyItemUsecase {
     const { videoRepository } = this.dependencies;
 
     const videosIds = videos.map((item) => item.id).join(',');
-    const videosFound = await videoRepository.findVideosByIds(videosIds);
+    const videosFound =
+      await videoRepository.findVideosByIdThatWereNotPurchased(
+        videosIds,
+        id_buyer_channel
+      );
     if (videosFound.length !== videos.length)
-      throw new Error('Algum video não foi encontrado.');
+      throw new Error('Algum video não foi encontrado ou já foi comprado.');
 
     let buyerOwnsTheVideo = false;
     videosFound.forEach((video) => {
