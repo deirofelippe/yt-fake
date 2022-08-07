@@ -33,6 +33,9 @@ jobs:
 
       - name: Run all test
         run: npm run test:ci
+
+      - name: Run mutation test
+        run: npm run test:mutation
   # CD:
   #   needs: [CI]
   #   runs-on: ubuntu-latest
