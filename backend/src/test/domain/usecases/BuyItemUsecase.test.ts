@@ -231,28 +231,6 @@ describe('BuyItemUsecase', () => {
       expect(orders[0].getOrderWithItems()).toEqual(expectedOrder);
     });
 
-    test('Deve lançar erro ao verificar que nao tem items para comprar no input', async () => {
-      const input: BuyItemUsecaseInput = {
-        id_authenticated_channel: '003',
-        items: []
-      };
-
-      const mockOrderFactory = new OrderFactory({
-        idGenerator
-      });
-      const buyItem = new BuyItemUsecase({
-        orderRepository,
-        orderFactory: mockOrderFactory,
-        playlistRepository,
-        videoRepository
-      });
-
-      const execute = async () => await buyItem.execute(input);
-      await expect(execute).rejects.toThrow(
-        new Error('Não há itens para ser comprado.')
-      );
-    });
-
     test('Deve lançar erro por não ter items no input para comprar', async () => {
       const buyItem = createBuyItemUsecase();
 
@@ -278,7 +256,7 @@ describe('BuyItemUsecase', () => {
       );
     });
 
-    test('Deve lançar erro ao verificar que um video não existe', async () => {
+    test('Deve lançar erro ao comprar um video que não existe', async () => {
       const input: BuyItemUsecaseInput = {
         id_authenticated_channel: '003',
         items: [{ id: '001', type: ItemType.VIDEO }]
@@ -292,7 +270,7 @@ describe('BuyItemUsecase', () => {
       );
     });
 
-    test('Deve lançar erro ao verificar que um video é privado', async () => {
+    test('Deve lançar erro ao comprar um video que é privado', async () => {
       video.visibility = VideoVisibility.PRIVATE;
 
       await videoRepository.create(video);
@@ -308,7 +286,7 @@ describe('BuyItemUsecase', () => {
       await expect(execute).rejects.toThrow(new Error('O video é privado.'));
     });
 
-    test('Deve lançar erro ao verificar que um video é gratuito', async () => {
+    test('Deve lançar erro ao comprar um video que é gratuito', async () => {
       video.price = 0;
 
       await videoRepository.create(video);
@@ -342,7 +320,7 @@ describe('BuyItemUsecase', () => {
       );
     });
 
-    test('Deve lançar erro ao verificar que um video já foi comprado pelo comprador', async () => {
+    test('Deve lançar erro ao comprar um video que já foi comprado pelo comprador', async () => {
       const purchasedItem: PurchasedItem = {
         id_channel: '003',
         id_item: video.id,
@@ -364,7 +342,7 @@ describe('BuyItemUsecase', () => {
       );
     });
 
-    test('Deve lançar erro ao verificar que uma playlist não existe', async () => {
+    test('Deve lançar erro ao comprar uma playlist não existe', async () => {
       const input: BuyItemUsecaseInput = {
         id_authenticated_channel: '003',
         items: [{ id: '001', type: ItemType.PLAYLIST }]
@@ -378,7 +356,7 @@ describe('BuyItemUsecase', () => {
       );
     });
 
-    test('Deve lançar erro ao verificar que uma playlist é privada', async () => {
+    test('Deve lançar erro ao comprar uma playlist que é privada', async () => {
       playlist.visibility = PlaylistVisibility.PRIVATE;
 
       await playlistRepository.create(playlist);
@@ -394,7 +372,7 @@ describe('BuyItemUsecase', () => {
       await expect(execute).rejects.toThrow(new Error('A playlist é privada.'));
     });
 
-    test('Deve lançar erro ao verificar que uma playlist é gratuita', async () => {
+    test('Deve lançar erro ao comprar uma playlist que é gratuita', async () => {
       playlist.price = 0;
 
       await playlistRepository.create(playlist);
@@ -412,7 +390,7 @@ describe('BuyItemUsecase', () => {
       );
     });
 
-    test('Deve lançar erro ao verificar que uma playlist é do próprio canal comprador', async () => {
+    test('Deve lançar erro ao comprar uma playlist que é do próprio canal comprador', async () => {
       playlist.id_channel = '003';
 
       await playlistRepository.create(playlist);
@@ -430,7 +408,7 @@ describe('BuyItemUsecase', () => {
       );
     });
 
-    test('Deve lançar erro ao verificar que uma playlist já foi comprada pelo comprador', async () => {
+    test('Deve lançar erro ao comprar uma playlist que já foi comprada pelo comprador', async () => {
       const purchasedItem: PurchasedItem = {
         id_channel: '003',
         id_item: playlist.id,
