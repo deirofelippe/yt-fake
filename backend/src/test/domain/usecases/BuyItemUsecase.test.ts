@@ -11,6 +11,7 @@ import { OrderFactory } from '../../../domain/factories/entities/OrderFactory';
 import { PlaylistFactory } from '../../../domain/factories/entities/PlaylistFactory';
 import { VideoFactory } from '../../../domain/factories/entities/VideoFactory';
 import { IDGenerator } from '../../../domain/libs/IDGenerator';
+import { PurchasedItem } from '../../../domain/repositories/OrderRepositoryInterface';
 import {
   BuyItemUsecase,
   BuyItemUsecaseInput,
@@ -340,9 +341,28 @@ describe('BuyItemUsecase', () => {
         new Error('O comprador é o dono do video que quer comprar.')
       );
     });
-    test.todo(
-      'Deve lançar erro ao verificar que um video já foi comprado pelo comprador'
-    );
+
+    test('Deve lançar erro ao verificar que um video já foi comprado pelo comprador', async () => {
+      const purchasedItem: PurchasedItem = {
+        id_channel: '003',
+        id_item: video.id,
+        id_order: '000',
+        type: 'video'
+      };
+      await orderRepository.addItemToPurchasedItems(purchasedItem);
+
+      const input: BuyItemUsecaseInput = {
+        id_authenticated_channel: '003',
+        items: [{ id: '001', type: ItemType.VIDEO }]
+      };
+
+      const buyItem = createBuyItemUsecase();
+
+      const execute = async () => await buyItem.execute(input);
+      await expect(execute).rejects.toThrow(
+        new Error('Algum video não foi encontrado ou já foi comprado.')
+      );
+    });
 
     test('Deve lançar erro ao verificar que uma playlist não existe', async () => {
       const input: BuyItemUsecaseInput = {
