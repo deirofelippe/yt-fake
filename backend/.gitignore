@@ -3,3 +3,6 @@ dist
 coverage
 .env
 package2.json
+# stryker temp files
+.stryker-tmp
+reports

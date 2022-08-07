@@ -10,6 +10,7 @@
   "scripts": {
     "test": "npx jest --config jest.config.js --runInBand --detectOpenHandles",
     "test:ci": "npm run test -- --coverage --silent --verbose",
+    "test:mutation": "npx stryker run --logLevel trace",
     "test:watch": "npm run test -- --watch",
     "prebuild": "npx rimraf ./dist",
     "build": "npx swc ./src -d ./dist",
@@ -24,6 +25,9 @@
   },
   "devDependencies": {
     "@faker-js/faker": "^6.0.0-alpha.7",
+    "@stryker-mutator/core": "^6.1.2",
+    "@stryker-mutator/jest-runner": "^6.1.2",
+    "@stryker-mutator/typescript-checker": "^6.1.2",
     "@swc/cli": "^0.1.57",
     "@swc/core": "^1.2.189",
     "@swc/jest": "^0.2.21",
