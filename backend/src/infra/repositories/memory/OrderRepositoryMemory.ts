@@ -4,10 +4,7 @@ import {
   OrderItemAttributes
 } from '../../../domain/entities/Order';
 import { EntityFactoryInterface } from '../../../domain/factories/entities/EntityFactoryInterface';
-import {
-  OrderRepositoryInterface,
-  PurchasedItem
-} from '../../../domain/repositories/OrderRepositoryInterface';
+import { OrderRepositoryInterface } from '../../../domain/repositories/OrderRepositoryInterface';
 import { MemoryDatabase } from '../../../test/MemoryDatabase';
 
 export class OrderRepositoryMemory implements OrderRepositoryInterface {
@@ -47,9 +44,5 @@ export class OrderRepositoryMemory implements OrderRepositoryInterface {
     orderItems.forEach((orderItem) =>
       this.memoryDatabase.orderItems.push(orderItem)
     );
-  }
-
-  async addItemToPurchasedItems(purchasedItem: PurchasedItem): Promise<void> {
-    this.memoryDatabase.purchasedItems.push(purchasedItem);
   }
 }

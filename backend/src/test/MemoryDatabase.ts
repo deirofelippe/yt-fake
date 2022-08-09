@@ -2,7 +2,6 @@ import { ChannelAttributes } from '../domain/entities/Channel';
 import { OrderAttributes, OrderItemAttributes } from '../domain/entities/Order';
 import { PlaylistAttributes } from '../domain/entities/Playlist';
 import { VideoAttributes } from '../domain/entities/Video';
-import { PurchasedItem } from '../domain/repositories/OrderRepositoryInterface';
 import { VideoInPlaylistAttributes } from '../domain/usecases/AddVideoToPlaylistUsecase';
 
 export class MemoryDatabase {
@@ -12,7 +11,6 @@ export class MemoryDatabase {
   public playlists: PlaylistAttributes[] = [];
   public videos: VideoAttributes[] = [];
   public videoInPlaylist: VideoInPlaylistAttributes[] = [];
-  public purchasedItems: PurchasedItem[] = [];
 
   public clear() {
     this.channels = [];
@@ -21,6 +19,5 @@ export class MemoryDatabase {
     this.videoInPlaylist = [];
     this.orders = [];
     this.orderItems = [];
-    this.purchasedItems = [];
   }
 }
