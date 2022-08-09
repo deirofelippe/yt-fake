@@ -1,3 +1,4 @@
+import { OrderItemAttributes } from '../../../domain/entities/Order';
 import {
   Playlist,
   PlaylistAttributes
@@ -60,7 +61,8 @@ export class PlaylistRepositoryMemory implements PlaylistRepositoryInterface {
     playlistsIds: string,
     id_buyer_channel: string
   ): Promise<Playlist[] | []> {
-    let playlistsFound: PlaylistAttributes[] = [];
+    const playlistsFound: PlaylistAttributes[] = [];
+    //pega as playlists q deseja comprar
     playlistsIds.split(',').forEach((id) => {
       const playlistFound = this.memoryDatabase.playlists.find(
         (playlist) => playlist.id === id
@@ -70,16 +72,30 @@ export class PlaylistRepositoryMemory implements PlaylistRepositoryInterface {
       playlistsFound.push(playlistFound);
     });
 
-    let playlistsNotPurchased: any[] = [];
-    playlistsFound.forEach((playlist) => {
-      const playlistFound = this.memoryDatabase.purchasedItems.find(
-        (purchased) =>
-          purchased.id_channel === id_buyer_channel &&
-          purchased.id_item === playlist.id
+    //pega as orders do channel
+    const ordersFound = this.memoryDatabase.orders.filter(
+      (order) => order.id_channel === id_buyer_channel
+    );
+
+    let orderItems: OrderItemAttributes[] = [];
+    //coloca os items de tds as orders em um array so
+    ordersFound.forEach((order) => {
+      const orderItemsFound = this.memoryDatabase.orderItems.filter(
+        (items) => items.id_order === order.id
       );
-      if (playlistFound) return;
+      orderItems = [...orderItems, ...orderItemsFound];
+    });
+
+    const playlistsNotPurchased: PlaylistAttributes[] = [];
+    //push no array as playlist que nao estao na lista de orderItems
+    playlistsFound.forEach((playlist) => {
+      const orderItemFound = orderItems.find(
+        (item) => item.id_purchased_item === playlist.id
+      );
+      if (orderItemFound) return;
       playlistsNotPurchased.push(playlist);
     });
+
     return playlistsNotPurchased.map((playlist) =>
       this.playlistFactory.recreate(playlist)
     );
