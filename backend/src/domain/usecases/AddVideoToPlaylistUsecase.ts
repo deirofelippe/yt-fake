@@ -1,4 +1,4 @@
-import { NotAuthorizedError } from '../../errors/NotAuthorizedError';
+import { ImpossibleActionError } from '../../errors/ImpossibleActionError';
 import { NotFoundError } from '../../errors/NotFoundError';
 import { IDGenerator } from '../libs/IDGenerator';
 import { PlaylistRepositoryInterface } from '../repositories/PlaylistRepositoryInterface';
@@ -56,8 +56,8 @@ export class AddVideoToPlaylistUsecase {
     );
 
     if (notOwnsThePlaylist)
-      throw new NotAuthorizedError(
-        'Channel can only add video to own playlist.'
+      throw new ImpossibleActionError(
+        'Channel pode adicionar video somente na própria playlist.'
       );
 
     let cantAddVideoToPlaylist = true;
@@ -69,21 +69,21 @@ export class AddVideoToPlaylistUsecase {
       playlistFound.isNotFree() && playlistAndVideoOwnerIsNotSame;
 
     if (cantAddVideoToPlaylist)
-      throw new NotAuthorizedError(
-        "Can't add a third-party video to your own buyable playlist."
+      throw new ImpossibleActionError(
+        'Não pode adicionar video de terceiro na própria playlist paga.'
       );
 
     const playlistIsFree = playlistFound.isFree();
     cantAddVideoToPlaylist = playlistIsFree && videoFound.isNotFree();
     if (cantAddVideoToPlaylist)
-      throw new NotAuthorizedError(
-        "Can't add a third-party buyable video to your own playlist."
+      throw new ImpossibleActionError(
+        'Não pode adiciona video pago de terceiro na própria playlist.'
       );
 
     cantAddVideoToPlaylist = playlistIsFree && videoFound.isPrivate();
     if (cantAddVideoToPlaylist)
-      throw new NotAuthorizedError(
-        "Can't add a third-party private video to your own playlist."
+      throw new ImpossibleActionError(
+        'Não pode adicionar video privado de terceiro na propria playlist.'
       );
 
     await playlistRepository.addVideo(videoInPlaylist);
