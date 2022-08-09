@@ -10,13 +10,14 @@ import {
 import { OrderFactory } from '../../../domain/factories/entities/OrderFactory';
 import { PlaylistFactory } from '../../../domain/factories/entities/PlaylistFactory';
 import { VideoFactory } from '../../../domain/factories/entities/VideoFactory';
-import { IDGenerator } from '../../../domain/libs/IDGenerator';
 import { PurchasedItem } from '../../../domain/repositories/OrderRepositoryInterface';
 import {
   BuyItemUsecase,
   BuyItemUsecaseInput,
   ItemType
 } from '../../../domain/usecases/BuyItemUsecase';
+import { FieldsValidationError } from '../../../errors/FieldsValidationError';
+import { ImpossibleActionError } from '../../../errors/ImpossibleActionError';
 import { CryptoIDGenerator } from '../../../infra/libs/CryptoIDGenerator';
 import { OrderRepositoryMemory } from '../../../infra/repositories/memory/OrderRepositoryMemory';
 import { PlaylistRepositoryMemory } from '../../../infra/repositories/memory/PlaylistRepositoryMemory';
@@ -247,13 +248,9 @@ describe('BuyItemUsecase', () => {
 
       const execute2 = async () => await buyItem.execute(input2);
 
-      await expect(execute1).rejects.toThrow(
-        new Error('Não há itens para ser comprado.')
-      );
+      await expect(execute1).rejects.toThrow(FieldsValidationError);
 
-      await expect(execute2).rejects.toThrow(
-        new Error('Não há itens para ser comprado.')
-      );
+      await expect(execute2).rejects.toThrow(FieldsValidationError);
     });
 
     test('Deve lançar erro ao comprar um video que não existe', async () => {
@@ -266,7 +263,9 @@ describe('BuyItemUsecase', () => {
 
       const execute = async () => await buyItem.execute(input);
       await expect(execute).rejects.toThrow(
-        new Error('Algum video não foi encontrado ou já foi comprado.')
+        new ImpossibleActionError(
+          'Algum video não foi encontrado ou já foi comprado.'
+        )
       );
     });
 
@@ -283,7 +282,9 @@ describe('BuyItemUsecase', () => {
       const buyItem = createBuyItemUsecase();
 
       const execute = async () => await buyItem.execute(input);
-      await expect(execute).rejects.toThrow(new Error('O video é privado.'));
+      await expect(execute).rejects.toThrow(
+        new ImpossibleActionError('O video é privado.')
+      );
     });
 
     test('Deve lançar erro ao comprar um video que é gratuito', async () => {
@@ -299,7 +300,9 @@ describe('BuyItemUsecase', () => {
       const buyItem = createBuyItemUsecase();
 
       const execute = async () => await buyItem.execute(input);
-      await expect(execute).rejects.toThrow(new Error('O video é gratuito.'));
+      await expect(execute).rejects.toThrow(
+        new ImpossibleActionError('O video é gratuito.')
+      );
     });
 
     test('Deve lançar erro ao comprador tentar comprar o proprio video', async () => {
@@ -316,7 +319,9 @@ describe('BuyItemUsecase', () => {
 
       const execute = async () => await buyItem.execute(input);
       await expect(execute).rejects.toThrow(
-        new Error('O comprador é o dono do video que quer comprar.')
+        new ImpossibleActionError(
+          'O comprador é o dono do video que quer comprar.'
+        )
       );
     });
 
@@ -338,7 +343,9 @@ describe('BuyItemUsecase', () => {
 
       const execute = async () => await buyItem.execute(input);
       await expect(execute).rejects.toThrow(
-        new Error('Algum video não foi encontrado ou já foi comprado.')
+        new ImpossibleActionError(
+          'Algum video não foi encontrado ou já foi comprado.'
+        )
       );
     });
 
@@ -352,7 +359,9 @@ describe('BuyItemUsecase', () => {
 
       const execute = async () => await buyItem.execute(input);
       await expect(execute).rejects.toThrow(
-        new Error('Alguma playlist não foi encontrada ou já foi comprada.')
+        new ImpossibleActionError(
+          'Alguma playlist não foi encontrada ou já foi comprada.'
+        )
       );
     });
 
@@ -369,7 +378,9 @@ describe('BuyItemUsecase', () => {
       const buyItem = createBuyItemUsecase();
 
       const execute = async () => await buyItem.execute(input);
-      await expect(execute).rejects.toThrow(new Error('A playlist é privada.'));
+      await expect(execute).rejects.toThrow(
+        new ImpossibleActionError('A playlist é privada.')
+      );
     });
 
     test('Deve lançar erro ao comprar uma playlist que é gratuita', async () => {
@@ -386,7 +397,7 @@ describe('BuyItemUsecase', () => {
 
       const execute = async () => await buyItem.execute(input);
       await expect(execute).rejects.toThrow(
-        new Error('A playlist é gratuita.')
+        new ImpossibleActionError('A playlist é gratuita.')
       );
     });
 
@@ -404,7 +415,9 @@ describe('BuyItemUsecase', () => {
 
       const execute = async () => await buyItem.execute(input);
       await expect(execute).rejects.toThrow(
-        new Error('O comprador é o dono da playlist que quer comprar.')
+        new ImpossibleActionError(
+          'O comprador é o dono da playlist que quer comprar.'
+        )
       );
     });
 
@@ -426,7 +439,9 @@ describe('BuyItemUsecase', () => {
 
       const execute = async () => await buyItem.execute(input);
       await expect(execute).rejects.toThrow(
-        new Error('Alguma playlist não foi encontrada ou já foi comprada.')
+        new ImpossibleActionError(
+          'Alguma playlist não foi encontrada ou já foi comprada.'
+        )
       );
     });
   });
