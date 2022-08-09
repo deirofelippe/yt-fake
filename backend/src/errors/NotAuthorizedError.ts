@@ -1,6 +1,5 @@
 export class NotAuthorizedError extends Error {
   public statusCode: number;
-  public entityName: string;
 
   constructor(message: string) {
     super();
