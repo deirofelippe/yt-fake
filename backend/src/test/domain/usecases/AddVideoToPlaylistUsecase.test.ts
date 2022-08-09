@@ -227,7 +227,7 @@ describe('AddVideoToPlaylistUsecase', () => {
       );
     });
 
-    test('Deve lançar erro ao adicionar video de terceiro na propria playlist com tipo "buyable".', async () => {
+    test('Deve lançar erro ao adicionar video de terceiro na propria playlist paga.', async () => {
       playlist.price = 12;
       video.id_channel = '002';
       input.id_authenticated_channel = '001';
@@ -245,7 +245,7 @@ describe('AddVideoToPlaylistUsecase', () => {
       );
     });
 
-    test('Deve lançar erro ao adicionar video de terceiro com visibilidade "private" na propria playlist com tipo "regular".', async () => {
+    test('Deve lançar erro ao adicionar video privado de terceiro na propria playlist gratuita.', async () => {
       video.visibility = VideoVisibility.PRIVATE;
       video.id_channel = '002';
       playlist.price = 0;
@@ -265,7 +265,7 @@ describe('AddVideoToPlaylistUsecase', () => {
       );
     });
 
-    test('Deve lançar erro ao adicionar video compravel de terceiro na propria playlist com tipo "regular".', async () => {
+    test('Deve lançar erro ao adicionar video pago de terceiro na propria playlist gratuita.', async () => {
       video.price = 1;
       video.visibility = VideoVisibility.PUBLIC;
       video.id_channel = '002';
