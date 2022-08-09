@@ -12,7 +12,7 @@ import {
   AddVideoToPlaylistUsecase,
   AddVideoToPlaylistUsecaseInput
 } from '../../../domain/usecases/AddVideoToPlaylistUsecase';
-import { FieldsValidationError } from '../../../errors/FieldsValidationError';
+import { ImpossibleActionError } from '../../../errors/ImpossibleActionError';
 import { CryptoIDGenerator } from '../../../infra/libs/CryptoIDGenerator';
 import { PlaylistRepositoryMemory } from '../../../infra/repositories/memory/PlaylistRepositoryMemory';
 import { VideoRepositoryMemory } from '../../../infra/repositories/memory/VideoRepositoryMemory';
@@ -45,36 +45,6 @@ describe('AddVideoToPlaylistUsecase', () => {
   };
 
   describe('Adicionar video na playlist', () => {
-    describe('Validations', () => {
-      test('Error campo "id_reference_video" e "id_playlist"', async () => {
-        const input: AddVideoToPlaylistUsecaseInput = {
-          id_referenced_video: '$',
-          id_authenticated_channel: '002',
-          id_playlist: ''
-        };
-
-        const addVideoInPlaylist = createAddVideoToPlaylistUsecase();
-
-        const expectedError = [
-          {
-            field: 'id_referenced_video',
-            message:
-              'Não deve ter caracteres especiais, somente letras e números'
-          },
-          { field: 'id_referenced_video', message: 'Deve ter 3 caracteres' },
-          { field: 'id_playlist', message: 'Campo deve ser preenchido' }
-        ];
-
-        try {
-          await addVideoInPlaylist.execute(input);
-        } catch (error) {
-          if (error instanceof FieldsValidationError) {
-            expect(error.fields).toEqual(expectedError);
-          }
-        }
-      });
-    });
-
     let video: VideoAttributes;
     let playlist: PlaylistAttributes;
     let input: AddVideoToPlaylistUsecaseInput;
@@ -251,7 +221,9 @@ describe('AddVideoToPlaylistUsecase', () => {
       const execute = async () => await addVideoInPlaylist.execute(input);
 
       await expect(execute).rejects.toThrowError(
-        'Channel can only add video to own playlist.'
+        new ImpossibleActionError(
+          'Channel pode adicionar video somente na própria playlist.'
+        )
       );
     });
 
@@ -267,7 +239,9 @@ describe('AddVideoToPlaylistUsecase', () => {
       const execute = async () => await addVideoInPlaylist.execute(input);
 
       await expect(execute).rejects.toThrowError(
-        "Can't add a third-party video to your own buyable playlist."
+        new ImpossibleActionError(
+          'Não pode adicionar video de terceiro na própria playlist paga.'
+        )
       );
     });
 
@@ -285,7 +259,9 @@ describe('AddVideoToPlaylistUsecase', () => {
       const execute = async () => await addVideoInPlaylist.execute(input);
 
       await expect(execute).rejects.toThrowError(
-        "Can't add a third-party private video to your own playlist."
+        new ImpossibleActionError(
+          'Não pode adicionar video privado de terceiro na propria playlist.'
+        )
       );
     });
 
@@ -304,7 +280,9 @@ describe('AddVideoToPlaylistUsecase', () => {
       const execute = async () => await addVideoInPlaylist.execute(input);
 
       await expect(execute).rejects.toThrowError(
-        "Can't add a third-party buyable video to your own playlist."
+        new ImpossibleActionError(
+          'Não pode adiciona video pago de terceiro na própria playlist.'
+        )
       );
     });
   });
