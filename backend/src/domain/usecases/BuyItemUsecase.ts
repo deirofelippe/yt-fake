@@ -1,3 +1,5 @@
+import { FieldsValidationError } from '../../errors/FieldsValidationError';
+import { ImpossibleActionError } from '../../errors/ImpossibleActionError';
 import { Order } from '../entities/Order';
 import { EntityFactoryInterface } from '../factories/entities/EntityFactoryInterface';
 import { OrderRepositoryInterface } from '../repositories/OrderRepositoryInterface';
@@ -32,7 +34,11 @@ export class BuyItemUsecase {
 
     const { id_authenticated_channel: id_buyer_channel } = input;
     const items = input.items ?? [];
-    if (items.length <= 0) throw new Error('Não há itens para ser comprado.');
+
+    if (items.length <= 0)
+      throw new FieldsValidationError([
+        { field: 'items', message: 'Items não pode estar vazio.' }
+      ]);
 
     const videos: Item[] = [],
       playlists: Item[] = [];
@@ -77,17 +83,23 @@ export class BuyItemUsecase {
         id_buyer_channel
       );
     if (videosFound.length !== videos.length)
-      throw new Error('Algum video não foi encontrado ou já foi comprado.');
+      throw new ImpossibleActionError(
+        'Algum video não foi encontrado ou já foi comprado.'
+      );
 
     let buyerOwnsTheVideo = false;
     videosFound.forEach((video) => {
       buyerOwnsTheVideo = video.isFromTheSameChannel(id_buyer_channel);
       if (buyerOwnsTheVideo)
-        throw new Error('O comprador é o dono do video que quer comprar.');
+        throw new ImpossibleActionError(
+          'O comprador é o dono do video que quer comprar.'
+        );
 
-      if (video.isFree()) throw new Error('O video é gratuito.');
+      if (video.isFree())
+        throw new ImpossibleActionError('O video é gratuito.');
 
-      if (video.isPrivate()) throw new Error('O video é privado.');
+      if (video.isPrivate())
+        throw new ImpossibleActionError('O video é privado.');
     });
   }
 
@@ -109,17 +121,23 @@ export class BuyItemUsecase {
         id_buyer_channel
       );
     if (playlistsFound.length !== playlists.length)
-      throw new Error('Alguma playlist não foi encontrada ou já foi comprada.');
+      throw new ImpossibleActionError(
+        'Alguma playlist não foi encontrada ou já foi comprada.'
+      );
 
     let buyerOwnsThePlaylist = false;
     playlistsFound.forEach((playlist) => {
       buyerOwnsThePlaylist = playlist.isFromTheSameChannel(id_buyer_channel);
       if (buyerOwnsThePlaylist)
-        throw new Error('O comprador é o dono da playlist que quer comprar.');
+        throw new ImpossibleActionError(
+          'O comprador é o dono da playlist que quer comprar.'
+        );
 
-      if (playlist.isFree()) throw new Error('A playlist é gratuita.');
+      if (playlist.isFree())
+        throw new ImpossibleActionError('A playlist é gratuita.');
 
-      if (playlist.isPrivate()) throw new Error('A playlist é privada.');
+      if (playlist.isPrivate())
+        throw new ImpossibleActionError('A playlist é privada.');
     });
   }
 }
