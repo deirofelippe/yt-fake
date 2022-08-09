@@ -1,4 +1,7 @@
-import { OrderAttributes } from '../../../domain/entities/Order';
+import {
+  OrderAttributes,
+  OrderItemAttributes
+} from '../../../domain/entities/Order';
 import {
   PlaylistAttributes,
   PlaylistVisibility
@@ -326,13 +329,19 @@ describe('BuyItemUsecase', () => {
     });
 
     test('Deve lançar erro ao comprar um video que já foi comprado pelo comprador', async () => {
-      const purchasedItem: PurchasedItem = {
-        id_channel: '003',
-        id_item: video.id,
-        id_order: '000',
+      const order: Omit<OrderAttributes, 'items'> = {
+        id: '003',
+        id_channel: '003'
+      };
+      const orderItem: OrderItemAttributes = {
+        id: '004',
+        id_order: order.id,
+        id_purchased_item: video.id,
         type: 'video'
       };
-      await orderRepository.addItemToPurchasedItems(purchasedItem);
+      await orderRepository.createOrder(order);
+      await orderRepository.createOrderItems([orderItem]);
+      await videoRepository.create(video);
 
       const input: BuyItemUsecaseInput = {
         id_authenticated_channel: '003',
@@ -422,13 +431,19 @@ describe('BuyItemUsecase', () => {
     });
 
     test('Deve lançar erro ao comprar uma playlist que já foi comprada pelo comprador', async () => {
-      const purchasedItem: PurchasedItem = {
-        id_channel: '003',
-        id_item: playlist.id,
-        id_order: '000',
+      const order: Omit<OrderAttributes, 'items'> = {
+        id: '003',
+        id_channel: '003'
+      };
+      const orderItem: OrderItemAttributes = {
+        id: '004',
+        id_order: order.id,
+        id_purchased_item: playlist.id,
         type: 'playlist'
       };
-      await orderRepository.addItemToPurchasedItems(purchasedItem);
+      await orderRepository.createOrder(order);
+      await orderRepository.createOrderItems([orderItem]);
+      await playlistRepository.create(playlist);
 
       const input: BuyItemUsecaseInput = {
         id_authenticated_channel: '003',
