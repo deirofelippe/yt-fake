@@ -13,7 +13,6 @@ import {
 import { OrderFactory } from '../../../domain/factories/entities/OrderFactory';
 import { PlaylistFactory } from '../../../domain/factories/entities/PlaylistFactory';
 import { VideoFactory } from '../../../domain/factories/entities/VideoFactory';
-import { PurchasedItem } from '../../../domain/repositories/OrderRepositoryInterface';
 import {
   BuyItemUsecase,
   BuyItemUsecaseInput,
@@ -22,6 +21,8 @@ import {
 import { FieldsValidationError } from '../../../errors/FieldsValidationError';
 import { ImpossibleActionError } from '../../../errors/ImpossibleActionError';
 import { CryptoIDGenerator } from '../../../infra/libs/CryptoIDGenerator';
+import { MercadoPago } from '../../../infra/payment/MercadoPago';
+import { PagSeguro } from '../../../infra/payment/PagSeguro';
 import { OrderRepositoryMemory } from '../../../infra/repositories/memory/OrderRepositoryMemory';
 import { PlaylistRepositoryMemory } from '../../../infra/repositories/memory/PlaylistRepositoryMemory';
 import { VideoRepositoryMemory } from '../../../infra/repositories/memory/VideoRepositoryMemory';
@@ -458,6 +459,25 @@ describe('BuyItemUsecase', () => {
           'Alguma playlist não foi encontrada ou já foi comprada.'
         )
       );
+    });
+
+    test('url', async () => {
+      const videos: VideoAttributes[] = [
+        { id: '001', id_channel: '', video: '', title: 'teste 1', price: 50.1 },
+        { id: '002', title: 'teste 2', id_channel: '', video: '', price: 73.12 }
+      ];
+      const playlists: PlaylistAttributes[] = [
+        { id: '003', title: 'teste 3', id_channel: '', price: 30.0 },
+        { id: '004', title: 'teste 4', price: 130.0, id_channel: '' }
+      ];
+
+      const items: any[] = [...videos, ...playlists];
+
+      // const pagseguro = new PagSeguro();
+      // await pagseguro.execute(items);
+
+      // const mercadopago = new MercadoPago();
+      // await mercadopago.execute(items);
     });
   });
 });
