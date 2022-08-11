@@ -1,10 +1,15 @@
 import { OrderItemAttributes } from '../../../domain/entities/Order';
 import {
   Playlist,
-  PlaylistAttributes
+  PlaylistAttributes,
+  PlaylistVisibility
 } from '../../../domain/entities/Playlist';
 import { EntityFactoryInterface } from '../../../domain/factories/entities/EntityFactoryInterface';
-import { PlaylistRepositoryInterface } from '../../../domain/repositories/PlaylistRepositoryInterface';
+import {
+  FindLibrary,
+  LibraryAttributes,
+  PlaylistRepositoryInterface
+} from '../../../domain/repositories/PlaylistRepositoryInterface';
 import { VideoInPlaylistAttributes } from '../../../domain/usecases/AddVideoToPlaylistUsecase';
 import { MemoryDatabase } from '../../../test/MemoryDatabase';
 
@@ -13,6 +18,33 @@ export class PlaylistRepositoryMemory implements PlaylistRepositoryInterface {
     private readonly memoryDatabase: MemoryDatabase,
     private readonly playlistFactory: EntityFactoryInterface<Playlist>
   ) {}
+
+  async findLibrary(id_channel: string): Promise<FindLibrary[]> {
+    //pega registros de library so do channel
+    const channelLibrary = this.memoryDatabase.library.filter(
+      (lib) => lib.id_channel === id_channel
+    );
+
+    if (channelLibrary.length <= 0) return;
+
+    const libraryPlaylists = channelLibrary.map((channelLib) => {
+      //pega a playlist que esta na library
+      const playlist = this.memoryDatabase.playlists.find(
+        (playlist) => playlist.id === channelLib.id_playlist
+      );
+      //retorna os dados da playlist da library
+      return {
+        id: playlist.id,
+        title: playlist.title,
+        visibility: playlist.visibility
+      };
+    });
+
+    return libraryPlaylists;
+  }
+  async addToLibrary(library: LibraryAttributes): Promise<void> {
+    this.memoryDatabase.library.push(library);
+  }
 
   async findPlaylistsByIds(ids: string): Promise<Playlist[] | []> {
     let playlistsFound: PlaylistAttributes[] = [];
