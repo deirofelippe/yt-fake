@@ -83,6 +83,40 @@ describe('CreatePlaylistUsecase', () => {
       );
     });
 
+    test('Deve ser adicionada na library as playlists criadas.', async () => {
+      await channelRepository.create(channel);
+
+      const createPlaylist = createPlaylistUsecase();
+
+      const input1: CreatePlaylistUsecaseInput = {
+        ...playlist,
+        title: playlist.title + '1',
+        id_authenticated_channel: playlist.id_channel
+      };
+      const input2: CreatePlaylistUsecaseInput = {
+        ...playlist,
+        title: playlist.title + '2',
+        id_authenticated_channel: playlist.id_channel
+      };
+      await createPlaylist.execute(input1);
+      await createPlaylist.execute(input2);
+
+      const library = await playlistRepository.findLibrary(playlist.id_channel);
+
+      expect(library).toEqual([
+        {
+          id: expect.any(String),
+          title: 'Curso de Fullcycle Development1',
+          visibility: 'public'
+        },
+        {
+          id: expect.any(String),
+          title: 'Curso de Fullcycle Development2',
+          visibility: 'public'
+        }
+      ]);
+    });
+
     test('Deve lançar erro ao criar playlist com channel inexistente.', async () => {
       const input: CreatePlaylistUsecaseInput = {
         ...playlist,
