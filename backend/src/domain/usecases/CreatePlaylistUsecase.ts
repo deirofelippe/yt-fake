@@ -36,6 +36,12 @@ export class CreatePlaylistUsecase {
 
     const playlist = playlistFactory.create(input);
 
+    const library = {
+      id_channel: input.id_authenticated_channel,
+      id_playlist: playlist.id
+    };
+
     await playlistRepository.create(playlist.getAttributes());
+    await playlistRepository.addToLibrary(library);
   }
 }

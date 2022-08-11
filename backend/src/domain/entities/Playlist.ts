@@ -40,6 +40,10 @@ export class Playlist {
     return this.attributes.id_channel;
   }
 
+  get id() {
+    return this.attributes.id;
+  }
+
   /**
    * Verifica se a visibility do vídeo é publica.
    * @returns boolean
