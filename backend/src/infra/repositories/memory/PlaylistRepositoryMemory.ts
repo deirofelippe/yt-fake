@@ -6,10 +6,10 @@ import {
 } from '../../../domain/entities/Playlist';
 import { EntityFactoryInterface } from '../../../domain/factories/entities/EntityFactoryInterface';
 import {
-  FindLibrary,
-  LibraryAttributes,
+  FindLibraryOutput,
   PlaylistRepositoryInterface
 } from '../../../domain/repositories/PlaylistRepositoryInterface';
+import { LibraryAttributes } from '../../../domain/usecases/AddPlaylistToLibraryUsecase';
 import { VideoInPlaylistAttributes } from '../../../domain/usecases/AddVideoToPlaylistUsecase';
 import { MemoryDatabase } from '../../../test/MemoryDatabase';
 
@@ -19,7 +19,7 @@ export class PlaylistRepositoryMemory implements PlaylistRepositoryInterface {
     private readonly playlistFactory: EntityFactoryInterface<Playlist>
   ) {}
 
-  async findLibrary(id_channel: string): Promise<FindLibrary[]> {
+  async findLibrary(id_channel: string): Promise<FindLibraryOutput[] | []> {
     //pega registros de library so do channel
     const channelLibrary = this.memoryDatabase.library.filter(
       (lib) => lib.id_channel === id_channel

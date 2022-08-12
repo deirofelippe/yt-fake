@@ -2,7 +2,7 @@ import { ChannelAttributes } from '../domain/entities/Channel';
 import { OrderAttributes, OrderItemAttributes } from '../domain/entities/Order';
 import { PlaylistAttributes } from '../domain/entities/Playlist';
 import { VideoAttributes } from '../domain/entities/Video';
-import { LibraryAttributes } from '../domain/repositories/PlaylistRepositoryInterface';
+import { LibraryAttributes } from '../domain/usecases/AddPlaylistToLibraryUsecase';
 import { VideoInPlaylistAttributes } from '../domain/usecases/AddVideoToPlaylistUsecase';
 
 export class MemoryDatabase {

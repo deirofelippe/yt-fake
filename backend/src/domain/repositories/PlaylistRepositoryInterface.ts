@@ -3,11 +3,12 @@ import {
   PlaylistAttributes,
   PlaylistVisibility
 } from '../entities/Playlist';
+import { LibraryAttributes } from '../usecases/AddPlaylistToLibraryUsecase';
 import { VideoInPlaylistAttributes } from '../usecases/AddVideoToPlaylistUsecase';
 
 export interface PlaylistRepositoryInterface {
   addToLibrary(library: LibraryAttributes): Promise<void>;
-  findLibrary(id_channel: string): Promise<FindLibrary[]>;
+  findLibrary(id_channel: string): Promise<FindLibraryOutput[] | []>;
   findAll(): Promise<Playlist[] | []>;
   findById(id: string): Promise<Playlist | undefined>;
   create(playlist: PlaylistAttributes): Promise<void>;
@@ -19,9 +20,7 @@ export interface PlaylistRepositoryInterface {
   ): Promise<Playlist[] | []>;
 }
 
-export type LibraryAttributes = { id_channel: string; id_playlist: string };
-
-export type FindLibrary = {
+export type FindLibraryOutput = {
   id: string;
   title: string;
   visibility: PlaylistVisibility;
