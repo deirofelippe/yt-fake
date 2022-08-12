@@ -43,6 +43,7 @@ describe('AddPlaylistToLibraryUsecase', () => {
       memoryDatabase.clear();
     });
 
+    test.skip('Deve ser buscado somente as playlists da library do channel.', async () => {});
     test('Deve ser adicionada duas playlists na library.', async () => {
       const playlist1 = createFakePlaylist();
       playlist1.id_channel = '003';
@@ -53,11 +54,11 @@ describe('AddPlaylistToLibraryUsecase', () => {
       await playlistRepository.create(playlist2);
 
       const input1 = {
-        id_authenticated_channel: playlist1.id_channel,
+        id_authenticated_channel: '001',
         id_playlist: playlist1.id
       };
       const input2 = {
-        id_authenticated_channel: playlist2.id_channel,
+        id_authenticated_channel: '001',
         id_playlist: playlist2.id
       };
 
