@@ -6,10 +6,10 @@ export const env = {
     email: process.env.PAG_SEGURO_EMAIL,
     sandbox: {
       token: process.env.PAG_SEGURO_TOKEN,
-      authUrl: process.env.PAG_SEGURO_URL_AUTH_SANDBOX,
+      authUrl: process.env.PAG_SEGURO_URL_SANDBOX_AUTH,
       notificationConsultingUrl:
         process.env.PAG_SEGURO_URL_SANDBOX_NOTIFICATION,
-      redirectUrl: process.env.PAG_SEGURO_URL_CHECKOUT_SANDBOX
+      redirectUrl: process.env.PAG_SEGURO_URL_SANDBOX_CHECKOUT
     }
   },
   mercadoPagoIdApp: process.env.MERCADO_PAGO_ID_APP,
