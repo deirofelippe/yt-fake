@@ -1,8 +1,9 @@
 import { FieldsValidationError } from '../../errors/FieldsValidationError';
 import { ImpossibleActionError } from '../../errors/ImpossibleActionError';
-import { Order } from '../entities/Order';
-import { EntityFactoryInterface } from '../factories/entities/EntityFactoryInterface';
-import { OrderRepositoryInterface } from '../repositories/OrderRepositoryInterface';
+import {
+  PaymentGatewayInterface,
+  CheckoutRedirectInput
+} from '../libs/PaymentGatewayInterface';
 import { PlaylistRepositoryInterface } from '../repositories/PlaylistRepositoryInterface';
 import { VideoRepositoryInterface } from '../repositories/VideoRepositoryInterface';
 
@@ -22,15 +23,14 @@ export type BuyItemUsecaseInput = {
 export type BuyItemUsecaseDependencies = {
   playlistRepository: PlaylistRepositoryInterface;
   videoRepository: VideoRepositoryInterface;
-  orderRepository: OrderRepositoryInterface;
-  orderFactory: EntityFactoryInterface<Order>;
+  paymentGateway: PaymentGatewayInterface;
 };
 
 export class BuyItemUsecase {
   constructor(private readonly dependencies: BuyItemUsecaseDependencies) {}
 
   public async execute(input: BuyItemUsecaseInput) {
-    const { orderRepository, orderFactory } = this.dependencies;
+    const { paymentGateway } = this.dependencies;
 
     const { id_authenticated_channel: id_buyer_channel } = input;
     const items = input.items ?? [];
@@ -54,22 +54,27 @@ export class BuyItemUsecase {
       }
     }
 
-    await this.throwErrorIfAnyVideoCannotBePurchased(videos, id_buyer_channel);
-    await this.throwErrorIfAnyPlaylistCannotBePurchased(
-      playlists,
-      id_buyer_channel
-    );
+    const videosItemsCheckout =
+      await this.throwErrorIfAnyVideoCannotBePurchased(
+        videos,
+        id_buyer_channel
+      );
+    const playlistsItemsCheckout =
+      await this.throwErrorIfAnyPlaylistCannotBePurchased(
+        playlists,
+        id_buyer_channel
+      );
 
-    const order = orderFactory.create(input);
-
-    await orderRepository.createOrder(order.getOrder());
-    await orderRepository.createOrderItems(order.getOrderItems());
+    return await paymentGateway.getCheckoutRedirectUrl([
+      ...videosItemsCheckout,
+      ...playlistsItemsCheckout
+    ]);
   }
 
   private async throwErrorIfAnyVideoCannotBePurchased(
     videos: Item[],
     id_buyer_channel: string
-  ): Promise<never | void> {
+  ): Promise<never | CheckoutRedirectInput[]> {
     if (videos.length <= 0) {
       return;
     }
@@ -88,6 +93,7 @@ export class BuyItemUsecase {
       );
 
     let buyerOwnsTheVideo = false;
+    const checkoutItems: CheckoutRedirectInput[] = [];
     videosFound.forEach((video) => {
       buyerOwnsTheVideo = video.channelIsTheSame(id_buyer_channel);
       if (buyerOwnsTheVideo)
@@ -100,13 +106,23 @@ export class BuyItemUsecase {
 
       if (video.isPrivate())
         throw new ImpossibleActionError('O video é privado.');
+
+      const { id, title, price } = video.getAttributes();
+
+      checkoutItems.push({
+        id,
+        title,
+        price
+      });
     });
+
+    return checkoutItems;
   }
 
   private async throwErrorIfAnyPlaylistCannotBePurchased(
     playlists: Item[],
     id_buyer_channel: string
-  ): Promise<never | void> {
+  ): Promise<never | CheckoutRedirectInput[]> {
     if (playlists.length <= 0) {
       return;
     }
@@ -126,6 +142,7 @@ export class BuyItemUsecase {
       );
 
     let buyerOwnsThePlaylist = false;
+    const checkoutItems: CheckoutRedirectInput[] = [];
     playlistsFound.forEach((playlist) => {
       buyerOwnsThePlaylist = playlist.channelIsTheSame(id_buyer_channel);
       if (buyerOwnsThePlaylist)
@@ -138,6 +155,16 @@ export class BuyItemUsecase {
 
       if (playlist.isPrivate())
         throw new ImpossibleActionError('A playlist é privada.');
+
+      const { id, title, price } = playlist.getAttributes();
+
+      checkoutItems.push({
+        id,
+        title,
+        price
+      });
     });
+
+    return checkoutItems;
   }
 }
