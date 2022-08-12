@@ -1,3 +1,4 @@
+import nock from 'nock';
 import {
   OrderAttributes,
   OrderItemAttributes
@@ -18,21 +19,20 @@ import {
   BuyItemUsecaseInput,
   ItemType
 } from '../../../domain/usecases/BuyItemUsecase';
+import { env } from '../../../env';
 import { FieldsValidationError } from '../../../errors/FieldsValidationError';
 import { ImpossibleActionError } from '../../../errors/ImpossibleActionError';
 import { CryptoIDGenerator } from '../../../infra/libs/CryptoIDGenerator';
-import { MercadoPago } from '../../../infra/payment/MercadoPago';
-import { PagSeguro } from '../../../infra/payment/PagSeguro';
-import { OrderRepositoryMemory } from '../../../infra/repositories/memory/OrderRepositoryMemory';
+import { PagSeguro } from '../../../infra/libs/paymentGateway/PagSeguro';
 import { PlaylistRepositoryMemory } from '../../../infra/repositories/memory/PlaylistRepositoryMemory';
 import { VideoRepositoryMemory } from '../../../infra/repositories/memory/VideoRepositoryMemory';
 import { MemoryDatabase } from '../../MemoryDatabase';
+import { xmlCheckoutRedirect } from './__mocks__/mockPagseguroResponses';
 
 describe('BuyItemUsecase', () => {
   describe('Comprar items', () => {
     const memoryDatabase = new MemoryDatabase();
     const idGenerator = new CryptoIDGenerator();
-    const orderFactory = new OrderFactory({ idGenerator });
     const videoFactory = new VideoFactory({
       idGenerator
     });
@@ -47,17 +47,13 @@ describe('BuyItemUsecase', () => {
       memoryDatabase,
       playlistFactory
     );
-    const orderRepository = new OrderRepositoryMemory(
-      memoryDatabase,
-      orderFactory
-    );
+    const paymentGateway = new PagSeguro();
 
     const createBuyItemUsecase = (): BuyItemUsecase => {
       return new BuyItemUsecase({
-        orderRepository,
+        paymentGateway,
         playlistRepository,
-        videoRepository,
-        orderFactory
+        videoRepository
       });
     };
 
@@ -118,42 +114,22 @@ describe('BuyItemUsecase', () => {
         ]
       };
 
-      const mock_id = '001';
-      const mockOrderFactory = new OrderFactory({
-        idGenerator: { generate: () => mock_id }
-      });
-      const buyItem = new BuyItemUsecase({
-        orderRepository,
-        playlistRepository,
-        videoRepository,
-        orderFactory: mockOrderFactory
-      });
-      await buyItem.execute(input);
+      const params = new URLSearchParams({
+        email: env.pagSeguro.email,
+        token: env.pagSeguro.sandbox.token
+      }).toString();
+      const uri = `/v2/checkout?${params}`;
 
-      const order = await orderRepository.findAllOrders(
-        input.id_authenticated_channel
-      );
+      nock('https://ws.sandbox.pagseguro.uol.com.br')
+        .post(uri)
+        .reply(200, xmlCheckoutRedirect);
 
-      const expectedOrders: OrderAttributes = {
-        id: mock_id,
-        id_channel: input.id_authenticated_channel,
-        items: [
-          {
-            id_purchased_item: input.items[0].id,
-            type: input.items[0].type,
-            id_order: mock_id,
-            id: mock_id
-          },
-          {
-            id_purchased_item: input.items[1].id,
-            type: input.items[1].type,
-            id_order: mock_id,
-            id: mock_id
-          }
-        ]
-      };
+      const buyItem = createBuyItemUsecase();
+      const url = await buyItem.execute(input);
 
-      expect(order[0].getOrderWithItems()).toEqual(expectedOrders);
+      const expectedUrl = `${env.pagSeguro.sandbox.redirectUrl}?code=94915CFA4B4BEB1CC47D1F8629FB6AD3`;
+
+      expect(url).toEqual(expectedUrl);
     });
 
     test('Deve ser comprado somente uma playlist', async () => {
