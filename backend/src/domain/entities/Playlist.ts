@@ -81,8 +81,8 @@ export class Playlist {
    * @param id_channel id do canal a ser verificado.
    * @returns boolean
    */
-  public channelsIsTheSame(id_channel: string) {
-    return this.attributes.id_channel !== id_channel;
+  public channelIsTheSame(id_channel: string) {
+    return this.attributes.id_channel === id_channel;
   }
 
   /**
@@ -90,15 +90,7 @@ export class Playlist {
    * @param id_channel id do canal a ser verificado.
    * @returns boolean
    */
-  public channelsIsNotTheSame(id_channel: string) {
+  public channelIsNotTheSame(id_channel: string) {
     return this.attributes.id_channel !== id_channel;
-  }
-  /**
-   * Verifica se o id do canal recebido por parametro é o mesmo que o canal dono do video desta classe.
-   * @param id_channel id do canal a ser comparado.
-   * @returns boolean
-   */
-  public isFromTheSameChannel(id_channel: string): boolean {
-    return this.attributes.id_channel === id_channel;
   }
 }

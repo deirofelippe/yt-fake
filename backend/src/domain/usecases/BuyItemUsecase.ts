@@ -89,7 +89,7 @@ export class BuyItemUsecase {
 
     let buyerOwnsTheVideo = false;
     videosFound.forEach((video) => {
-      buyerOwnsTheVideo = video.isFromTheSameChannel(id_buyer_channel);
+      buyerOwnsTheVideo = video.channelIsTheSame(id_buyer_channel);
       if (buyerOwnsTheVideo)
         throw new ImpossibleActionError(
           'O comprador é o dono do video que quer comprar.'
@@ -127,7 +127,7 @@ export class BuyItemUsecase {
 
     let buyerOwnsThePlaylist = false;
     playlistsFound.forEach((playlist) => {
-      buyerOwnsThePlaylist = playlist.isFromTheSameChannel(id_buyer_channel);
+      buyerOwnsThePlaylist = playlist.channelIsTheSame(id_buyer_channel);
       if (buyerOwnsThePlaylist)
         throw new ImpossibleActionError(
           'O comprador é o dono da playlist que quer comprar.'

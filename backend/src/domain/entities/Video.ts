@@ -83,11 +83,11 @@ export class Video {
     return this.attributes.price > 0;
   }
   /**
-   * Verifica se o id do canal recebido por parametro é o mesmo que o canal dono do video desta classe.
-   * @param id_channel id do canal a ser comparado.
+   * Verifica se o canal é o mesmo.
+   * @param id_channel id do canal a ser verificado.
    * @returns boolean
    */
-  public isFromTheSameChannel(id_channel: string): boolean {
+  public channelIsTheSame(id_channel: string) {
     return this.attributes.id_channel === id_channel;
   }
 }
