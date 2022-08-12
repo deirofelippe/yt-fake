@@ -13,6 +13,7 @@ import {
   AddVideoToPlaylistUsecaseInput
 } from '../../../domain/usecases/AddVideoToPlaylistUsecase';
 import { ImpossibleActionError } from '../../../errors/ImpossibleActionError';
+import { NotAuthorizedError } from '../../../errors/NotAuthorizedError';
 import { CryptoIDGenerator } from '../../../infra/libs/CryptoIDGenerator';
 import { PlaylistRepositoryMemory } from '../../../infra/repositories/memory/PlaylistRepositoryMemory';
 import { VideoRepositoryMemory } from '../../../infra/repositories/memory/VideoRepositoryMemory';
@@ -221,8 +222,8 @@ describe('AddVideoToPlaylistUsecase', () => {
       const execute = async () => await addVideoInPlaylist.execute(input);
 
       await expect(execute).rejects.toThrowError(
-        new ImpossibleActionError(
-          'Channel pode adicionar video somente na própria playlist.'
+        new NotAuthorizedError(
+          'Channel não pode adicionar video na própria playlist de terceiro.'
         )
       );
     });
