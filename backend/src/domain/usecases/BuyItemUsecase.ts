@@ -74,9 +74,9 @@ export class BuyItemUsecase {
   private async throwErrorIfAnyVideoCannotBePurchased(
     videos: Item[],
     id_buyer_channel: string
-  ): Promise<never | CheckoutRedirectInput[]> {
+  ): Promise<never | CheckoutRedirectInput[] | []> {
     if (videos.length <= 0) {
-      return;
+      return [];
     }
 
     const { videoRepository } = this.dependencies;
@@ -122,9 +122,9 @@ export class BuyItemUsecase {
   private async throwErrorIfAnyPlaylistCannotBePurchased(
     playlists: Item[],
     id_buyer_channel: string
-  ): Promise<never | CheckoutRedirectInput[]> {
+  ): Promise<never | CheckoutRedirectInput[] | []> {
     if (playlists.length <= 0) {
-      return;
+      return [];
     }
 
     const { playlistRepository } = this.dependencies;
