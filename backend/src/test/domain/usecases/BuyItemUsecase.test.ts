@@ -24,6 +24,7 @@ import { FieldsValidationError } from '../../../errors/FieldsValidationError';
 import { ImpossibleActionError } from '../../../errors/ImpossibleActionError';
 import { CryptoIDGenerator } from '../../../infra/libs/CryptoIDGenerator';
 import { PagSeguro } from '../../../infra/libs/paymentGateway/PagSeguro';
+import { OrderRepositoryMemory } from '../../../infra/repositories/memory/OrderRepositoryMemory';
 import { PlaylistRepositoryMemory } from '../../../infra/repositories/memory/PlaylistRepositoryMemory';
 import { VideoRepositoryMemory } from '../../../infra/repositories/memory/VideoRepositoryMemory';
 import { MemoryDatabase } from '../../MemoryDatabase';
@@ -39,6 +40,9 @@ describe('BuyItemUsecase', () => {
     const playlistFactory = new PlaylistFactory({
       idGenerator
     });
+    const orderFactory = new OrderFactory({
+      idGenerator
+    });
     const videoRepository = new VideoRepositoryMemory(
       memoryDatabase,
       videoFactory
@@ -46,6 +50,10 @@ describe('BuyItemUsecase', () => {
     const playlistRepository = new PlaylistRepositoryMemory(
       memoryDatabase,
       playlistFactory
+    );
+    const orderRepository = new OrderRepositoryMemory(
+      memoryDatabase,
+      orderFactory
     );
     const paymentGateway = new PagSeguro();
 
@@ -80,30 +88,14 @@ describe('BuyItemUsecase', () => {
         views: 2000,
         id: '001',
         id_channel: '002',
-        title: 'DevOps',
-        price: 300,
+        title: 'Docker',
+        price: 30,
         visibility: VideoVisibility.PUBLIC
       };
     });
 
     test('Deve ser comprado somente um video e uma playlist', async () => {
-      const video: VideoAttributes = {
-        id: '000',
-        id_channel: '001',
-        title: 'Filme Tekkonkinkreet',
-        video: 'filme.mp4',
-        price: 25,
-        visibility: VideoVisibility.PUBLIC
-      };
       await videoRepository.create(video);
-
-      const playlist: PlaylistAttributes = {
-        id: '001',
-        id_channel: '002',
-        title: 'DevOps',
-        price: 300,
-        visibility: PlaylistVisibility.PUBLIC
-      };
       await playlistRepository.create(playlist);
 
       const input: BuyItemUsecaseInput = {
@@ -121,7 +113,10 @@ describe('BuyItemUsecase', () => {
       const uri = `/v2/checkout?${params}`;
 
       nock('https://ws.sandbox.pagseguro.uol.com.br')
-        .post(uri)
+        .post(
+          uri,
+          'itemId1=001&itemAmount1=30.00&itemDescription1=Docker&itemQuantity1=1&itemId2=001&itemAmount2=300.00&itemDescription2=DevOps&itemQuantity2=1&currency=BRL&redirectURL=https%3A%2F%2Fc517-2804-14d-5c33-566b-77cb-ac6c-afe-36c4.ngrok.io%2Fps%2Ffeedback&notificationURL=https%3A%2F%2Fc517-2804-14d-5c33-566b-77cb-ac6c-afe-36c4.ngrok.io%2Fps%2Ffeedback'
+        )
         .reply(200, xmlCheckoutRedirect);
 
       const buyItem = createBuyItemUsecase();
@@ -140,36 +135,25 @@ describe('BuyItemUsecase', () => {
         items: [{ id: playlist.id, type: ItemType.PLAYLIST }]
       };
 
-      const mock_id = '001';
-      const mockOrderFactory = new OrderFactory({
-        idGenerator: { generate: () => mock_id }
-      });
-      const buyItem = new BuyItemUsecase({
-        orderRepository,
-        orderFactory: mockOrderFactory,
-        playlistRepository,
-        videoRepository
-      });
-      await buyItem.execute(input);
+      const params = new URLSearchParams({
+        email: env.pagSeguro.email,
+        token: env.pagSeguro.sandbox.token
+      }).toString();
+      const uri = `/v2/checkout?${params}`;
 
-      const orders = await orderRepository.findAllOrders(
-        input.id_authenticated_channel
-      );
+      nock('https://ws.sandbox.pagseguro.uol.com.br')
+        .post(
+          uri,
+          'itemId1=001&itemAmount1=300.00&itemDescription1=DevOps&itemQuantity1=1&currency=BRL&redirectURL=https%3A%2F%2Fc517-2804-14d-5c33-566b-77cb-ac6c-afe-36c4.ngrok.io%2Fps%2Ffeedback&notificationURL=https%3A%2F%2Fc517-2804-14d-5c33-566b-77cb-ac6c-afe-36c4.ngrok.io%2Fps%2Ffeedback'
+        )
+        .reply(200, xmlCheckoutRedirect);
 
-      const expectedOrder = {
-        id: mock_id,
-        id_channel: input.id_authenticated_channel,
-        items: [
-          {
-            id_purchased_item: input.items[0].id,
-            type: input.items[0].type,
-            id_order: mock_id,
-            id: mock_id
-          }
-        ]
-      };
+      const buyItem = createBuyItemUsecase();
+      const url = await buyItem.execute(input);
 
-      expect(orders[0].getOrderWithItems()).toEqual(expectedOrder);
+      const expectedUrl = `${env.pagSeguro.sandbox.redirectUrl}?code=94915CFA4B4BEB1CC47D1F8629FB6AD3`;
+
+      expect(url).toEqual(expectedUrl);
     });
 
     test('Deve ser comprado somente um video', async () => {
@@ -180,36 +164,25 @@ describe('BuyItemUsecase', () => {
         items: [{ id: video.id, type: ItemType.VIDEO }]
       };
 
-      const mock_id = '001';
-      const mockOrderFactory = new OrderFactory({
-        idGenerator: { generate: () => mock_id }
-      });
-      const buyItem = new BuyItemUsecase({
-        orderRepository,
-        orderFactory: mockOrderFactory,
-        playlistRepository,
-        videoRepository
-      });
-      await buyItem.execute(input);
+      const params = new URLSearchParams({
+        email: env.pagSeguro.email,
+        token: env.pagSeguro.sandbox.token
+      }).toString();
+      const uri = `/v2/checkout?${params}`;
 
-      const orders = await orderRepository.findAllOrders(
-        input.id_authenticated_channel
-      );
+      nock('https://ws.sandbox.pagseguro.uol.com.br')
+        .post(
+          uri,
+          'itemId1=001&itemAmount1=30.00&itemDescription1=Docker&itemQuantity1=1&currency=BRL&redirectURL=https%3A%2F%2Fc517-2804-14d-5c33-566b-77cb-ac6c-afe-36c4.ngrok.io%2Fps%2Ffeedback&notificationURL=https%3A%2F%2Fc517-2804-14d-5c33-566b-77cb-ac6c-afe-36c4.ngrok.io%2Fps%2Ffeedback'
+        )
+        .reply(200, xmlCheckoutRedirect);
 
-      const expectedOrder = {
-        id: mock_id,
-        id_channel: input.id_authenticated_channel,
-        items: [
-          {
-            id_purchased_item: input.items[0].id,
-            type: input.items[0].type,
-            id_order: mock_id,
-            id: mock_id
-          }
-        ]
-      };
+      const buyItem = createBuyItemUsecase();
+      const url = await buyItem.execute(input);
 
-      expect(orders[0].getOrderWithItems()).toEqual(expectedOrder);
+      const expectedUrl = `${env.pagSeguro.sandbox.redirectUrl}?code=94915CFA4B4BEB1CC47D1F8629FB6AD3`;
+
+      expect(url).toEqual(expectedUrl);
     });
 
     test('Deve lançar erro por não ter items no input para comprar', async () => {
@@ -435,25 +408,6 @@ describe('BuyItemUsecase', () => {
           'Alguma playlist não foi encontrada ou já foi comprada.'
         )
       );
-    });
-
-    test('url', async () => {
-      const videos: VideoAttributes[] = [
-        { id: '001', id_channel: '', video: '', title: 'teste 1', price: 50.1 },
-        { id: '002', title: 'teste 2', id_channel: '', video: '', price: 73.12 }
-      ];
-      const playlists: PlaylistAttributes[] = [
-        { id: '003', title: 'teste 3', id_channel: '', price: 30.0 },
-        { id: '004', title: 'teste 4', price: 130.0, id_channel: '' }
-      ];
-
-      const items: any[] = [...videos, ...playlists];
-
-      // const pagseguro = new PagSeguro();
-      // await pagseguro.execute(items);
-
-      // const mercadopago = new MercadoPago();
-      // await mercadopago.execute(items);
     });
   });
 });
