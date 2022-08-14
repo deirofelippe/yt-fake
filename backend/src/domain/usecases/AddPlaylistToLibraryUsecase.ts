@@ -19,6 +19,13 @@ export class AddPlaylistToLibraryUsecase {
     const playlist = await playlistRepository.findById(input.id_playlist);
     if (!playlist) throw new NotFoundError(input.id_playlist, 'Playlist');
 
+    const playlistIsInLibrary = await playlistRepository.findPlaylistInLibrary({
+      id_playlist: input.id_playlist,
+      id_channel: input.id_authenticated_channel
+    });
+    if (playlistIsInLibrary)
+      throw new ImpossibleActionError('A playlist já está na library.');
+
     if (playlist.channelIsTheSame(input.id_authenticated_channel))
       throw new ImpossibleActionError(
         'Não pode adicionar a própria playlist na própria library, ela já foi adicionada.'
