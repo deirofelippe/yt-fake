@@ -1,26 +1,22 @@
-import { Order } from '../../../../domain/entities/Order';
-import { EntityFactoryInterface } from '../../../../domain/factories/entities/EntityFactoryInterface';
-import { BuyItemUsecaseFactory } from '../../../../domain/factories/usecases/BuyItemUsecaseFactory';
-import { OrderRepositoryInterface } from '../../../../domain/repositories/OrderRepositoryInterface';
+import { GetCheckoutUrlUsecaseFactory } from '../../../../domain/factories/usecases/GetCheckoutUrlUsecaseFactory';
+import { PaymentGatewayInterface } from '../../../../domain/libs/PaymentGatewayInterface';
 import { PlaylistRepositoryInterface } from '../../../../domain/repositories/PlaylistRepositoryInterface';
 import { VideoRepositoryInterface } from '../../../../domain/repositories/VideoRepositoryInterface';
 import { FieldsValidationError } from '../../../../errors/FieldsValidationError';
-import { buyItemJoiSchema } from '../../../../infra/libs/joi/BuyItemJoiSchema';
+import { getCheckoutUrlJoiSchema } from '../../../../infra/libs/joi/GetCheckoutUrlJoiSchema';
 import { JoiValidator } from '../../../../infra/libs/joi/JoiValidator';
 
-describe('BuyItemUsecaseFactory', () => {
+describe('GetCheckoutUrlUsecaseFactory', () => {
   const mockPlaylistRepository = {} as PlaylistRepositoryInterface;
-  const mockOrderFactory = {} as EntityFactoryInterface<Order>;
   const mockVideoRepository = {} as VideoRepositoryInterface;
-  const mockOrderRepository = {} as OrderRepositoryInterface;
+  const mockPaymentGateway = {} as PaymentGatewayInterface;
 
-  const validator = new JoiValidator(buyItemJoiSchema);
-  const buyItemUsecaseFactory = new BuyItemUsecaseFactory({
+  const validator = new JoiValidator(getCheckoutUrlJoiSchema);
+  const getCheckoutUrlUsecaseFactory = new GetCheckoutUrlUsecaseFactory({
     factory: { validator },
     usecase: {
-      orderFactory: mockOrderFactory,
-      orderRepository: mockOrderRepository,
       playlistRepository: mockPlaylistRepository,
+      paymentGateway: mockPaymentGateway,
       videoRepository: mockVideoRepository
     }
   });
@@ -32,7 +28,7 @@ describe('BuyItemUsecaseFactory', () => {
     };
 
     test('Deve passar nos testes', async () => {
-      buyItemUsecaseFactory.create(input);
+      getCheckoutUrlUsecaseFactory.create(input);
     });
 
     test('Não deve passar no teste 0', async () => {
@@ -59,7 +55,7 @@ describe('BuyItemUsecaseFactory', () => {
       ];
 
       try {
-        buyItemUsecaseFactory.create(input);
+        getCheckoutUrlUsecaseFactory.create(input);
       } catch (error) {
         if (error instanceof FieldsValidationError) {
           expect(error.fields).toEqual(expectedError);
@@ -81,7 +77,7 @@ describe('BuyItemUsecaseFactory', () => {
       ];
 
       try {
-        buyItemUsecaseFactory.create(input);
+        getCheckoutUrlUsecaseFactory.create(input);
       } catch (error) {
         if (error instanceof FieldsValidationError) {
           expect(error.fields).toEqual(expectedError);
@@ -99,7 +95,7 @@ describe('BuyItemUsecaseFactory', () => {
       ];
 
       try {
-        buyItemUsecaseFactory.create(input);
+        getCheckoutUrlUsecaseFactory.create(input);
       } catch (error) {
         if (error instanceof FieldsValidationError) {
           expect(error.fields).toEqual(expectedError);
@@ -118,7 +114,7 @@ describe('BuyItemUsecaseFactory', () => {
       ];
 
       try {
-        buyItemUsecaseFactory.create(input);
+        getCheckoutUrlUsecaseFactory.create(input);
       } catch (error) {
         if (error instanceof FieldsValidationError) {
           expect(error.fields).toEqual(expectedError);
@@ -137,7 +133,7 @@ describe('BuyItemUsecaseFactory', () => {
       ];
 
       try {
-        buyItemUsecaseFactory.create(input);
+        getCheckoutUrlUsecaseFactory.create(input);
       } catch (error) {
         if (error instanceof FieldsValidationError) {
           expect(error.fields).toEqual(expectedError);
@@ -153,7 +149,7 @@ describe('BuyItemUsecaseFactory', () => {
       ];
 
       try {
-        buyItemUsecaseFactory.create(input);
+        getCheckoutUrlUsecaseFactory.create(input);
       } catch (error) {
         if (error instanceof FieldsValidationError) {
           expect(error.fields).toEqual(expectedError);

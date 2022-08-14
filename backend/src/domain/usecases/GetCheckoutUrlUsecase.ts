@@ -15,21 +15,23 @@ export type Item = {
   id: string;
   type: ItemType;
 };
-export type BuyItemUsecaseInput = {
+export type GetCheckoutUrlUsecaseInput = {
   id_authenticated_channel: string;
   items: Item[];
 };
 
-export type BuyItemUsecaseDependencies = {
+export type GetCheckoutUrlUsecaseDependencies = {
   playlistRepository: PlaylistRepositoryInterface;
   videoRepository: VideoRepositoryInterface;
   paymentGateway: PaymentGatewayInterface;
 };
 
-export class BuyItemUsecase {
-  constructor(private readonly dependencies: BuyItemUsecaseDependencies) {}
+export class GetCheckoutUrlUsecase {
+  constructor(
+    private readonly dependencies: GetCheckoutUrlUsecaseDependencies
+  ) {}
 
-  public async execute(input: BuyItemUsecaseInput) {
+  public async execute(input: GetCheckoutUrlUsecaseInput) {
     const { paymentGateway } = this.dependencies;
 
     const { id_authenticated_channel: id_buyer_channel } = input;

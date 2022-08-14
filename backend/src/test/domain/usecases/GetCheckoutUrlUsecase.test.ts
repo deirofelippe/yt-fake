@@ -15,10 +15,10 @@ import { OrderFactory } from '../../../domain/factories/entities/OrderFactory';
 import { PlaylistFactory } from '../../../domain/factories/entities/PlaylistFactory';
 import { VideoFactory } from '../../../domain/factories/entities/VideoFactory';
 import {
-  BuyItemUsecase,
-  BuyItemUsecaseInput,
+  GetCheckoutUrlUsecase,
+  GetCheckoutUrlUsecaseInput,
   ItemType
-} from '../../../domain/usecases/BuyItemUsecase';
+} from '../../../domain/usecases/GetCheckoutUrlUsecase';
 import { env } from '../../../env';
 import { FieldsValidationError } from '../../../errors/FieldsValidationError';
 import { ImpossibleActionError } from '../../../errors/ImpossibleActionError';
@@ -30,7 +30,7 @@ import { VideoRepositoryMemory } from '../../../infra/repositories/memory/VideoR
 import { MemoryDatabase } from '../../MemoryDatabase';
 import { xmlCheckoutRedirect } from './__mocks__/mockPagseguroResponses';
 
-describe('BuyItemUsecase', () => {
+describe('GetCheckoutUrlUsecase', () => {
   describe('Comprar items', () => {
     const memoryDatabase = new MemoryDatabase();
     const idGenerator = new CryptoIDGenerator();
@@ -57,8 +57,8 @@ describe('BuyItemUsecase', () => {
     );
     const paymentGateway = new PagSeguro();
 
-    const createBuyItemUsecase = (): BuyItemUsecase => {
-      return new BuyItemUsecase({
+    const createGetCheckoutUrlUsecase = (): GetCheckoutUrlUsecase => {
+      return new GetCheckoutUrlUsecase({
         paymentGateway,
         playlistRepository,
         videoRepository
@@ -98,7 +98,7 @@ describe('BuyItemUsecase', () => {
       await videoRepository.create(video);
       await playlistRepository.create(playlist);
 
-      const input: BuyItemUsecaseInput = {
+      const input: GetCheckoutUrlUsecaseInput = {
         id_authenticated_channel: '003',
         items: [
           { id: video.id, type: ItemType.VIDEO },
@@ -119,7 +119,7 @@ describe('BuyItemUsecase', () => {
         )
         .reply(200, xmlCheckoutRedirect);
 
-      const buyItem = createBuyItemUsecase();
+      const buyItem = createGetCheckoutUrlUsecase();
       const url = await buyItem.execute(input);
 
       const expectedUrl = `${env.pagSeguro.sandbox.redirectUrl}?code=94915CFA4B4BEB1CC47D1F8629FB6AD3`;
@@ -130,7 +130,7 @@ describe('BuyItemUsecase', () => {
     test('Deve ser comprado somente uma playlist', async () => {
       await playlistRepository.create(playlist);
 
-      const input: BuyItemUsecaseInput = {
+      const input: GetCheckoutUrlUsecaseInput = {
         id_authenticated_channel: '003',
         items: [{ id: playlist.id, type: ItemType.PLAYLIST }]
       };
@@ -148,7 +148,7 @@ describe('BuyItemUsecase', () => {
         )
         .reply(200, xmlCheckoutRedirect);
 
-      const buyItem = createBuyItemUsecase();
+      const buyItem = createGetCheckoutUrlUsecase();
       const url = await buyItem.execute(input);
 
       const expectedUrl = `${env.pagSeguro.sandbox.redirectUrl}?code=94915CFA4B4BEB1CC47D1F8629FB6AD3`;
@@ -159,7 +159,7 @@ describe('BuyItemUsecase', () => {
     test('Deve ser comprado somente um video', async () => {
       await videoRepository.create(video);
 
-      const input: BuyItemUsecaseInput = {
+      const input: GetCheckoutUrlUsecaseInput = {
         id_authenticated_channel: '003',
         items: [{ id: video.id, type: ItemType.VIDEO }]
       };
@@ -177,7 +177,7 @@ describe('BuyItemUsecase', () => {
         )
         .reply(200, xmlCheckoutRedirect);
 
-      const buyItem = createBuyItemUsecase();
+      const buyItem = createGetCheckoutUrlUsecase();
       const url = await buyItem.execute(input);
 
       const expectedUrl = `${env.pagSeguro.sandbox.redirectUrl}?code=94915CFA4B4BEB1CC47D1F8629FB6AD3`;
@@ -186,16 +186,16 @@ describe('BuyItemUsecase', () => {
     });
 
     test('Deve lançar erro por não ter items no input para comprar', async () => {
-      const buyItem = createBuyItemUsecase();
+      const buyItem = createGetCheckoutUrlUsecase();
 
-      const input1: BuyItemUsecaseInput = {
+      const input1: GetCheckoutUrlUsecaseInput = {
         id_authenticated_channel: '003',
         items: []
       };
 
       const input2 = {
         id_authenticated_channel: '003'
-      } as BuyItemUsecaseInput;
+      } as GetCheckoutUrlUsecaseInput;
 
       const execute1 = async () => await buyItem.execute(input1);
 
@@ -207,12 +207,12 @@ describe('BuyItemUsecase', () => {
     });
 
     test('Deve lançar erro ao comprar um video que não existe', async () => {
-      const input: BuyItemUsecaseInput = {
+      const input: GetCheckoutUrlUsecaseInput = {
         id_authenticated_channel: '003',
         items: [{ id: '001', type: ItemType.VIDEO }]
       };
 
-      const buyItem = createBuyItemUsecase();
+      const buyItem = createGetCheckoutUrlUsecase();
 
       const execute = async () => await buyItem.execute(input);
       await expect(execute).rejects.toThrow(
@@ -227,12 +227,12 @@ describe('BuyItemUsecase', () => {
 
       await videoRepository.create(video);
 
-      const input: BuyItemUsecaseInput = {
+      const input: GetCheckoutUrlUsecaseInput = {
         id_authenticated_channel: '003',
         items: [{ id: video.id, type: ItemType.VIDEO }]
       };
 
-      const buyItem = createBuyItemUsecase();
+      const buyItem = createGetCheckoutUrlUsecase();
 
       const execute = async () => await buyItem.execute(input);
       await expect(execute).rejects.toThrow(
@@ -245,12 +245,12 @@ describe('BuyItemUsecase', () => {
 
       await videoRepository.create(video);
 
-      const input: BuyItemUsecaseInput = {
+      const input: GetCheckoutUrlUsecaseInput = {
         id_authenticated_channel: '003',
         items: [{ id: video.id, type: ItemType.VIDEO }]
       };
 
-      const buyItem = createBuyItemUsecase();
+      const buyItem = createGetCheckoutUrlUsecase();
 
       const execute = async () => await buyItem.execute(input);
       await expect(execute).rejects.toThrow(
@@ -263,12 +263,12 @@ describe('BuyItemUsecase', () => {
 
       await videoRepository.create(video);
 
-      const input: BuyItemUsecaseInput = {
+      const input: GetCheckoutUrlUsecaseInput = {
         id_authenticated_channel: '003',
         items: [{ id: video.id, type: ItemType.VIDEO }]
       };
 
-      const buyItem = createBuyItemUsecase();
+      const buyItem = createGetCheckoutUrlUsecase();
 
       const execute = async () => await buyItem.execute(input);
       await expect(execute).rejects.toThrow(
@@ -293,12 +293,12 @@ describe('BuyItemUsecase', () => {
       await orderRepository.createOrderItems([orderItem]);
       await videoRepository.create(video);
 
-      const input: BuyItemUsecaseInput = {
+      const input: GetCheckoutUrlUsecaseInput = {
         id_authenticated_channel: '003',
         items: [{ id: '001', type: ItemType.VIDEO }]
       };
 
-      const buyItem = createBuyItemUsecase();
+      const buyItem = createGetCheckoutUrlUsecase();
 
       const execute = async () => await buyItem.execute(input);
       await expect(execute).rejects.toThrow(
@@ -309,12 +309,12 @@ describe('BuyItemUsecase', () => {
     });
 
     test('Deve lançar erro ao comprar uma playlist não existe', async () => {
-      const input: BuyItemUsecaseInput = {
+      const input: GetCheckoutUrlUsecaseInput = {
         id_authenticated_channel: '003',
         items: [{ id: '001', type: ItemType.PLAYLIST }]
       };
 
-      const buyItem = createBuyItemUsecase();
+      const buyItem = createGetCheckoutUrlUsecase();
 
       const execute = async () => await buyItem.execute(input);
       await expect(execute).rejects.toThrow(
@@ -329,12 +329,12 @@ describe('BuyItemUsecase', () => {
 
       await playlistRepository.create(playlist);
 
-      const input: BuyItemUsecaseInput = {
+      const input: GetCheckoutUrlUsecaseInput = {
         id_authenticated_channel: '003',
         items: [{ id: playlist.id, type: ItemType.PLAYLIST }]
       };
 
-      const buyItem = createBuyItemUsecase();
+      const buyItem = createGetCheckoutUrlUsecase();
 
       const execute = async () => await buyItem.execute(input);
       await expect(execute).rejects.toThrow(
@@ -347,12 +347,12 @@ describe('BuyItemUsecase', () => {
 
       await playlistRepository.create(playlist);
 
-      const input: BuyItemUsecaseInput = {
+      const input: GetCheckoutUrlUsecaseInput = {
         id_authenticated_channel: '003',
         items: [{ id: playlist.id, type: ItemType.PLAYLIST }]
       };
 
-      const buyItem = createBuyItemUsecase();
+      const buyItem = createGetCheckoutUrlUsecase();
 
       const execute = async () => await buyItem.execute(input);
       await expect(execute).rejects.toThrow(
@@ -365,12 +365,12 @@ describe('BuyItemUsecase', () => {
 
       await playlistRepository.create(playlist);
 
-      const input: BuyItemUsecaseInput = {
+      const input: GetCheckoutUrlUsecaseInput = {
         id_authenticated_channel: '003',
         items: [{ id: playlist.id, type: ItemType.PLAYLIST }]
       };
 
-      const buyItem = createBuyItemUsecase();
+      const buyItem = createGetCheckoutUrlUsecase();
 
       const execute = async () => await buyItem.execute(input);
       await expect(execute).rejects.toThrow(
@@ -395,12 +395,12 @@ describe('BuyItemUsecase', () => {
       await orderRepository.createOrderItems([orderItem]);
       await playlistRepository.create(playlist);
 
-      const input: BuyItemUsecaseInput = {
+      const input: GetCheckoutUrlUsecaseInput = {
         id_authenticated_channel: '003',
         items: [{ id: playlist.id, type: ItemType.PLAYLIST }]
       };
 
-      const buyItem = createBuyItemUsecase();
+      const buyItem = createGetCheckoutUrlUsecase();
 
       const execute = async () => await buyItem.execute(input);
       await expect(execute).rejects.toThrow(
