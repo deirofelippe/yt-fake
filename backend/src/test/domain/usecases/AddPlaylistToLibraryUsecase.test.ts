@@ -1,10 +1,11 @@
 import faker from '@faker-js/faker';
+import { randomUUID } from 'crypto';
 import {
   PlaylistAttributes,
   PlaylistVisibility
 } from '../../../domain/entities/Playlist';
 import { PlaylistFactory } from '../../../domain/factories/entities/PlaylistFactory';
-import { FindLibraryOutput } from '../../../domain/repositories/PlaylistRepositoryInterface';
+import { ShortPlaylist } from '../../../domain/repositories/PlaylistRepositoryInterface';
 import { AddPlaylistToLibraryUsecase } from '../../../domain/usecases/AddPlaylistToLibraryUsecase';
 import { CryptoIDGenerator } from '../../../infra/libs/CryptoIDGenerator';
 import { PlaylistRepositoryMemory } from '../../../infra/repositories/memory/PlaylistRepositoryMemory';
@@ -29,8 +30,8 @@ describe('AddPlaylistToLibraryUsecase', () => {
 
   const createFakePlaylist = (): PlaylistAttributes => {
     return {
-      id: Date.now().toString(),
-      id_channel: Date.now().toString(),
+      id: randomUUID(),
+      id_channel: randomUUID(),
       title: faker.commerce.productName(),
       description: faker.commerce.productDescription(),
       price: 0,
@@ -43,7 +44,61 @@ describe('AddPlaylistToLibraryUsecase', () => {
       memoryDatabase.clear();
     });
 
-    test.skip('Deve ser buscado somente as playlists da library do channel.', async () => {});
+    test('Não deve ser buscado as playlists da library de outros channels.', async () => {
+      //channel 1 tem as playlists 1 2
+      //channel 2 tem as playlists 2 3
+      //channel 3 tem as playlists 2
+      const playlist1 = createFakePlaylist();
+      await playlistRepository.create(playlist1);
+
+      const playlist2 = createFakePlaylist();
+      await playlistRepository.create(playlist2);
+
+      const playlist3 = createFakePlaylist();
+      await playlistRepository.create(playlist3);
+
+      const channel1 = '001',
+        channel2 = '002',
+        channel3 = '003';
+
+      const input1 = {
+        id_authenticated_channel: channel1,
+        id_playlist: playlist1.id
+      };
+      const input2 = {
+        id_authenticated_channel: channel1,
+        id_playlist: playlist2.id
+      };
+      const input3 = {
+        id_authenticated_channel: channel2,
+        id_playlist: playlist2.id
+      };
+      const input4 = {
+        id_authenticated_channel: channel2,
+        id_playlist: playlist3.id
+      };
+      const input5 = {
+        id_authenticated_channel: channel3,
+        id_playlist: playlist2.id
+      };
+
+      const addPlaylistToLibraryUsecase = createAddPlaylistToLibraryUsecase();
+      await addPlaylistToLibraryUsecase.execute(input1);
+      await addPlaylistToLibraryUsecase.execute(input2);
+      await addPlaylistToLibraryUsecase.execute(input3);
+      await addPlaylistToLibraryUsecase.execute(input4);
+      await addPlaylistToLibraryUsecase.execute(input5);
+
+      const library = await playlistRepository.findLibrary(channel3);
+      expect(library).toEqual<ShortPlaylist[]>([
+        {
+          id: playlist2.id,
+          title: playlist2.title,
+          visibility: playlist2.visibility
+        }
+      ]);
+    });
+
     test('Deve ser adicionada duas playlists na library.', async () => {
       const playlist1 = createFakePlaylist();
       playlist1.id_channel = '003';
@@ -70,9 +125,8 @@ describe('AddPlaylistToLibraryUsecase', () => {
       const library = await playlistRepository.findLibrary(
         input1.id_authenticated_channel
       );
-      console.log(library);
 
-      expect(library).toEqual<FindLibraryOutput[]>([
+      expect(library).toEqual<ShortPlaylist[]>([
         {
           title: playlist1.title,
           visibility: playlist1.visibility,
