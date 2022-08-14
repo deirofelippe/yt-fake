@@ -17,7 +17,7 @@ export class AddPlaylistToLibraryUsecase {
     const { playlistRepository } = this.dependencies;
 
     const playlist = await playlistRepository.findById(input.id_playlist);
-    if (!playlist) throw new NotFoundError(input.id_playlist, 'Playlist');
+    if (!playlist) throw new NotFoundError('Playlist');
 
     const playlistIsInLibrary = await playlistRepository.findPlaylistInLibrary({
       id_playlist: input.id_playlist,

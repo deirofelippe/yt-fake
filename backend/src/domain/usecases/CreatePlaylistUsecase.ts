@@ -31,7 +31,7 @@ export class CreatePlaylistUsecase {
     );
 
     if (!channelExists) {
-      throw new NotFoundError(input.id_authenticated_channel, 'Channel');
+      throw new NotFoundError('Channel');
     }
 
     const playlist = playlistFactory.create(input);

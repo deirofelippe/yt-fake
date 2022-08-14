@@ -127,7 +127,7 @@ describe('CreatePlaylistUsecase', () => {
 
       const execute = async () => await createPlaylist.execute(input);
 
-      await expect(execute).rejects.toThrowError(NotFoundError);
+      await expect(execute).rejects.toThrowError(new NotFoundError('Channel'));
     });
   });
 });

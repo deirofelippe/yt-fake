@@ -73,12 +73,11 @@ export class AddVideoToPlaylistUsecase {
       videoInPlaylist.id_playlist
     );
 
-    if (!playlist)
-      throw new NotFoundError(videoInPlaylist.id_playlist, 'Playlist');
+    if (!playlist) throw new NotFoundError('Playlist');
 
     const video = await videoRepository.findById(videoInPlaylist.id_playlist);
 
-    if (!video) throw new NotFoundError(videoInPlaylist.id_playlist, 'Video');
+    if (!video) throw new NotFoundError('Video');
 
     return { playlist, video };
   }

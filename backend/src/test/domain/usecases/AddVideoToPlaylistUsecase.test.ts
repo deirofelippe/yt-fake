@@ -14,6 +14,7 @@ import {
 } from '../../../domain/usecases/AddVideoToPlaylistUsecase';
 import { ImpossibleActionError } from '../../../errors/ImpossibleActionError';
 import { NotAuthorizedError } from '../../../errors/NotAuthorizedError';
+import { NotFoundError } from '../../../errors/NotFoundError';
 import { CryptoIDGenerator } from '../../../infra/libs/CryptoIDGenerator';
 import { PlaylistRepositoryMemory } from '../../../infra/repositories/memory/PlaylistRepositoryMemory';
 import { VideoRepositoryMemory } from '../../../infra/repositories/memory/VideoRepositoryMemory';
@@ -173,9 +174,7 @@ describe('AddVideoToPlaylistUsecase', () => {
 
       const execute = async () => await addVideoInPlaylist.execute(input);
 
-      await expect(execute).rejects.toThrowError(
-        'Playlist not found, with id: 003'
-      );
+      await expect(execute).rejects.toThrowError(new NotFoundError('Playlist'));
     });
 
     test('Deve lançar erro ao buscar video inexistente.', async () => {
@@ -206,9 +205,7 @@ describe('AddVideoToPlaylistUsecase', () => {
 
       const execute = async () => await addVideoInPlaylist.execute(input);
 
-      await expect(execute).rejects.toThrowError(
-        'Video not found, with id: 001'
-      );
+      await expect(execute).rejects.toThrowError(new NotFoundError('Video'));
     });
 
     test('Deve lançar erro ao adicionar video em playlist de outro channel.', async () => {
