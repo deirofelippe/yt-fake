@@ -6,8 +6,8 @@ import {
 } from '../../../domain/entities/Playlist';
 import { EntityFactoryInterface } from '../../../domain/factories/entities/EntityFactoryInterface';
 import {
-  FindLibraryOutput,
-  PlaylistRepositoryInterface
+  PlaylistRepositoryInterface,
+  ShortPlaylist
 } from '../../../domain/repositories/PlaylistRepositoryInterface';
 import { LibraryAttributes } from '../../../domain/usecases/AddPlaylistToLibraryUsecase';
 import { VideoInPlaylistAttributes } from '../../../domain/usecases/AddVideoToPlaylistUsecase';
@@ -18,8 +18,30 @@ export class PlaylistRepositoryMemory implements PlaylistRepositoryInterface {
     private readonly memoryDatabase: MemoryDatabase,
     private readonly playlistFactory: EntityFactoryInterface<Playlist>
   ) {}
+  async findPlaylistInLibrary(input: {
+    id_playlist: string;
+    id_channel: string;
+  }): Promise<ShortPlaylist> {
+    const playlistInLibrary = this.memoryDatabase.library.find(
+      (playlist) =>
+        playlist.id_playlist === input.id_playlist &&
+        playlist.id_channel === input.id_channel
+    );
 
-  async findLibrary(id_channel: string): Promise<FindLibraryOutput[] | []> {
+    if (!playlistInLibrary) return undefined;
+
+    const playlist = this.memoryDatabase.playlists.find(
+      (playlist) => playlist.id === input.id_playlist
+    );
+
+    return {
+      id: playlist.id,
+      title: playlist.title,
+      visibility: playlist.visibility
+    };
+  }
+
+  async findLibrary(id_channel: string): Promise<ShortPlaylist[] | []> {
     //pega registros de library so do channel
     const channelLibrary = this.memoryDatabase.library.filter(
       (lib) => lib.id_channel === id_channel
