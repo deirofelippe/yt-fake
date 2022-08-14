@@ -7,6 +7,8 @@ import {
 import { PlaylistFactory } from '../../../domain/factories/entities/PlaylistFactory';
 import { ShortPlaylist } from '../../../domain/repositories/PlaylistRepositoryInterface';
 import { AddPlaylistToLibraryUsecase } from '../../../domain/usecases/AddPlaylistToLibraryUsecase';
+import { ImpossibleActionError } from '../../../errors/ImpossibleActionError';
+import { NotFoundError } from '../../../errors/NotFoundError';
 import { CryptoIDGenerator } from '../../../infra/libs/CryptoIDGenerator';
 import { PlaylistRepositoryMemory } from '../../../infra/repositories/memory/PlaylistRepositoryMemory';
 import { MemoryDatabase } from '../../MemoryDatabase';
@@ -138,6 +140,110 @@ describe('AddPlaylistToLibraryUsecase', () => {
           id: playlist2.id
         }
       ]);
+    });
+
+    test('Deve lançar erro ao adicionar playlist inexistente na library.', async () => {
+      const input = {
+        id_authenticated_channel: '001',
+        id_playlist: '001'
+      };
+
+      const addPlaylistToLibraryUsecase = createAddPlaylistToLibraryUsecase();
+
+      const execute = async () =>
+        await addPlaylistToLibraryUsecase.execute(input);
+
+      await expect(execute).rejects.toThrow(new NotFoundError('Playlist'));
+    });
+
+    test('Deve lançar erro ao adicionar playlist que já está na library.', async () => {
+      const playlist = createFakePlaylist();
+
+      await playlistRepository.create(playlist);
+
+      const input = {
+        id_authenticated_channel: '001',
+        id_playlist: playlist.id
+      };
+
+      const addPlaylistToLibraryUsecase = createAddPlaylistToLibraryUsecase();
+
+      await addPlaylistToLibraryUsecase.execute(input);
+
+      const execute = async () =>
+        await addPlaylistToLibraryUsecase.execute(input);
+
+      await expect(execute).rejects.toThrow(
+        new ImpossibleActionError('A playlist já está na library.')
+      );
+    });
+
+    test('Deve lançar erro ao adicionar a própria playlist na própria library.', async () => {
+      const playlist = createFakePlaylist();
+
+      await playlistRepository.create(playlist);
+
+      const input = {
+        id_authenticated_channel: playlist.id_channel,
+        id_playlist: playlist.id
+      };
+
+      const addPlaylistToLibraryUsecase = createAddPlaylistToLibraryUsecase();
+
+      const execute = async () =>
+        await addPlaylistToLibraryUsecase.execute(input);
+
+      await expect(execute).rejects.toThrow(
+        new ImpossibleActionError(
+          'Não pode adicionar a própria playlist na própria library, ela já foi adicionada.'
+        )
+      );
+    });
+
+    test('Deve lançar erro ao adicionar playlist paga na library.', async () => {
+      const playlist = createFakePlaylist();
+      playlist.price = 25;
+
+      await playlistRepository.create(playlist);
+
+      const input = {
+        id_authenticated_channel: '001',
+        id_playlist: playlist.id
+      };
+
+      const addPlaylistToLibraryUsecase = createAddPlaylistToLibraryUsecase();
+
+      const execute = async () =>
+        await addPlaylistToLibraryUsecase.execute(input);
+
+      await expect(execute).rejects.toThrow(
+        new ImpossibleActionError(
+          'Não pode adicionar playlist paga de terceiro na própria library.'
+        )
+      );
+    });
+
+    test('Deve lançar erro ao adicionar playlist privada na library.', async () => {
+      const playlist = createFakePlaylist();
+      playlist.visibility = PlaylistVisibility.PRIVATE;
+
+      await playlistRepository.create(playlist);
+
+      const input = {
+        id_authenticated_channel: '001',
+        id_playlist: playlist.id
+      };
+
+      const addPlaylistToLibraryUsecase = createAddPlaylistToLibraryUsecase();
+
+      const execute = async () =>
+        await addPlaylistToLibraryUsecase.execute(input);
+
+      await expect(execute).rejects.toThrow(
+        new ImpossibleActionError(
+          'Não pode adicionar playlist private de terceiro na própria library.'
+        )
+      );
     });
   });
 });
