@@ -19,11 +19,13 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Install Docker Compose
-        uses: ndeloof/install-compose-action@v0.0.1
-        with:
-          version: v2.9.0
-          legacy: true
+      # - name: Install Docker Compose
+      #   run: docker-compose
+      # - name: Install Docker Compose
+      #   uses: ndeloof/install-compose-action@v0.0.1
+      #   with:
+      #     version: v2.9.0
+      #     legacy: true
 
       - name: Copy .env
         run: cp .env.example .env
@@ -31,11 +33,11 @@ jobs:
       - name: Start app
         run: make start-app
 
-      - name: Run lint
-        run: make lint
+      # - name: Run lint
+      #   run: make lint
 
       - name: Run all test
-        run: make test
+        run: docker-compose run yt-fake-backend npm run dev
 
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
