@@ -2,6 +2,6 @@
 dist
 node_modules
 coverage
-.env
 reports
+.env
 .stryker-tmp
