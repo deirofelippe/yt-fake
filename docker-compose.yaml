@@ -4,7 +4,7 @@ services:
   yt-fake-backend:
     build:
       context: ./backend
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.dev
     container_name: yt-fake-backend
     volumes:
       - "./backend:/home/node/app"
@@ -13,12 +13,12 @@ services:
     ports:
       - "3000:3000"
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
 
   postgres:
-    image: postgres:12.10
+    image: postgres:12.8-alpine
     container_name: postgres
-    restart: always
     ports:
       - "5432:5432"
     volumes:
@@ -27,6 +27,11 @@ services:
       POSTGRES_PASSWORD: root
       POSTGRES_USER: postgres
       POSTGRES_DB: yt_fake
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   adminer:
     image: adminer:4.8.1
@@ -35,7 +40,8 @@ services:
     ports:
       - 8080:8080
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
 
 volumes:
   database:

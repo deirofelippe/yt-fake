@@ -1,0 +1,8 @@
+FROM node:16.13.2-alpine3.14
+WORKDIR /home/node/app
+RUN apk update
+COPY package*.json ./
+RUN npm ci --only=production
+COPY ./ ./
+CMD npm start
+USER node
