@@ -7,40 +7,46 @@ on:
 
 jobs:
   CI:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     defaults:
       run:
         working-directory: backend
-    strategy:
-      matrix:
-        node-version: [16.x]
+    container: node:16.13.2
+
+    services:
+      postgres:
+        image: postgres:12.8
+        env:
+          POSTGRES_PASSWORD: root
+          POSTGRES_USER: postgres
+          POSTGRES_DB: yt_fake
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           fetch-depth: 0
 
-      # - name: Install Docker Compose
-      #   run: docker-compose
-      # - name: Install Docker Compose
-      #   uses: ndeloof/install-compose-action@v0.0.1
-      #   with:
-      #     version: v2.9.0
-      #     legacy: true
+      - name: Install dependencies
+        run: npm ci
 
-      - name: Copy .env
+      - name: Rename .env.example to .env
         run: cp .env.example .env
-
-      - name: Start app
-        run: make start-app
 
       # - name: Run lint
       #   run: make lint
 
-      - name: Run all test
-        run: docker-compose run yt-fake-backend npm run dev
+      - name: Run tests
+        run: npm run test:ci
 
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
+        with:
+          projectBaseDir: backend
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}

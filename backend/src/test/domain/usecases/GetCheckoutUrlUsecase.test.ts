@@ -124,6 +124,7 @@ describe('GetCheckoutUrlUsecase', () => {
 
       const expectedUrl = `${env.pagSeguro.sandbox.redirectUrl}?code=94915CFA4B4BEB1CC47D1F8629FB6AD3`;
 
+      expect(uri).toEqual('/v2/checkout?email=test%40email.com&token=12345');
       expect(url).toEqual(expectedUrl);
     });
 

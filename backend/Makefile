@@ -34,8 +34,12 @@ start-backend:
 start-db:
 	@docker volume create --name=database
 	@docker-compose up -d postgres
+<<<<<<< Updated upstream
 .PHONY: start-db
 
 config-alias:
 	alias glogp="git log --pretty=format:\"%C(auto) %h %Cgreen %ad %C(auto) %s\" --date=format:\"%d/%m/%y %T\""
+.PHONY: config-alias
+=======
 .PHONY: start-db
+>>>>>>> Stashed changes
