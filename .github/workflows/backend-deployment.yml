@@ -47,7 +47,7 @@ jobs:
         run: npm run test:ci
 
       - name: Run mutation test
-        run: make test-mutation
+        run: npm run test:mutation
 
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
