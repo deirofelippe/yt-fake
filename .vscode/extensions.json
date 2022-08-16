@@ -3,6 +3,8 @@
     "hediet.vscode-drawio",
     "esbenp.prettier-vscode",
     "dbaeumer.vscode-eslint",
-    "humao.rest-client"
+    "humao.rest-client",
+    "redhat.vscode-yaml",
+    "ms-vscode.makefile-tools"
   ]
 }
