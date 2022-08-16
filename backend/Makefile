@@ -32,5 +32,10 @@ start-backend:
 .PHONY: start-backend
 
 start-db:
+	@docker volume create --name=database
 	@docker-compose up -d postgres
+.PHONY: start-db
+
+config-alias:
+	alias glogp="git log --pretty=format:\"%C(auto) %h %Cgreen %ad %C(auto) %s\" --date=format:\"%d/%m/%y %T\""
 .PHONY: start-db
