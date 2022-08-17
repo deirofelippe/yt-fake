@@ -3,15 +3,15 @@ open-backend:
 	@docker-compose exec yt-fake-backend ash
 .PHONY: open-backend
 
-lint: start-app
+lint: 
 	@docker-compose exec yt-fake-backend npm run lint
 .PHONY: lint
 
-test: start-app
+test: 
 	@docker-compose exec yt-fake-backend npm run test:ci
 .PHONY: test
 
-test-mutation: start-app
+test-mutation: 
 	@docker-compose exec yt-fake-backend npm run test:mutation
 .PHONY: test-mutation
 
@@ -34,12 +34,8 @@ start-backend:
 start-db:
 	@docker volume create --name=database
 	@docker-compose up -d postgres
-<<<<<<< Updated upstream
 .PHONY: start-db
 
 config-alias:
 	alias glogp="git log --pretty=format:\"%C(auto) %h %Cgreen %ad %C(auto) %s\" --date=format:\"%d/%m/%y %T\""
 .PHONY: config-alias
-=======
-.PHONY: start-db
->>>>>>> Stashed changes
