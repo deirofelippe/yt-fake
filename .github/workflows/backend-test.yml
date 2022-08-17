@@ -2,7 +2,7 @@ name: Continuous integration
 
 on:
   push:
-  pull_request:
+    branches-ignore: [main, master]
   workflow_dispatch:
 
 jobs:
