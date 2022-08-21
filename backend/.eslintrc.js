@@ -1,7 +1,7 @@
 module.exports = {
   root: true,
   parser: '@typescript-eslint/parser',
-  plugins: ['@typescript-eslint', 'sonarjs', 'jest'],
+  plugins: ['@typescript-eslint', 'sonarjs', 'only-warn', 'jest'],
   overrides: [
     {
       files: ['*.ts', '*.tsx'],
