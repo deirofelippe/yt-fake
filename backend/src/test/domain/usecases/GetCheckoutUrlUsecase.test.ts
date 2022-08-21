@@ -61,7 +61,9 @@ describe('GetCheckoutUrlUsecase', () => {
       return new GetCheckoutUrlUsecase({
         paymentGateway,
         playlistRepository,
-        videoRepository
+        videoRepository,
+        orderFactory,
+        orderRepository
       });
     };
 
@@ -94,7 +96,7 @@ describe('GetCheckoutUrlUsecase', () => {
       };
     });
 
-    test('Deve ser comprado somente um video e uma playlist', async () => {
+    test('Deve ser retornado uma url ao comprar um video e uma playlist', async () => {
       await videoRepository.create(video);
       await playlistRepository.create(playlist);
 
@@ -119,8 +121,8 @@ describe('GetCheckoutUrlUsecase', () => {
         )
         .reply(200, xmlCheckoutRedirect);
 
-      const buyItem = createGetCheckoutUrlUsecase();
-      const url = await buyItem.execute(input);
+      const createOrderUsecase = createGetCheckoutUrlUsecase();
+      const url = await createOrderUsecase.execute(input);
 
       const expectedUrl = `${env.pagSeguro.sandbox.redirectUrl}?code=94915CFA4B4BEB1CC47D1F8629FB6AD3`;
 
@@ -128,7 +130,63 @@ describe('GetCheckoutUrlUsecase', () => {
       expect(url).toEqual(expectedUrl);
     });
 
-    test('Deve ser comprado somente uma playlist', async () => {
+    test('Deve ser cadastrado uma order ao comprar um video e uma playlist', async () => {
+      await videoRepository.create(video);
+      await playlistRepository.create(playlist);
+
+      const input: GetCheckoutUrlUsecaseInput = {
+        id_authenticated_channel: '003',
+        items: [
+          { id: video.id, type: ItemType.VIDEO },
+          { id: playlist.id, type: ItemType.PLAYLIST }
+        ]
+      };
+
+      const createOrderUsecase = new GetCheckoutUrlUsecase({
+        paymentGateway: {
+          getCheckoutRedirectUrl: async () => 'teste',
+          transactionConsulting: () => ''
+        },
+        playlistRepository,
+        videoRepository,
+        orderFactory,
+        orderRepository
+      });
+
+      const url = await createOrderUsecase.execute(input);
+
+      const orders = await orderRepository.findAllOrders(
+        input.id_authenticated_channel
+      );
+      const expectedOrders = orders.map((order) => ({
+        ...order.getOrderWithItems()
+      }));
+
+      expect(expectedOrders).toEqual([
+        expect.objectContaining<OrderAttributes>({
+          id: expect.any(String),
+          id_channel: input.id_authenticated_channel,
+          transaction: { status: 'Aguardando pagamento' },
+          items: [
+            {
+              id: expect.any(String),
+              id_order: expect.any(String),
+              id_purchased_item: input.items[0].id,
+              type: input.items[0].type
+            },
+            {
+              id: expect.any(String),
+              id_order: expect.any(String),
+              id_purchased_item: input.items[1].id,
+              type: input.items[1].type
+            }
+          ]
+        })
+      ]);
+      expect(url).toEqual('teste');
+    });
+
+    test('Deve ser retornado uma url ao comprar somente uma playlist', async () => {
       await playlistRepository.create(playlist);
 
       const input: GetCheckoutUrlUsecaseInput = {
@@ -149,15 +207,61 @@ describe('GetCheckoutUrlUsecase', () => {
         )
         .reply(200, xmlCheckoutRedirect);
 
-      const buyItem = createGetCheckoutUrlUsecase();
-      const url = await buyItem.execute(input);
+      const createOrderUsecase = createGetCheckoutUrlUsecase();
+      const url = await createOrderUsecase.execute(input);
 
       const expectedUrl = `${env.pagSeguro.sandbox.redirectUrl}?code=94915CFA4B4BEB1CC47D1F8629FB6AD3`;
 
       expect(url).toEqual(expectedUrl);
     });
 
-    test('Deve ser comprado somente um video', async () => {
+    test('Deve ser cadastrado uma order ao comprar somente uma playlist', async () => {
+      await playlistRepository.create(playlist);
+
+      const input: GetCheckoutUrlUsecaseInput = {
+        id_authenticated_channel: '003',
+        items: [{ id: playlist.id, type: ItemType.PLAYLIST }]
+      };
+
+      const createOrderUsecase = new GetCheckoutUrlUsecase({
+        paymentGateway: {
+          getCheckoutRedirectUrl: async () => 'teste',
+          transactionConsulting: () => ''
+        },
+        playlistRepository,
+        videoRepository,
+        orderFactory,
+        orderRepository
+      });
+
+      const url = await createOrderUsecase.execute(input);
+
+      const orders = await orderRepository.findAllOrders(
+        input.id_authenticated_channel
+      );
+      const expectedOrders = orders.map((order) => ({
+        ...order.getOrderWithItems()
+      }));
+
+      expect(expectedOrders).toEqual([
+        expect.objectContaining<OrderAttributes>({
+          id: expect.any(String),
+          id_channel: input.id_authenticated_channel,
+          transaction: { status: 'Aguardando pagamento' },
+          items: [
+            {
+              id: expect.any(String),
+              id_order: expect.any(String),
+              id_purchased_item: input.items[0].id,
+              type: input.items[0].type
+            }
+          ]
+        })
+      ]);
+      expect(url).toEqual('teste');
+    });
+
+    test('Deve ser retornado uma url ao comprar somente um video', async () => {
       await videoRepository.create(video);
 
       const input: GetCheckoutUrlUsecaseInput = {
@@ -178,16 +282,62 @@ describe('GetCheckoutUrlUsecase', () => {
         )
         .reply(200, xmlCheckoutRedirect);
 
-      const buyItem = createGetCheckoutUrlUsecase();
-      const url = await buyItem.execute(input);
+      const createOrderUsecase = createGetCheckoutUrlUsecase();
+      const url = await createOrderUsecase.execute(input);
 
       const expectedUrl = `${env.pagSeguro.sandbox.redirectUrl}?code=94915CFA4B4BEB1CC47D1F8629FB6AD3`;
 
       expect(url).toEqual(expectedUrl);
     });
 
+    test('Deve ser cadastrado uma order ao comprar somente um video', async () => {
+      await videoRepository.create(video);
+
+      const input: GetCheckoutUrlUsecaseInput = {
+        id_authenticated_channel: '003',
+        items: [{ id: video.id, type: ItemType.VIDEO }]
+      };
+
+      const createOrderUsecase = new GetCheckoutUrlUsecase({
+        paymentGateway: {
+          getCheckoutRedirectUrl: async () => 'teste',
+          transactionConsulting: () => ''
+        },
+        playlistRepository,
+        videoRepository,
+        orderFactory,
+        orderRepository
+      });
+
+      const url = await createOrderUsecase.execute(input);
+
+      const orders = await orderRepository.findAllOrders(
+        input.id_authenticated_channel
+      );
+      const expectedOrders = orders.map((order) => ({
+        ...order.getOrderWithItems()
+      }));
+
+      expect(expectedOrders).toEqual([
+        expect.objectContaining<OrderAttributes>({
+          id: expect.any(String),
+          id_channel: input.id_authenticated_channel,
+          transaction: { status: 'Aguardando pagamento' },
+          items: [
+            {
+              id: expect.any(String),
+              id_order: expect.any(String),
+              id_purchased_item: input.items[0].id,
+              type: input.items[0].type
+            }
+          ]
+        })
+      ]);
+      expect(url).toEqual('teste');
+    });
+
     test('Deve lançar erro por não ter items no input para comprar', async () => {
-      const buyItem = createGetCheckoutUrlUsecase();
+      const createOrderUsecase = createGetCheckoutUrlUsecase();
 
       const input1: GetCheckoutUrlUsecaseInput = {
         id_authenticated_channel: '003',
@@ -198,9 +348,9 @@ describe('GetCheckoutUrlUsecase', () => {
         id_authenticated_channel: '003'
       } as GetCheckoutUrlUsecaseInput;
 
-      const execute1 = async () => await buyItem.execute(input1);
+      const execute1 = async () => await createOrderUsecase.execute(input1);
 
-      const execute2 = async () => await buyItem.execute(input2);
+      const execute2 = async () => await createOrderUsecase.execute(input2);
 
       await expect(execute1).rejects.toThrow(FieldsValidationError);
 
@@ -213,9 +363,9 @@ describe('GetCheckoutUrlUsecase', () => {
         items: [{ id: '001', type: ItemType.VIDEO }]
       };
 
-      const buyItem = createGetCheckoutUrlUsecase();
+      const createOrderUsecase = createGetCheckoutUrlUsecase();
 
-      const execute = async () => await buyItem.execute(input);
+      const execute = async () => await createOrderUsecase.execute(input);
       await expect(execute).rejects.toThrow(
         new ImpossibleActionError(
           'Algum video não foi encontrado ou já foi comprado.'
@@ -233,9 +383,9 @@ describe('GetCheckoutUrlUsecase', () => {
         items: [{ id: video.id, type: ItemType.VIDEO }]
       };
 
-      const buyItem = createGetCheckoutUrlUsecase();
+      const createOrderUsecase = createGetCheckoutUrlUsecase();
 
-      const execute = async () => await buyItem.execute(input);
+      const execute = async () => await createOrderUsecase.execute(input);
       await expect(execute).rejects.toThrow(
         new ImpossibleActionError('O video é privado.')
       );
@@ -251,9 +401,9 @@ describe('GetCheckoutUrlUsecase', () => {
         items: [{ id: video.id, type: ItemType.VIDEO }]
       };
 
-      const buyItem = createGetCheckoutUrlUsecase();
+      const createOrderUsecase = createGetCheckoutUrlUsecase();
 
-      const execute = async () => await buyItem.execute(input);
+      const execute = async () => await createOrderUsecase.execute(input);
       await expect(execute).rejects.toThrow(
         new ImpossibleActionError('O video é gratuito.')
       );
@@ -269,9 +419,9 @@ describe('GetCheckoutUrlUsecase', () => {
         items: [{ id: video.id, type: ItemType.VIDEO }]
       };
 
-      const buyItem = createGetCheckoutUrlUsecase();
+      const createOrderUsecase = createGetCheckoutUrlUsecase();
 
-      const execute = async () => await buyItem.execute(input);
+      const execute = async () => await createOrderUsecase.execute(input);
       await expect(execute).rejects.toThrow(
         new ImpossibleActionError(
           'O comprador é o dono do video que quer comprar.'
@@ -299,9 +449,9 @@ describe('GetCheckoutUrlUsecase', () => {
         items: [{ id: '001', type: ItemType.VIDEO }]
       };
 
-      const buyItem = createGetCheckoutUrlUsecase();
+      const createOrderUsecase = createGetCheckoutUrlUsecase();
 
-      const execute = async () => await buyItem.execute(input);
+      const execute = async () => await createOrderUsecase.execute(input);
       await expect(execute).rejects.toThrow(
         new ImpossibleActionError(
           'Algum video não foi encontrado ou já foi comprado.'
@@ -315,9 +465,9 @@ describe('GetCheckoutUrlUsecase', () => {
         items: [{ id: '001', type: ItemType.PLAYLIST }]
       };
 
-      const buyItem = createGetCheckoutUrlUsecase();
+      const createOrderUsecase = createGetCheckoutUrlUsecase();
 
-      const execute = async () => await buyItem.execute(input);
+      const execute = async () => await createOrderUsecase.execute(input);
       await expect(execute).rejects.toThrow(
         new ImpossibleActionError(
           'Alguma playlist não foi encontrada ou já foi comprada.'
@@ -335,9 +485,9 @@ describe('GetCheckoutUrlUsecase', () => {
         items: [{ id: playlist.id, type: ItemType.PLAYLIST }]
       };
 
-      const buyItem = createGetCheckoutUrlUsecase();
+      const createOrderUsecase = createGetCheckoutUrlUsecase();
 
-      const execute = async () => await buyItem.execute(input);
+      const execute = async () => await createOrderUsecase.execute(input);
       await expect(execute).rejects.toThrow(
         new ImpossibleActionError('A playlist é privada.')
       );
@@ -353,9 +503,9 @@ describe('GetCheckoutUrlUsecase', () => {
         items: [{ id: playlist.id, type: ItemType.PLAYLIST }]
       };
 
-      const buyItem = createGetCheckoutUrlUsecase();
+      const createOrderUsecase = createGetCheckoutUrlUsecase();
 
-      const execute = async () => await buyItem.execute(input);
+      const execute = async () => await createOrderUsecase.execute(input);
       await expect(execute).rejects.toThrow(
         new ImpossibleActionError('A playlist é gratuita.')
       );
@@ -371,9 +521,9 @@ describe('GetCheckoutUrlUsecase', () => {
         items: [{ id: playlist.id, type: ItemType.PLAYLIST }]
       };
 
-      const buyItem = createGetCheckoutUrlUsecase();
+      const createOrderUsecase = createGetCheckoutUrlUsecase();
 
-      const execute = async () => await buyItem.execute(input);
+      const execute = async () => await createOrderUsecase.execute(input);
       await expect(execute).rejects.toThrow(
         new ImpossibleActionError(
           'O comprador é o dono da playlist que quer comprar.'
@@ -401,9 +551,9 @@ describe('GetCheckoutUrlUsecase', () => {
         items: [{ id: playlist.id, type: ItemType.PLAYLIST }]
       };
 
-      const buyItem = createGetCheckoutUrlUsecase();
+      const createOrderUsecase = createGetCheckoutUrlUsecase();
 
-      const execute = async () => await buyItem.execute(input);
+      const execute = async () => await createOrderUsecase.execute(input);
       await expect(execute).rejects.toThrow(
         new ImpossibleActionError(
           'Alguma playlist não foi encontrada ou já foi comprada.'
