@@ -1,9 +1,14 @@
 import { FieldsValidationError } from '../../errors/FieldsValidationError';
 import { ImpossibleActionError } from '../../errors/ImpossibleActionError';
+import { Order } from '../entities/Order';
+import { Playlist } from '../entities/Playlist';
+import { Video } from '../entities/Video';
+import { EntityFactoryInterface } from '../factories/entities/EntityFactoryInterface';
 import {
   PaymentGatewayInterface,
   CheckoutRedirectInput
 } from '../libs/PaymentGatewayInterface';
+import { OrderRepositoryInterface } from '../repositories/OrderRepositoryInterface';
 import { PlaylistRepositoryInterface } from '../repositories/PlaylistRepositoryInterface';
 import { VideoRepositoryInterface } from '../repositories/VideoRepositoryInterface';
 
@@ -23,6 +28,8 @@ export type GetCheckoutUrlUsecaseInput = {
 export type GetCheckoutUrlUsecaseDependencies = {
   playlistRepository: PlaylistRepositoryInterface;
   videoRepository: VideoRepositoryInterface;
+  orderRepository: OrderRepositoryInterface;
+  orderFactory: EntityFactoryInterface<Order>;
   paymentGateway: PaymentGatewayInterface;
 };
 
@@ -32,7 +39,7 @@ export class GetCheckoutUrlUsecase {
   ) {}
 
   public async execute(input: GetCheckoutUrlUsecaseInput) {
-    const { paymentGateway } = this.dependencies;
+    const { paymentGateway, orderRepository, orderFactory } = this.dependencies;
 
     const { id_authenticated_channel: id_buyer_channel } = input;
     const items = input.items ?? [];
@@ -52,79 +59,43 @@ export class GetCheckoutUrlUsecase {
       }
       if (item.type == 'playlist') {
         playlists.push(item);
-        continue;
       }
     }
 
-    const videosItemsCheckout =
-      await this.throwErrorIfAnyVideoCannotBePurchased(
-        videos,
-        id_buyer_channel
-      );
-    const playlistsItemsCheckout =
-      await this.throwErrorIfAnyPlaylistCannotBePurchased(
-        playlists,
-        id_buyer_channel
-      );
+    const videosFound = await this.findVideosByIdThatWereNotPurchased(
+      videos,
+      id_buyer_channel
+    );
+    this.throwErrorIfAnyVideoCannotBePurchased(videosFound, id_buyer_channel);
+    const videosCheckoutItems = this.videosToCheckoutRedirectInput(videosFound);
 
-    return await paymentGateway.getCheckoutRedirectUrl([
-      ...videosItemsCheckout,
-      ...playlistsItemsCheckout
+    const playlistsFound = await this.findPlaylistsByIdThatWereNotPurchased(
+      playlists,
+      id_buyer_channel
+    );
+    this.throwErrorIfAnyPlaylistCannotBePurchased(
+      playlistsFound,
+      id_buyer_channel
+    );
+    const playlistsCheckoutItems =
+      this.playlistsToCheckoutRedirectInput(playlistsFound);
+
+    const url = await paymentGateway.getCheckoutRedirectUrl([
+      ...videosCheckoutItems,
+      ...playlistsCheckoutItems
     ]);
+
+    const order = orderFactory.create(input);
+    await orderRepository.createOrder(order.getOrder());
+    await orderRepository.createOrderItems(order.getOrderItems());
+
+    return url;
   }
 
-  private async throwErrorIfAnyVideoCannotBePurchased(
-    videos: Item[],
+  private async findPlaylistsByIdThatWereNotPurchased(
+    playlists: Item[] | [],
     id_buyer_channel: string
-  ): Promise<never | CheckoutRedirectInput[] | []> {
-    if (videos.length <= 0) {
-      return [];
-    }
-
-    const { videoRepository } = this.dependencies;
-
-    const videosIds = videos.map((item) => item.id).join(',');
-    const videosFound =
-      await videoRepository.findVideosByIdThatWereNotPurchased(
-        videosIds,
-        id_buyer_channel
-      );
-    if (videosFound.length !== videos.length)
-      throw new ImpossibleActionError(
-        'Algum video não foi encontrado ou já foi comprado.'
-      );
-
-    let buyerOwnsTheVideo = false;
-    const checkoutItems: CheckoutRedirectInput[] = [];
-    videosFound.forEach((video) => {
-      buyerOwnsTheVideo = video.channelIsTheSame(id_buyer_channel);
-      if (buyerOwnsTheVideo)
-        throw new ImpossibleActionError(
-          'O comprador é o dono do video que quer comprar.'
-        );
-
-      if (video.isFree())
-        throw new ImpossibleActionError('O video é gratuito.');
-
-      if (video.isPrivate())
-        throw new ImpossibleActionError('O video é privado.');
-
-      const { id, title, price } = video.getAttributes();
-
-      checkoutItems.push({
-        id,
-        title,
-        price
-      });
-    });
-
-    return checkoutItems;
-  }
-
-  private async throwErrorIfAnyPlaylistCannotBePurchased(
-    playlists: Item[],
-    id_buyer_channel: string
-  ): Promise<never | CheckoutRedirectInput[] | []> {
+  ) {
     if (playlists.length <= 0) {
       return [];
     }
@@ -143,9 +114,43 @@ export class GetCheckoutUrlUsecase {
         'Alguma playlist não foi encontrada ou já foi comprada.'
       );
 
+    return playlistsFound;
+  }
+
+  private async findVideosByIdThatWereNotPurchased(
+    videos: Item[] | [],
+    id_buyer_channel: string
+  ) {
+    if (videos.length <= 0) {
+      return [];
+    }
+
+    const { videoRepository } = this.dependencies;
+
+    const videosIds = videos.map((item) => item.id).join(',');
+    const videosFound =
+      await videoRepository.findVideosByIdThatWereNotPurchased(
+        videosIds,
+        id_buyer_channel
+      );
+    if (videosFound.length !== videos.length)
+      throw new ImpossibleActionError(
+        'Algum video não foi encontrado ou já foi comprado.'
+      );
+
+    return videosFound;
+  }
+
+  private throwErrorIfAnyPlaylistCannotBePurchased(
+    playlists: Playlist[] | [],
+    id_buyer_channel: string
+  ): Promise<never | void> {
+    if (playlists.length <= 0) {
+      return;
+    }
+
     let buyerOwnsThePlaylist = false;
-    const checkoutItems: CheckoutRedirectInput[] = [];
-    playlistsFound.forEach((playlist) => {
+    for (const playlist of playlists) {
       buyerOwnsThePlaylist = playlist.channelIsTheSame(id_buyer_channel);
       if (buyerOwnsThePlaylist)
         throw new ImpossibleActionError(
@@ -157,16 +162,52 @@ export class GetCheckoutUrlUsecase {
 
       if (playlist.isPrivate())
         throw new ImpossibleActionError('A playlist é privada.');
+    }
+  }
 
+  private throwErrorIfAnyVideoCannotBePurchased(
+    videos: Video[] | [],
+    id_buyer_channel: string
+  ): Promise<never | void> {
+    if (videos.length <= 0) {
+      return;
+    }
+
+    let buyerOwnsTheVideo = false;
+    for (const video of videos) {
+      buyerOwnsTheVideo = video.channelIsTheSame(id_buyer_channel);
+      if (buyerOwnsTheVideo)
+        throw new ImpossibleActionError(
+          'O comprador é o dono do video que quer comprar.'
+        );
+
+      if (video.isFree())
+        throw new ImpossibleActionError('O video é gratuito.');
+
+      if (video.isPrivate())
+        throw new ImpossibleActionError('O video é privado.');
+    }
+  }
+
+  private playlistsToCheckoutRedirectInput(playlists: Playlist[] | []) {
+    if (playlists.length <= 0) {
+      return [];
+    }
+
+    return playlists.map((playlist): CheckoutRedirectInput => {
       const { id, title, price } = playlist.getAttributes();
-
-      checkoutItems.push({
-        id,
-        title,
-        price
-      });
+      return { id, price, title };
     });
+  }
 
-    return checkoutItems;
+  private videosToCheckoutRedirectInput(videos: Video[] | []) {
+    if (videos.length <= 0) {
+      return [];
+    }
+
+    return videos.map((video): CheckoutRedirectInput => {
+      const { id, title, price } = video.getAttributes();
+      return { id, price, title };
+    });
   }
 }
