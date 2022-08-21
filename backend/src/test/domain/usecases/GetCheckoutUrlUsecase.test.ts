@@ -19,6 +19,7 @@ import {
   GetCheckoutUrlUsecaseInput,
   ItemType
 } from '../../../domain/usecases/GetCheckoutUrlUsecase';
+import { throws } from 'smid';
 import { env } from '../../../env';
 import { FieldsValidationError } from '../../../errors/FieldsValidationError';
 import { ImpossibleActionError } from '../../../errors/ImpossibleActionError';
@@ -343,18 +344,22 @@ describe('GetCheckoutUrlUsecase', () => {
         id_authenticated_channel: '003',
         items: []
       };
-
       const input2 = {
         id_authenticated_channel: '003'
       } as GetCheckoutUrlUsecaseInput;
 
-      const execute1 = async () => await createOrderUsecase.execute(input1);
+      const error1: FieldsValidationError = await throws(
+        async () => await createOrderUsecase.execute(input1)
+      );
+      const error2: FieldsValidationError = await throws(
+        async () => await createOrderUsecase.execute(input2)
+      );
 
-      const execute2 = async () => await createOrderUsecase.execute(input2);
+      expect(error1).toBeInstanceOf(FieldsValidationError);
+      expect(error1.message).toEqual('Campo(s) inválido(s).');
 
-      await expect(execute1).rejects.toThrow(FieldsValidationError);
-
-      await expect(execute2).rejects.toThrow(FieldsValidationError);
+      expect(error2).toBeInstanceOf(FieldsValidationError);
+      expect(error2.message).toEqual('Campo(s) inválido(s).');
     });
 
     test('Deve lançar erro ao comprar um video que não existe', async () => {
@@ -365,11 +370,13 @@ describe('GetCheckoutUrlUsecase', () => {
 
       const createOrderUsecase = createGetCheckoutUrlUsecase();
 
-      const execute = async () => await createOrderUsecase.execute(input);
-      await expect(execute).rejects.toThrow(
-        new ImpossibleActionError(
-          'Algum video não foi encontrado ou já foi comprado.'
-        )
+      const error: ImpossibleActionError = await throws(
+        async () => await createOrderUsecase.execute(input)
+      );
+
+      expect(error).toBeInstanceOf(ImpossibleActionError);
+      expect(error.message).toEqual(
+        'Algum video não foi encontrado ou já foi comprado.'
       );
     });
 
@@ -385,10 +392,12 @@ describe('GetCheckoutUrlUsecase', () => {
 
       const createOrderUsecase = createGetCheckoutUrlUsecase();
 
-      const execute = async () => await createOrderUsecase.execute(input);
-      await expect(execute).rejects.toThrow(
-        new ImpossibleActionError('O video é privado.')
+      const error: ImpossibleActionError = await throws(
+        async () => await createOrderUsecase.execute(input)
       );
+
+      expect(error).toBeInstanceOf(ImpossibleActionError);
+      expect(error.message).toEqual('O video é privado.');
     });
 
     test('Deve lançar erro ao comprar um video que é gratuito', async () => {
@@ -403,10 +412,12 @@ describe('GetCheckoutUrlUsecase', () => {
 
       const createOrderUsecase = createGetCheckoutUrlUsecase();
 
-      const execute = async () => await createOrderUsecase.execute(input);
-      await expect(execute).rejects.toThrow(
-        new ImpossibleActionError('O video é gratuito.')
+      const error: ImpossibleActionError = await throws(
+        async () => await createOrderUsecase.execute(input)
       );
+
+      expect(error).toBeInstanceOf(ImpossibleActionError);
+      expect(error.message).toEqual('O video é gratuito.');
     });
 
     test('Deve lançar erro ao comprador tentar comprar o proprio video', async () => {
@@ -421,11 +432,13 @@ describe('GetCheckoutUrlUsecase', () => {
 
       const createOrderUsecase = createGetCheckoutUrlUsecase();
 
-      const execute = async () => await createOrderUsecase.execute(input);
-      await expect(execute).rejects.toThrow(
-        new ImpossibleActionError(
-          'O comprador é o dono do video que quer comprar.'
-        )
+      const error: ImpossibleActionError = await throws(
+        async () => await createOrderUsecase.execute(input)
+      );
+
+      expect(error).toBeInstanceOf(ImpossibleActionError);
+      expect(error.message).toEqual(
+        'O comprador é o dono do video que quer comprar.'
       );
     });
 
@@ -451,11 +464,13 @@ describe('GetCheckoutUrlUsecase', () => {
 
       const createOrderUsecase = createGetCheckoutUrlUsecase();
 
-      const execute = async () => await createOrderUsecase.execute(input);
-      await expect(execute).rejects.toThrow(
-        new ImpossibleActionError(
-          'Algum video não foi encontrado ou já foi comprado.'
-        )
+      const error: ImpossibleActionError = await throws(
+        async () => await createOrderUsecase.execute(input)
+      );
+
+      expect(error).toBeInstanceOf(ImpossibleActionError);
+      expect(error.message).toEqual(
+        'Algum video não foi encontrado ou já foi comprado.'
       );
     });
 
@@ -487,10 +502,12 @@ describe('GetCheckoutUrlUsecase', () => {
 
       const createOrderUsecase = createGetCheckoutUrlUsecase();
 
-      const execute = async () => await createOrderUsecase.execute(input);
-      await expect(execute).rejects.toThrow(
-        new ImpossibleActionError('A playlist é privada.')
+      const error: ImpossibleActionError = await throws(
+        async () => await createOrderUsecase.execute(input)
       );
+
+      expect(error).toBeInstanceOf(ImpossibleActionError);
+      expect(error.message).toEqual('A playlist é privada.');
     });
 
     test('Deve lançar erro ao comprar uma playlist que é gratuita', async () => {
@@ -505,10 +522,12 @@ describe('GetCheckoutUrlUsecase', () => {
 
       const createOrderUsecase = createGetCheckoutUrlUsecase();
 
-      const execute = async () => await createOrderUsecase.execute(input);
-      await expect(execute).rejects.toThrow(
-        new ImpossibleActionError('A playlist é gratuita.')
+      const error: ImpossibleActionError = await throws(
+        async () => await createOrderUsecase.execute(input)
       );
+
+      expect(error).toBeInstanceOf(ImpossibleActionError);
+      expect(error.message).toEqual('A playlist é gratuita.');
     });
 
     test('Deve lançar erro ao comprar uma playlist que é do próprio canal comprador', async () => {
@@ -523,11 +542,13 @@ describe('GetCheckoutUrlUsecase', () => {
 
       const createOrderUsecase = createGetCheckoutUrlUsecase();
 
-      const execute = async () => await createOrderUsecase.execute(input);
-      await expect(execute).rejects.toThrow(
-        new ImpossibleActionError(
-          'O comprador é o dono da playlist que quer comprar.'
-        )
+      const error: ImpossibleActionError = await throws(
+        async () => await createOrderUsecase.execute(input)
+      );
+
+      expect(error).toBeInstanceOf(ImpossibleActionError);
+      expect(error.message).toEqual(
+        'O comprador é o dono da playlist que quer comprar.'
       );
     });
 
@@ -553,11 +574,13 @@ describe('GetCheckoutUrlUsecase', () => {
 
       const createOrderUsecase = createGetCheckoutUrlUsecase();
 
-      const execute = async () => await createOrderUsecase.execute(input);
-      await expect(execute).rejects.toThrow(
-        new ImpossibleActionError(
-          'Alguma playlist não foi encontrada ou já foi comprada.'
-        )
+      const error: ImpossibleActionError = await throws(
+        async () => await createOrderUsecase.execute(input)
+      );
+
+      expect(error).toBeInstanceOf(ImpossibleActionError);
+      expect(error.message).toEqual(
+        'Alguma playlist não foi encontrada ou já foi comprada.'
       );
     });
   });
