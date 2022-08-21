@@ -1,4 +1,4 @@
-name: Continuous integration and continuous deployment
+name: CI and CD
 
 on:
   push:
@@ -44,7 +44,13 @@ jobs:
       #   run: make lint
 
       - name: Run tests
-        run: npm run test:ci
+        run: npm run test:coverage
+
+      - name: Coveralls
+        uses: coverallsapp/github-action@master
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          base-path: "./backend"
 
       - name: Run mutation test
         run: npm run test:mutation
@@ -52,7 +58,7 @@ jobs:
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
         with:
-          projectBaseDir: backend
+          projectBaseDir: "./backend"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}

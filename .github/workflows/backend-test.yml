@@ -1,4 +1,4 @@
-name: Continuous integration
+name: CI
 
 on:
   push:
@@ -41,7 +41,13 @@ jobs:
       #   run: make lint
 
       - name: Run tests
-        run: npm run test:ci
+        run: npm run test:coverage
+
+      - name: Coveralls
+        uses: coverallsapp/github-action@master
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          base-path: "./backend"
 
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
