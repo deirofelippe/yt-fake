@@ -8,11 +8,20 @@ good citizen: sempre iniciar os valores de um objeto pelo construtor e não por 
 fail fast: faça o teste que falha primeiro. Exemplo: prefira ***"se user não existe, então lance um erro"*** no lugar de ***"se user existe, então faça algo"***
 tell dont ask
 
-evitar o null
-sempre iniciar a variavel
-nao retornar null nas funcoes
-iniciar valores no construtor
-inversao de dependencias
+- evitar o null
+    - sempre iniciar a variavel
+    - nao retornar null nas funcoes, caso necessario
+    - iniciar valores no construtor
+    
+- inversao de dependencias
+
+- antes de fazer um if defensivo, se pergunte se a variavel pode ser nula ou a variavel nao deve ser nula e por algum motivo esta sendo
+- primeiro escreva o codigo ruim que funciona, depois refatore e tome cuidado com overengineering
+- loop nao deve conter varias responsabilidade, quebre em mais loops caso não interfira na performance.
+- cuidado com o DRY, evite o reuso antes do uso.
+- evite a otimizacao prematura e micro otimizacoes, o codigo fica menos legivel e mais complexo sem motivo
+
+foco no dominio: primeiro escreve o conceito inicial do sistema listando o backlog, depois faz os testes dos stories mais importantes, deixa pra depois a decisao de qual tecnologia usar (banco de dados, framework e etc), escreve primeiro o codigo feio que funcione e depois refatore e use os principios,
 
 ### Padrões no DDD
 
