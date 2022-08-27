@@ -66,6 +66,7 @@ describe('GetCheckoutUrlUsecase', () => {
         playlistRepository,
         videoRepository,
         orderFactory,
+        idGenerator,
         orderRepository
       });
     };
@@ -149,10 +150,7 @@ describe('GetCheckoutUrlUsecase', () => {
       const uri = `/v2/checkout?${params}`;
 
       nock('https://ws.sandbox.pagseguro.uol.com.br')
-        .post(
-          uri,
-          'itemId1=001&itemAmount1=30.00&itemDescription1=Docker&itemQuantity1=1&itemId2=001&itemAmount2=300.00&itemDescription2=DevOps&itemQuantity2=1&currency=BRL&redirectURL=https%3A%2F%2Fc517-2804-14d-5c33-566b-77cb-ac6c-afe-36c4.ngrok.io%2Fps%2Ffeedback&notificationURL=https%3A%2F%2Fc517-2804-14d-5c33-566b-77cb-ac6c-afe-36c4.ngrok.io%2Fps%2Ffeedback'
-        )
+        .post(uri)
         .reply(200, xmlCheckoutRedirect);
 
       const createOrderUsecase = createGetCheckoutUrlUsecase();
@@ -181,6 +179,7 @@ describe('GetCheckoutUrlUsecase', () => {
           getCheckoutRedirectUrl: async () => 'teste',
           transactionConsulting: () => ''
         },
+        idGenerator,
         playlistRepository,
         videoRepository,
         orderFactory,
@@ -235,10 +234,7 @@ describe('GetCheckoutUrlUsecase', () => {
       const uri = `/v2/checkout?${params}`;
 
       nock('https://ws.sandbox.pagseguro.uol.com.br')
-        .post(
-          uri,
-          'itemId1=001&itemAmount1=300.00&itemDescription1=DevOps&itemQuantity1=1&currency=BRL&redirectURL=https%3A%2F%2Fc517-2804-14d-5c33-566b-77cb-ac6c-afe-36c4.ngrok.io%2Fps%2Ffeedback&notificationURL=https%3A%2F%2Fc517-2804-14d-5c33-566b-77cb-ac6c-afe-36c4.ngrok.io%2Fps%2Ffeedback'
-        )
+        .post(uri)
         .reply(200, xmlCheckoutRedirect);
 
       const createOrderUsecase = createGetCheckoutUrlUsecase();
@@ -262,6 +258,7 @@ describe('GetCheckoutUrlUsecase', () => {
           getCheckoutRedirectUrl: async () => 'teste',
           transactionConsulting: () => ''
         },
+        idGenerator,
         playlistRepository,
         videoRepository,
         orderFactory,
@@ -310,10 +307,7 @@ describe('GetCheckoutUrlUsecase', () => {
       const uri = `/v2/checkout?${params}`;
 
       nock('https://ws.sandbox.pagseguro.uol.com.br')
-        .post(
-          uri,
-          'itemId1=001&itemAmount1=30.00&itemDescription1=Docker&itemQuantity1=1&currency=BRL&redirectURL=https%3A%2F%2Fc517-2804-14d-5c33-566b-77cb-ac6c-afe-36c4.ngrok.io%2Fps%2Ffeedback&notificationURL=https%3A%2F%2Fc517-2804-14d-5c33-566b-77cb-ac6c-afe-36c4.ngrok.io%2Fps%2Ffeedback'
-        )
+        .post(uri)
         .reply(200, xmlCheckoutRedirect);
 
       const createOrderUsecase = createGetCheckoutUrlUsecase();
@@ -337,6 +331,7 @@ describe('GetCheckoutUrlUsecase', () => {
           getCheckoutRedirectUrl: async () => 'teste',
           transactionConsulting: () => ''
         },
+        idGenerator,
         playlistRepository,
         videoRepository,
         orderFactory,
