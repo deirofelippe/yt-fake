@@ -30,6 +30,8 @@ import { PlaylistRepositoryMemory } from '../../../infra/repositories/memory/Pla
 import { VideoRepositoryMemory } from '../../../infra/repositories/memory/VideoRepositoryMemory';
 import { MemoryDatabase } from '../../MemoryDatabase';
 import { xmlCheckoutRedirect } from './__mocks__/mockPagseguroResponses';
+import faker from '@faker-js/faker';
+import { randomUUID } from 'crypto';
 
 describe('GetCheckoutUrlUsecase', () => {
   describe('Comprar items', () => {
@@ -71,41 +73,72 @@ describe('GetCheckoutUrlUsecase', () => {
     let video: VideoAttributes;
     let playlist: PlaylistAttributes;
 
+    const staticVideoValues: VideoAttributes = {
+      video: 'https://acidic-unibody.com',
+      thumbnail: 'http://loremflickr.com/640/480',
+      description:
+        'New ABC 13 9370, 13.3, 5th Gen CoreA5-8250U, 8GB RAM, 256GB SSD, power UHD Graphics, OS 10 Home, OS Office A & J 2016',
+      dislikes: 12070,
+      likes: 25107,
+      views: 20290,
+      id: 'd722f675-7ec3-429d-9cc4-957cc216fe26',
+      id_channel: '002',
+      title: 'Recycled Fresh Mouse',
+      price: 353,
+      visibility: VideoVisibility.PUBLIC
+    };
+    const staticPlaylistValues: PlaylistAttributes = {
+      description:
+        'The slim & simple Maple Gaming Keyboard from Dev Byte comes with a sleek body and 7- Color RGB LED Back-lighting for smart functionality',
+      id: '96b9e83f-369d-46ac-a3eb-bca525389beb',
+      id_channel: '002',
+      title: 'Licensed Metal Tuna',
+      price: 571,
+      visibility: PlaylistVisibility.PUBLIC
+    };
+
+    const createFakeVideo = (): VideoAttributes => {
+      return {
+        video: faker.internet.url(),
+        thumbnail: faker.image.imageUrl(),
+        description: faker.commerce.productDescription(),
+        dislikes: faker.datatype.number({ min: 0 }),
+        likes: faker.datatype.number({ min: 0 }),
+        views: faker.datatype.number({ min: 0 }),
+        id: randomUUID(),
+        id_channel: '002',
+        title: faker.commerce.productName(),
+        price: parseFloat(faker.commerce.price(5, 1000, 2)),
+        visibility: VideoVisibility.PUBLIC
+      };
+    };
+    const createFakePlaylist = (): PlaylistAttributes => {
+      return {
+        description: faker.commerce.productDescription(),
+        id: randomUUID(),
+        id_channel: '002',
+        title: faker.commerce.productName(),
+        price: parseFloat(faker.commerce.price(5, 1000, 2)),
+        visibility: PlaylistVisibility.PUBLIC
+      };
+    };
+
     beforeEach(() => {
       memoryDatabase.clear();
 
-      playlist = {
-        id: '001',
-        id_channel: '002',
-        title: 'DevOps',
-        price: 300,
-        visibility: PlaylistVisibility.PUBLIC
-      };
-
-      video = {
-        video: 's3//amazon',
-        thumbnail: 'devops.png',
-        description: 'Aulão sobre as principais ferramentas.',
-        dislikes: 5,
-        likes: 1000,
-        views: 2000,
-        id: '001',
-        id_channel: '002',
-        title: 'Docker',
-        price: 30,
-        visibility: VideoVisibility.PUBLIC
-      };
+      playlist = createFakePlaylist();
+      video = createFakeVideo();
     });
 
     test('Deve ser retornado uma url ao comprar um video e uma playlist', async () => {
-      await videoRepository.create(video);
-      await playlistRepository.create(playlist);
+      await videoRepository.create(staticVideoValues);
+      await playlistRepository.create(staticPlaylistValues);
 
       const input: GetCheckoutUrlUsecaseInput = {
         id_authenticated_channel: '003',
         items: [
-          { id: video.id, type: ItemType.VIDEO },
-          { id: playlist.id, type: ItemType.PLAYLIST }
+          { id: staticVideoValues.id, type: ItemType.VIDEO },
+          { id: staticPlaylistValues.id, type: ItemType.PLAYLIST }
         ]
       };
 
@@ -132,14 +165,14 @@ describe('GetCheckoutUrlUsecase', () => {
     });
 
     test('Deve ser cadastrado uma order ao comprar um video e uma playlist', async () => {
-      await videoRepository.create(video);
-      await playlistRepository.create(playlist);
+      await videoRepository.create(staticVideoValues);
+      await playlistRepository.create(staticPlaylistValues);
 
       const input: GetCheckoutUrlUsecaseInput = {
         id_authenticated_channel: '003',
         items: [
-          { id: video.id, type: ItemType.VIDEO },
-          { id: playlist.id, type: ItemType.PLAYLIST }
+          { id: staticVideoValues.id, type: ItemType.VIDEO },
+          { id: staticPlaylistValues.id, type: ItemType.PLAYLIST }
         ]
       };
 
@@ -188,11 +221,11 @@ describe('GetCheckoutUrlUsecase', () => {
     });
 
     test('Deve ser retornado uma url ao comprar somente uma playlist', async () => {
-      await playlistRepository.create(playlist);
+      await playlistRepository.create(staticPlaylistValues);
 
       const input: GetCheckoutUrlUsecaseInput = {
         id_authenticated_channel: '003',
-        items: [{ id: playlist.id, type: ItemType.PLAYLIST }]
+        items: [{ id: staticPlaylistValues.id, type: ItemType.PLAYLIST }]
       };
 
       const params = new URLSearchParams({
@@ -217,11 +250,11 @@ describe('GetCheckoutUrlUsecase', () => {
     });
 
     test('Deve ser cadastrado uma order ao comprar somente uma playlist', async () => {
-      await playlistRepository.create(playlist);
+      await playlistRepository.create(staticPlaylistValues);
 
       const input: GetCheckoutUrlUsecaseInput = {
         id_authenticated_channel: '003',
-        items: [{ id: playlist.id, type: ItemType.PLAYLIST }]
+        items: [{ id: staticPlaylistValues.id, type: ItemType.PLAYLIST }]
       };
 
       const createOrderUsecase = new GetCheckoutUrlUsecase({
@@ -263,11 +296,11 @@ describe('GetCheckoutUrlUsecase', () => {
     });
 
     test('Deve ser retornado uma url ao comprar somente um video', async () => {
-      await videoRepository.create(video);
+      await videoRepository.create(staticVideoValues);
 
       const input: GetCheckoutUrlUsecaseInput = {
         id_authenticated_channel: '003',
-        items: [{ id: video.id, type: ItemType.VIDEO }]
+        items: [{ id: staticVideoValues.id, type: ItemType.VIDEO }]
       };
 
       const params = new URLSearchParams({
@@ -292,11 +325,11 @@ describe('GetCheckoutUrlUsecase', () => {
     });
 
     test('Deve ser cadastrado uma order ao comprar somente um video', async () => {
-      await videoRepository.create(video);
+      await videoRepository.create(staticVideoValues);
 
       const input: GetCheckoutUrlUsecaseInput = {
         id_authenticated_channel: '003',
-        items: [{ id: video.id, type: ItemType.VIDEO }]
+        items: [{ id: staticVideoValues.id, type: ItemType.VIDEO }]
       };
 
       const createOrderUsecase = new GetCheckoutUrlUsecase({
