@@ -4,8 +4,10 @@ import { Order } from '../entities/Order';
 import { Playlist } from '../entities/Playlist';
 import { Video } from '../entities/Video';
 import { EntityFactoryInterface } from '../factories/entities/EntityFactoryInterface';
+import { IDGenerator } from '../libs/IDGenerator';
 import {
   PaymentGatewayInterface,
+  CheckoutRedirectItem,
   CheckoutRedirectInput
 } from '../libs/PaymentGatewayInterface';
 import { OrderRepositoryInterface } from '../repositories/OrderRepositoryInterface';
@@ -31,6 +33,7 @@ export type GetCheckoutUrlUsecaseDependencies = {
   orderRepository: OrderRepositoryInterface;
   orderFactory: EntityFactoryInterface<Order>;
   paymentGateway: PaymentGatewayInterface;
+  idGenerator: IDGenerator;
 };
 
 export class GetCheckoutUrlUsecase {
@@ -39,7 +42,8 @@ export class GetCheckoutUrlUsecase {
   ) {}
 
   public async execute(input: GetCheckoutUrlUsecaseInput) {
-    const { paymentGateway, orderRepository, orderFactory } = this.dependencies;
+    const { paymentGateway, orderRepository, orderFactory, idGenerator } =
+      this.dependencies;
 
     const { id_authenticated_channel: id_buyer_channel } = input;
     const items = input.items ?? [];
@@ -80,10 +84,13 @@ export class GetCheckoutUrlUsecase {
     const playlistsCheckoutItems =
       this.playlistsToCheckoutRedirectInput(playlistsFound);
 
-    const url = await paymentGateway.getCheckoutRedirectUrl([
-      ...videosCheckoutItems,
-      ...playlistsCheckoutItems
-    ]);
+    const checkoutRedirectInput: CheckoutRedirectInput = {
+      id_order: idGenerator.generate(),
+      items: [...videosCheckoutItems, ...playlistsCheckoutItems]
+    };
+    const url = await paymentGateway.getCheckoutRedirectUrl(
+      checkoutRedirectInput
+    );
 
     const order = orderFactory.create(input);
     await orderRepository.createOrder(order.getOrder());
@@ -189,23 +196,27 @@ export class GetCheckoutUrlUsecase {
     }
   }
 
-  private playlistsToCheckoutRedirectInput(playlists: Playlist[] | []) {
+  private playlistsToCheckoutRedirectInput(
+    playlists: Playlist[] | []
+  ): CheckoutRedirectItem[] {
     if (playlists.length <= 0) {
       return [];
     }
 
-    return playlists.map((playlist): CheckoutRedirectInput => {
+    return playlists.map((playlist): CheckoutRedirectItem => {
       const { id, title, price } = playlist.getAttributes();
       return { id, price, title };
     });
   }
 
-  private videosToCheckoutRedirectInput(videos: Video[] | []) {
+  private videosToCheckoutRedirectInput(
+    videos: Video[] | []
+  ): CheckoutRedirectItem[] {
     if (videos.length <= 0) {
       return [];
     }
 
-    return videos.map((video): CheckoutRedirectInput => {
+    return videos.map((video): CheckoutRedirectItem => {
       const { id, title, price } = video.getAttributes();
       return { id, price, title };
     });
