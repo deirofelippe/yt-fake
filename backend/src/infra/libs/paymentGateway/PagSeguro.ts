@@ -8,14 +8,13 @@ import { env } from '../../../env';
 import { Xml2jsParser } from '../Xml2jsParser';
 
 export class PagSeguro implements PaymentGatewayInterface {
-  constructor() {}
-
   public async getCheckoutRedirectUrl(
-    items: CheckoutRedirectInput[]
+    input: CheckoutRedirectInput
   ): Promise<string> {
-    const body = this.generateBodyForCheckoutRedirect(items);
+    const body = this.generateBodyForCheckoutRedirect(input);
     const url = this.generateUrlForCheckoutRedirect();
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let transaction: any;
     try {
       const response = await axios.post(url, body, {
@@ -28,16 +27,18 @@ export class PagSeguro implements PaymentGatewayInterface {
       throw error;
     }
     const code = transaction.checkout.code[0];
+
     return `${env.pagSeguro.sandbox.redirectUrl}?code=${code}`;
   }
 
-  private generateBodyForCheckoutRedirect(items: CheckoutRedirectInput[]) {
-    const itemsBody = items.reduce((body, item, index) => {
+  private generateBodyForCheckoutRedirect(input: CheckoutRedirectInput) {
+    const itemsBody = input.items.reduce((body, item, index) => {
       index++;
 
       const { id, price, title } = item;
 
-      let itemToBeConverted: any = {};
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const itemToBeConverted: any = {};
       itemToBeConverted[`itemId${index}`] = id;
       itemToBeConverted[`itemAmount${index}`] = Number(price).toFixed(2);
       itemToBeConverted[`itemDescription${index}`] = title;
@@ -50,10 +51,10 @@ export class PagSeguro implements PaymentGatewayInterface {
 
     const otherBodyInfos = new URLSearchParams({
       currency: 'BRL',
-      redirectURL:
-        'https://c517-2804-14d-5c33-566b-77cb-ac6c-afe-36c4.ngrok.io/ps/feedback',
+      reference: input.id_order,
+      redirectURL: 'http://localhost:3000/',
       notificationURL:
-        'https://c517-2804-14d-5c33-566b-77cb-ac6c-afe-36c4.ngrok.io/ps/feedback'
+        'http://localhost:3000/payment/notification?gateway=pagseguro'
     }).toString();
 
     return itemsBody + '&' + otherBodyInfos;
