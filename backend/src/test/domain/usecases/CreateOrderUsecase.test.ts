@@ -26,12 +26,12 @@ import { env } from '../../../env';
 import { FieldsValidationError } from '../../../errors/FieldsValidationError';
 import { ImpossibleActionError } from '../../../errors/ImpossibleActionError';
 import { CryptoIDGenerator } from '../../../infra/libs/CryptoIDGenerator';
-import { PagSeguro } from '../../../infra/libs/paymentGateway/PagSeguro';
 import { OrderRepositoryMemory } from '../../../infra/repositories/memory/OrderRepositoryMemory';
 import { PlaylistRepositoryMemory } from '../../../infra/repositories/memory/PlaylistRepositoryMemory';
 import { VideoRepositoryMemory } from '../../../infra/repositories/memory/VideoRepositoryMemory';
 import { MemoryDatabase } from '../../MemoryDatabase';
 import { xmlCheckoutRedirect } from './__mocks__/mockPagseguroResponses';
+import { PagseguroCheckoutRedirect } from '../../../infra/payment-gateway/PagSeguro/PagseguroCheckoutRedirect';
 
 describe('CreateOrderUsecase', () => {
   describe('Comprar items', () => {
@@ -58,11 +58,11 @@ describe('CreateOrderUsecase', () => {
       memoryDatabase,
       orderFactory
     );
-    const paymentGateway = new PagSeguro();
+    const paymentCheckoutRedirect = new PagseguroCheckoutRedirect();
 
     const makeCreateOrderUsecase = (): CreateOrderUsecase => {
       return new CreateOrderUsecase({
-        paymentGateway,
+        paymentCheckoutRedirect,
         playlistRepository,
         videoRepository,
         orderFactory,
@@ -175,9 +175,8 @@ describe('CreateOrderUsecase', () => {
       };
 
       const createOrderUsecase = new CreateOrderUsecase({
-        paymentGateway: {
-          getCheckoutRedirectUrl: async () => 'teste',
-          transactionConsulting: () => ''
+        paymentCheckoutRedirect: {
+          execute: async () => 'teste'
         },
         idGenerator,
         playlistRepository,
@@ -254,9 +253,8 @@ describe('CreateOrderUsecase', () => {
       };
 
       const createOrderUsecase = new CreateOrderUsecase({
-        paymentGateway: {
-          getCheckoutRedirectUrl: async () => 'teste',
-          transactionConsulting: () => ''
+        paymentCheckoutRedirect: {
+          execute: async () => 'teste'
         },
         idGenerator,
         playlistRepository,
@@ -327,9 +325,8 @@ describe('CreateOrderUsecase', () => {
       };
 
       const createOrderUsecase = new CreateOrderUsecase({
-        paymentGateway: {
-          getCheckoutRedirectUrl: async () => 'teste',
-          transactionConsulting: () => ''
+        paymentCheckoutRedirect: {
+          execute: async () => 'teste'
         },
         idGenerator,
         playlistRepository,
