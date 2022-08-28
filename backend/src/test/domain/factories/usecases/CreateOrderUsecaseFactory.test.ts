@@ -1,7 +1,7 @@
 import { OrderFactory } from '../../../../domain/factories/entities/OrderFactory';
 import { CreateOrderUsecaseFactory } from '../../../../domain/factories/usecases/CreateOrderUsecaseFactory';
 import { IDGenerator } from '../../../../domain/libs/IDGenerator';
-import { PaymentGatewayInterface } from '../../../../domain/libs/PaymentGatewayInterface';
+import { PaymentCheckoutRedirectInterface } from '../../../../domain/payment-gateway/PaymentCheckoutRedirectInterface';
 import { OrderRepositoryInterface } from '../../../../domain/repositories/OrderRepositoryInterface';
 import { PlaylistRepositoryInterface } from '../../../../domain/repositories/PlaylistRepositoryInterface';
 import { VideoRepositoryInterface } from '../../../../domain/repositories/VideoRepositoryInterface';
@@ -15,7 +15,7 @@ describe('CreateOrderUsecaseFactory', () => {
   const mockIdGenerator = {} as IDGenerator;
   const mockOrderFactory = {} as OrderFactory;
   const mockOrderRepository = {} as OrderRepositoryInterface;
-  const mockPaymentGateway = {} as PaymentGatewayInterface;
+  const mockPaymentCheckoutRedirect = {} as PaymentCheckoutRedirectInterface;
 
   const validator = new JoiValidator(createOrderJoiSchema);
   const createOrderUsecaseFactory = new CreateOrderUsecaseFactory({
@@ -25,7 +25,7 @@ describe('CreateOrderUsecaseFactory', () => {
       orderFactory: mockOrderFactory,
       orderRepository: mockOrderRepository,
       playlistRepository: mockPlaylistRepository,
-      paymentGateway: mockPaymentGateway,
+      paymentCheckoutRedirect: mockPaymentCheckoutRedirect,
       videoRepository: mockVideoRepository
     }
   });

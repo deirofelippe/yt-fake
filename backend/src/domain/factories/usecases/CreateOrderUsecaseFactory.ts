@@ -27,7 +27,7 @@ export class CreateOrderUsecaseFactory
       usecase: {
         playlistRepository,
         videoRepository,
-        paymentGateway,
+        paymentCheckoutRedirect,
         idGenerator,
         orderFactory,
         orderRepository
@@ -41,7 +41,7 @@ export class CreateOrderUsecaseFactory
       orderFactory,
       orderRepository,
       playlistRepository,
-      paymentGateway,
+      paymentCheckoutRedirect,
       videoRepository
     });
   }
