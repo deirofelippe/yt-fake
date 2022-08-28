@@ -66,6 +66,48 @@ describe('TransactionNotificationUsecase', () => {
       ];
     });
 
+    test('Deve atualizar o status da transação da order', async () => {
+      const notExpectedTransactionStatus = 'Status diferente';
+      order = {
+        ...order,
+        paymentGateway: PaymentGatewayTypes.PAGSEGURO,
+        transaction: {
+          parcelas: 6,
+          status: notExpectedTransactionStatus,
+          date: '2022-08-25T23:02:22.000-03:00'
+        },
+        paymentMethod: {
+          code: 'Cartão de crédito Visa',
+          type: 'Cartão de crédito'
+        }
+      };
+
+      await orderRepository.createOrder(order);
+      await orderRepository.createOrderItems(orderItems);
+
+      const notificationCode = '111';
+      nock('https://ws.sandbox.pagseguro.uol.com.br')
+        .get(
+          `/v3/transactions/notifications/${notificationCode}?email=test%40email.com&token=12345`
+        )
+        .reply(200, xmlNotificationConsulting);
+
+      const input: TransactionNotificationUsecaseInput = {
+        notificationCode,
+        notificationType: 'transaction',
+        paymentGateway: PaymentGatewayTypes.PAGSEGURO
+      };
+
+      const transactionNotificationUsecase =
+        createTransactionNotificationUsecase();
+      await transactionNotificationUsecase.execute(input);
+
+      const orders = await orderRepository.findAllOrders(order.id_channel);
+
+      const transactionStatus = orders[0].getOrder().transaction.status;
+      expect(transactionStatus).not.toEqual(notExpectedTransactionStatus);
+    });
+
     test('Deve adicionar informações de transação na order', async () => {
       await orderRepository.createOrder(order);
       await orderRepository.createOrderItems(orderItems);
