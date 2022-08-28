@@ -41,7 +41,11 @@ jobs:
       #   run: make lint
 
       - name: Run tests
+<<<<<<< HEAD:.github/workflows/backend-main.yml
         run: npm run test:coverage
+=======
+        run: npm run test:coveralls
+>>>>>>> CI-CD: backend - muda script do teste da pipeline de deployment:.github/workflows/backend-deployment.yml
 
       - name: Coveralls
         uses: coverallsapp/github-action@master
