@@ -4,6 +4,7 @@ import {
   OrderAttributes,
   OrderItemAttributes
 } from '../../entities/Order';
+import { Item } from '../../usecases/CreateOrderUsecase';
 import { EntityFactoryInterface } from './EntityFactoryInterface';
 
 export class OrderFactory implements EntityFactoryInterface<Order> {
@@ -16,7 +17,7 @@ export class OrderFactory implements EntityFactoryInterface<Order> {
 
     return Order.create(attributes);
   }
-  create(attributes: OrderAttributes) {
+  create(attributes: CreateOrderFactoryInput) {
     const { idGenerator } = this.dependencies;
 
     const id_order = idGenerator.generate();
@@ -38,3 +39,8 @@ export class OrderFactory implements EntityFactoryInterface<Order> {
     return Order.create(order);
   }
 }
+
+export type CreateOrderFactoryInput = {
+  id_channel: string;
+  items: Item[];
+};
