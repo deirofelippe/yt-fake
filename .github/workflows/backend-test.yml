@@ -2,7 +2,10 @@ name: CI
 
 on:
   push:
-    branches-ignore: [main, master]
+    branches: [develop]
+  pull_request:
+    types: [opened, reopened]
+    branches: [main, master]
   workflow_dispatch:
 
 jobs:
@@ -41,13 +44,7 @@ jobs:
       #   run: make lint
 
       - name: Run tests
-        run: npm run test:coverage
-
-      - name: Coveralls
-        uses: coverallsapp/github-action@master
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          base-path: "./backend"
+        run: npm run test:cov
 
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master

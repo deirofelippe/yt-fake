@@ -3,9 +3,6 @@ name: CI and CD
 on:
   push:
     branches: [main, master]
-  pull_request:
-    types: [opened, reopened]
-    branches: [main, master]
   workflow_dispatch:
 
 jobs:
@@ -44,7 +41,7 @@ jobs:
       #   run: make lint
 
       - name: Run tests
-        run: npm run test:coverage
+        run: npm run test:cov
 
       - name: Coveralls
         uses: coverallsapp/github-action@master
