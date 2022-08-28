@@ -4,6 +4,9 @@ import { IDGenerator } from '../libs/IDGenerator';
 export enum PaymentGatewayTypes {
   PAGSEGURO = 'pagseguro'
 }
+export type TransactionAttributes = Required<
+  Pick<OrderAttributes, 'paymentGateway' | 'paymentMethod' | 'transaction'>
+>;
 
 export type OrderAttributes = {
   id: string;
@@ -56,5 +59,19 @@ export class Order {
   }
   public getOrderItems(): OrderItemAttributes[] {
     return this.attributes.items;
+  }
+  public thereIsNoTransactionInformation(): boolean {
+    return this.attributes.paymentGateway === undefined;
+  }
+  public addTransactionInformation(
+    transactionAttributes: TransactionAttributes
+  ) {
+    this.attributes = {
+      ...this.attributes,
+      ...transactionAttributes
+    };
+  }
+  public updateTransactionStatus(status: string) {
+    this.attributes.transaction.status = status;
   }
 }
