@@ -1,6 +1,15 @@
 # Backend
 
-## Boas práticas e padõres usados
+## Documentacao
+
+Swagger, endpoints, parametros
+Sobre o projeto, funcionalidades (channel, video, playlist, order), estrutura das pastas, camadas, arquitetura
+Ler sobre os desafios
+Tirar documentação do código
+Documentação viva com os testes
+Tipo a documentação do funcionamento do Laravel
+
+## Boas práticas e padrões usados
 
 ### Outros
 
@@ -22,6 +31,12 @@ tell dont ask
 - evite a otimizacao prematura e micro otimizacoes, o codigo fica menos legivel e mais complexo sem motivo
 
 foco no dominio: primeiro escreve o conceito inicial do sistema listando o backlog, depois faz os testes dos stories mais importantes, deixa pra depois a decisao de qual tecnologia usar (banco de dados, framework e etc), escreve primeiro o codigo feio que funcione e depois refatore e use os principios,
+
+como escolho os nomes? descrevo o que o metodo deve fazer, depois tento resumir em algumas palavras
+
+defino o given, when e then dos testes
+defino o comportamento da classe e o nome dos metodos
+por ultimo implemento os metodos da classe
 
 ### Padrões no DDD
 
