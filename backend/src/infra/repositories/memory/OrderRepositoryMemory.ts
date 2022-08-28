@@ -12,6 +12,40 @@ export class OrderRepositoryMemory implements OrderRepositoryInterface {
     private readonly memoryDatabase: MemoryDatabase,
     private readonly orderFactory: EntityFactoryInterface<Order>
   ) {}
+  async updateTransactionStatus(orderToUpdate: Order): Promise<void> {
+    const updatedOrder = this.memoryDatabase.orders.find(
+      (order) => order.id === orderToUpdate.id
+    );
+    updatedOrder.transaction.status =
+      orderToUpdate.getOrder().transaction.status;
+    const orders = this.memoryDatabase.orders.filter(
+      (order) => order.id !== orderToUpdate.id
+    );
+    orders.push(updatedOrder);
+    this.memoryDatabase.orders = orders;
+  }
+  async addTransactionToExistingOrder(updatedOrder: Order): Promise<void> {
+    const orders = this.memoryDatabase.orders.filter(
+      (order) => order.id !== updatedOrder.id
+    );
+    const orderAttributes = updatedOrder.getOrderWithItems();
+    delete orderAttributes.items;
+    orders.push(orderAttributes);
+    this.memoryDatabase.orders = orders;
+  }
+  async findOrder(id_order: string): Promise<Order> {
+    const { orders, orderItems } = this.memoryDatabase;
+    const order = orders.find((order) => order.id === id_order);
+
+    if (!order) return undefined;
+
+    const items = orderItems.filter((item) => item.id_order === id_order);
+    const orderWithItems: OrderAttributes = {
+      ...order,
+      items
+    };
+    return this.orderFactory.recreate(orderWithItems);
+  }
 
   async findAllOrders(id_channel: string): Promise<[] | Order[]> {
     const { orders, orderItems } = this.memoryDatabase;
