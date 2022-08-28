@@ -1,3 +1,6 @@
+import faker from '@faker-js/faker';
+import { throws } from 'smid';
+import { randomUUID } from 'crypto';
 import nock from 'nock';
 import {
   OrderAttributes,
@@ -15,11 +18,10 @@ import { OrderFactory } from '../../../domain/factories/entities/OrderFactory';
 import { PlaylistFactory } from '../../../domain/factories/entities/PlaylistFactory';
 import { VideoFactory } from '../../../domain/factories/entities/VideoFactory';
 import {
-  GetCheckoutUrlUsecase,
-  GetCheckoutUrlUsecaseInput,
+  CreateOrderUsecase,
+  CreateOrderUsecaseInput,
   ItemType
-} from '../../../domain/usecases/GetCheckoutUrlUsecase';
-import { throws } from 'smid';
+} from '../../../domain/usecases/CreateOrderUsecase';
 import { env } from '../../../env';
 import { FieldsValidationError } from '../../../errors/FieldsValidationError';
 import { ImpossibleActionError } from '../../../errors/ImpossibleActionError';
@@ -30,10 +32,8 @@ import { PlaylistRepositoryMemory } from '../../../infra/repositories/memory/Pla
 import { VideoRepositoryMemory } from '../../../infra/repositories/memory/VideoRepositoryMemory';
 import { MemoryDatabase } from '../../MemoryDatabase';
 import { xmlCheckoutRedirect } from './__mocks__/mockPagseguroResponses';
-import faker from '@faker-js/faker';
-import { randomUUID } from 'crypto';
 
-describe('GetCheckoutUrlUsecase', () => {
+describe('CreateOrderUsecase', () => {
   describe('Comprar items', () => {
     const memoryDatabase = new MemoryDatabase();
     const idGenerator = new CryptoIDGenerator();
@@ -60,8 +60,8 @@ describe('GetCheckoutUrlUsecase', () => {
     );
     const paymentGateway = new PagSeguro();
 
-    const createGetCheckoutUrlUsecase = (): GetCheckoutUrlUsecase => {
-      return new GetCheckoutUrlUsecase({
+    const makeCreateOrderUsecase = (): CreateOrderUsecase => {
+      return new CreateOrderUsecase({
         paymentGateway,
         playlistRepository,
         videoRepository,
@@ -135,7 +135,7 @@ describe('GetCheckoutUrlUsecase', () => {
       await videoRepository.create(staticVideoValues);
       await playlistRepository.create(staticPlaylistValues);
 
-      const input: GetCheckoutUrlUsecaseInput = {
+      const input: CreateOrderUsecaseInput = {
         id_authenticated_channel: '003',
         items: [
           { id: staticVideoValues.id, type: ItemType.VIDEO },
@@ -153,7 +153,7 @@ describe('GetCheckoutUrlUsecase', () => {
         .post(uri)
         .reply(200, xmlCheckoutRedirect);
 
-      const createOrderUsecase = createGetCheckoutUrlUsecase();
+      const createOrderUsecase = makeCreateOrderUsecase();
       const url = await createOrderUsecase.execute(input);
 
       const expectedUrl = `${env.pagSeguro.sandbox.redirectUrl}?code=94915CFA4B4BEB1CC47D1F8629FB6AD3`;
@@ -166,7 +166,7 @@ describe('GetCheckoutUrlUsecase', () => {
       await videoRepository.create(staticVideoValues);
       await playlistRepository.create(staticPlaylistValues);
 
-      const input: GetCheckoutUrlUsecaseInput = {
+      const input: CreateOrderUsecaseInput = {
         id_authenticated_channel: '003',
         items: [
           { id: staticVideoValues.id, type: ItemType.VIDEO },
@@ -174,7 +174,7 @@ describe('GetCheckoutUrlUsecase', () => {
         ]
       };
 
-      const createOrderUsecase = new GetCheckoutUrlUsecase({
+      const createOrderUsecase = new CreateOrderUsecase({
         paymentGateway: {
           getCheckoutRedirectUrl: async () => 'teste',
           transactionConsulting: () => ''
@@ -222,7 +222,7 @@ describe('GetCheckoutUrlUsecase', () => {
     test('Deve ser retornado uma url ao comprar somente uma playlist', async () => {
       await playlistRepository.create(staticPlaylistValues);
 
-      const input: GetCheckoutUrlUsecaseInput = {
+      const input: CreateOrderUsecaseInput = {
         id_authenticated_channel: '003',
         items: [{ id: staticPlaylistValues.id, type: ItemType.PLAYLIST }]
       };
@@ -237,7 +237,7 @@ describe('GetCheckoutUrlUsecase', () => {
         .post(uri)
         .reply(200, xmlCheckoutRedirect);
 
-      const createOrderUsecase = createGetCheckoutUrlUsecase();
+      const createOrderUsecase = makeCreateOrderUsecase();
       const url = await createOrderUsecase.execute(input);
 
       const expectedUrl = `${env.pagSeguro.sandbox.redirectUrl}?code=94915CFA4B4BEB1CC47D1F8629FB6AD3`;
@@ -248,12 +248,12 @@ describe('GetCheckoutUrlUsecase', () => {
     test('Deve ser cadastrado uma order ao comprar somente uma playlist', async () => {
       await playlistRepository.create(staticPlaylistValues);
 
-      const input: GetCheckoutUrlUsecaseInput = {
+      const input: CreateOrderUsecaseInput = {
         id_authenticated_channel: '003',
         items: [{ id: staticPlaylistValues.id, type: ItemType.PLAYLIST }]
       };
 
-      const createOrderUsecase = new GetCheckoutUrlUsecase({
+      const createOrderUsecase = new CreateOrderUsecase({
         paymentGateway: {
           getCheckoutRedirectUrl: async () => 'teste',
           transactionConsulting: () => ''
@@ -295,7 +295,7 @@ describe('GetCheckoutUrlUsecase', () => {
     test('Deve ser retornado uma url ao comprar somente um video', async () => {
       await videoRepository.create(staticVideoValues);
 
-      const input: GetCheckoutUrlUsecaseInput = {
+      const input: CreateOrderUsecaseInput = {
         id_authenticated_channel: '003',
         items: [{ id: staticVideoValues.id, type: ItemType.VIDEO }]
       };
@@ -310,7 +310,7 @@ describe('GetCheckoutUrlUsecase', () => {
         .post(uri)
         .reply(200, xmlCheckoutRedirect);
 
-      const createOrderUsecase = createGetCheckoutUrlUsecase();
+      const createOrderUsecase = makeCreateOrderUsecase();
       const url = await createOrderUsecase.execute(input);
 
       const expectedUrl = `${env.pagSeguro.sandbox.redirectUrl}?code=94915CFA4B4BEB1CC47D1F8629FB6AD3`;
@@ -321,12 +321,12 @@ describe('GetCheckoutUrlUsecase', () => {
     test('Deve ser cadastrado uma order ao comprar somente um video', async () => {
       await videoRepository.create(staticVideoValues);
 
-      const input: GetCheckoutUrlUsecaseInput = {
+      const input: CreateOrderUsecaseInput = {
         id_authenticated_channel: '003',
         items: [{ id: staticVideoValues.id, type: ItemType.VIDEO }]
       };
 
-      const createOrderUsecase = new GetCheckoutUrlUsecase({
+      const createOrderUsecase = new CreateOrderUsecase({
         paymentGateway: {
           getCheckoutRedirectUrl: async () => 'teste',
           transactionConsulting: () => ''
@@ -366,15 +366,15 @@ describe('GetCheckoutUrlUsecase', () => {
     });
 
     test('Deve lançar erro por não ter items no input para comprar', async () => {
-      const createOrderUsecase = createGetCheckoutUrlUsecase();
+      const createOrderUsecase = makeCreateOrderUsecase();
 
-      const input1: GetCheckoutUrlUsecaseInput = {
+      const input1: CreateOrderUsecaseInput = {
         id_authenticated_channel: '003',
         items: []
       };
       const input2 = {
         id_authenticated_channel: '003'
-      } as GetCheckoutUrlUsecaseInput;
+      } as CreateOrderUsecaseInput;
 
       const error1: FieldsValidationError = await throws(
         async () => await createOrderUsecase.execute(input1)
@@ -391,12 +391,12 @@ describe('GetCheckoutUrlUsecase', () => {
     });
 
     test('Deve lançar erro ao comprar um video que não existe', async () => {
-      const input: GetCheckoutUrlUsecaseInput = {
+      const input: CreateOrderUsecaseInput = {
         id_authenticated_channel: '003',
         items: [{ id: '001', type: ItemType.VIDEO }]
       };
 
-      const createOrderUsecase = createGetCheckoutUrlUsecase();
+      const createOrderUsecase = makeCreateOrderUsecase();
 
       const error: ImpossibleActionError = await throws(
         async () => await createOrderUsecase.execute(input)
@@ -413,12 +413,12 @@ describe('GetCheckoutUrlUsecase', () => {
 
       await videoRepository.create(video);
 
-      const input: GetCheckoutUrlUsecaseInput = {
+      const input: CreateOrderUsecaseInput = {
         id_authenticated_channel: '003',
         items: [{ id: video.id, type: ItemType.VIDEO }]
       };
 
-      const createOrderUsecase = createGetCheckoutUrlUsecase();
+      const createOrderUsecase = makeCreateOrderUsecase();
 
       const error: ImpossibleActionError = await throws(
         async () => await createOrderUsecase.execute(input)
@@ -433,12 +433,12 @@ describe('GetCheckoutUrlUsecase', () => {
 
       await videoRepository.create(video);
 
-      const input: GetCheckoutUrlUsecaseInput = {
+      const input: CreateOrderUsecaseInput = {
         id_authenticated_channel: '003',
         items: [{ id: video.id, type: ItemType.VIDEO }]
       };
 
-      const createOrderUsecase = createGetCheckoutUrlUsecase();
+      const createOrderUsecase = makeCreateOrderUsecase();
 
       const error: ImpossibleActionError = await throws(
         async () => await createOrderUsecase.execute(input)
@@ -453,12 +453,12 @@ describe('GetCheckoutUrlUsecase', () => {
 
       await videoRepository.create(video);
 
-      const input: GetCheckoutUrlUsecaseInput = {
+      const input: CreateOrderUsecaseInput = {
         id_authenticated_channel: '003',
         items: [{ id: video.id, type: ItemType.VIDEO }]
       };
 
-      const createOrderUsecase = createGetCheckoutUrlUsecase();
+      const createOrderUsecase = makeCreateOrderUsecase();
 
       const error: ImpossibleActionError = await throws(
         async () => await createOrderUsecase.execute(input)
@@ -485,12 +485,12 @@ describe('GetCheckoutUrlUsecase', () => {
       await orderRepository.createOrderItems([orderItem]);
       await videoRepository.create(video);
 
-      const input: GetCheckoutUrlUsecaseInput = {
+      const input: CreateOrderUsecaseInput = {
         id_authenticated_channel: '003',
         items: [{ id: '001', type: ItemType.VIDEO }]
       };
 
-      const createOrderUsecase = createGetCheckoutUrlUsecase();
+      const createOrderUsecase = makeCreateOrderUsecase();
 
       const error: ImpossibleActionError = await throws(
         async () => await createOrderUsecase.execute(input)
@@ -503,12 +503,12 @@ describe('GetCheckoutUrlUsecase', () => {
     });
 
     test('Deve lançar erro ao comprar uma playlist não existe', async () => {
-      const input: GetCheckoutUrlUsecaseInput = {
+      const input: CreateOrderUsecaseInput = {
         id_authenticated_channel: '003',
         items: [{ id: '001', type: ItemType.PLAYLIST }]
       };
 
-      const createOrderUsecase = createGetCheckoutUrlUsecase();
+      const createOrderUsecase = makeCreateOrderUsecase();
 
       const execute = async () => await createOrderUsecase.execute(input);
       await expect(execute).rejects.toThrow(
@@ -523,12 +523,12 @@ describe('GetCheckoutUrlUsecase', () => {
 
       await playlistRepository.create(playlist);
 
-      const input: GetCheckoutUrlUsecaseInput = {
+      const input: CreateOrderUsecaseInput = {
         id_authenticated_channel: '003',
         items: [{ id: playlist.id, type: ItemType.PLAYLIST }]
       };
 
-      const createOrderUsecase = createGetCheckoutUrlUsecase();
+      const createOrderUsecase = makeCreateOrderUsecase();
 
       const error: ImpossibleActionError = await throws(
         async () => await createOrderUsecase.execute(input)
@@ -543,12 +543,12 @@ describe('GetCheckoutUrlUsecase', () => {
 
       await playlistRepository.create(playlist);
 
-      const input: GetCheckoutUrlUsecaseInput = {
+      const input: CreateOrderUsecaseInput = {
         id_authenticated_channel: '003',
         items: [{ id: playlist.id, type: ItemType.PLAYLIST }]
       };
 
-      const createOrderUsecase = createGetCheckoutUrlUsecase();
+      const createOrderUsecase = makeCreateOrderUsecase();
 
       const error: ImpossibleActionError = await throws(
         async () => await createOrderUsecase.execute(input)
@@ -563,12 +563,12 @@ describe('GetCheckoutUrlUsecase', () => {
 
       await playlistRepository.create(playlist);
 
-      const input: GetCheckoutUrlUsecaseInput = {
+      const input: CreateOrderUsecaseInput = {
         id_authenticated_channel: '003',
         items: [{ id: playlist.id, type: ItemType.PLAYLIST }]
       };
 
-      const createOrderUsecase = createGetCheckoutUrlUsecase();
+      const createOrderUsecase = makeCreateOrderUsecase();
 
       const error: ImpossibleActionError = await throws(
         async () => await createOrderUsecase.execute(input)
@@ -595,12 +595,12 @@ describe('GetCheckoutUrlUsecase', () => {
       await orderRepository.createOrderItems([orderItem]);
       await playlistRepository.create(playlist);
 
-      const input: GetCheckoutUrlUsecaseInput = {
+      const input: CreateOrderUsecaseInput = {
         id_authenticated_channel: '003',
         items: [{ id: playlist.id, type: ItemType.PLAYLIST }]
       };
 
-      const createOrderUsecase = createGetCheckoutUrlUsecase();
+      const createOrderUsecase = makeCreateOrderUsecase();
 
       const error: ImpossibleActionError = await throws(
         async () => await createOrderUsecase.execute(input)

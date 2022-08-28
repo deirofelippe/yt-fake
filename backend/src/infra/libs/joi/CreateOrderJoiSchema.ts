@@ -1,8 +1,8 @@
 import Joi from 'joi';
 import { validationMessages as message } from '../../../domain/libs/ValidationMessages';
-import { ItemType } from '../../../domain/usecases/GetCheckoutUrlUsecase';
+import { ItemType } from '../../../domain/usecases/CreateOrderUsecase';
 
-export const getCheckoutUrlJoiSchema = Joi.object({
+export const createOrderJoiSchema = Joi.object({
   id_authenticated_channel: Joi.string().empty().required().max(50),
   items: Joi.array()
     .items(

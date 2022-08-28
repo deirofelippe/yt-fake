@@ -22,12 +22,12 @@ export type Item = {
   id: string;
   type: ItemType;
 };
-export type GetCheckoutUrlUsecaseInput = {
+export type CreateOrderUsecaseInput = {
   id_authenticated_channel: string;
   items: Item[];
 };
 
-export type GetCheckoutUrlUsecaseDependencies = {
+export type CreateOrderUsecaseDependencies = {
   playlistRepository: PlaylistRepositoryInterface;
   videoRepository: VideoRepositoryInterface;
   orderRepository: OrderRepositoryInterface;
@@ -36,12 +36,10 @@ export type GetCheckoutUrlUsecaseDependencies = {
   idGenerator: IDGenerator;
 };
 
-export class GetCheckoutUrlUsecase {
-  constructor(
-    private readonly dependencies: GetCheckoutUrlUsecaseDependencies
-  ) {}
+export class CreateOrderUsecase {
+  constructor(private readonly dependencies: CreateOrderUsecaseDependencies) {}
 
-  public async execute(input: GetCheckoutUrlUsecaseInput) {
+  public async execute(input: CreateOrderUsecaseInput) {
     const { paymentGateway, orderRepository, orderFactory, idGenerator } =
       this.dependencies;
 

@@ -4,7 +4,6 @@ import {
   OrderAttributes,
   OrderItemAttributes
 } from '../../entities/Order';
-import { GetCheckoutUrlUsecaseInput } from '../../usecases/GetCheckoutUrlUsecase';
 import { EntityFactoryInterface } from './EntityFactoryInterface';
 
 export class OrderFactory implements EntityFactoryInterface<Order> {
@@ -17,7 +16,7 @@ export class OrderFactory implements EntityFactoryInterface<Order> {
 
     return Order.create(attributes);
   }
-  create(attributes: GetCheckoutUrlUsecaseInput) {
+  create(attributes: OrderAttributes) {
     const { idGenerator } = this.dependencies;
 
     const id_order = idGenerator.generate();
@@ -32,7 +31,7 @@ export class OrderFactory implements EntityFactoryInterface<Order> {
     );
     const order: OrderAttributes = {
       id: id_order,
-      id_channel: attributes.id_authenticated_channel,
+      id_channel: attributes.id_channel,
       items: orderItem
     };
 
