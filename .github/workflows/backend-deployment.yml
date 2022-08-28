@@ -47,7 +47,7 @@ jobs:
         uses: coverallsapp/github-action@master
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          base-path: "./backend"
+          path-to-lcov: "./backend/coverage/lcov.info"
 
       - name: Run mutation test
         run: npm run test:mutation
