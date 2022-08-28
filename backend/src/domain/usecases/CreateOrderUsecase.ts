@@ -1,15 +1,14 @@
 import { FieldsValidationError } from '../../errors/FieldsValidationError';
 import { ImpossibleActionError } from '../../errors/ImpossibleActionError';
-import { Order } from '../entities/Order';
 import { Playlist } from '../entities/Playlist';
 import { Video } from '../entities/Video';
-import { EntityFactoryInterface } from '../factories/entities/EntityFactoryInterface';
+import { OrderFactory } from '../factories/entities/OrderFactory';
 import { IDGenerator } from '../libs/IDGenerator';
 import {
-  PaymentGatewayInterface,
+  CheckoutRedirectInput,
   CheckoutRedirectItem,
-  CheckoutRedirectInput
-} from '../libs/PaymentGatewayInterface';
+  PaymentCheckoutRedirectInterface
+} from '../payment-gateway/PaymentCheckoutRedirectInterface';
 import { OrderRepositoryInterface } from '../repositories/OrderRepositoryInterface';
 import { PlaylistRepositoryInterface } from '../repositories/PlaylistRepositoryInterface';
 import { VideoRepositoryInterface } from '../repositories/VideoRepositoryInterface';
@@ -31,8 +30,8 @@ export type CreateOrderUsecaseDependencies = {
   playlistRepository: PlaylistRepositoryInterface;
   videoRepository: VideoRepositoryInterface;
   orderRepository: OrderRepositoryInterface;
-  orderFactory: EntityFactoryInterface<Order>;
-  paymentGateway: PaymentGatewayInterface;
+  orderFactory: OrderFactory;
+  paymentCheckoutRedirect: PaymentCheckoutRedirectInterface;
   idGenerator: IDGenerator;
 };
 
@@ -40,8 +39,12 @@ export class CreateOrderUsecase {
   constructor(private readonly dependencies: CreateOrderUsecaseDependencies) {}
 
   public async execute(input: CreateOrderUsecaseInput) {
-    const { paymentGateway, orderRepository, orderFactory, idGenerator } =
-      this.dependencies;
+    const {
+      paymentCheckoutRedirect,
+      orderRepository,
+      orderFactory,
+      idGenerator
+    } = this.dependencies;
 
     const { id_authenticated_channel: id_buyer_channel } = input;
     const items = input.items ?? [];
@@ -86,11 +89,12 @@ export class CreateOrderUsecase {
       id_order: idGenerator.generate(),
       items: [...videosCheckoutItems, ...playlistsCheckoutItems]
     };
-    const url = await paymentGateway.getCheckoutRedirectUrl(
-      checkoutRedirectInput
-    );
+    const url = await paymentCheckoutRedirect.execute(checkoutRedirectInput);
 
-    const order = orderFactory.create(input);
+    const order = orderFactory.create({
+      items: input.items,
+      id_channel: input.id_authenticated_channel
+    });
     await orderRepository.createOrder(order.getOrder());
     await orderRepository.createOrderItems(order.getOrderItems());
 
