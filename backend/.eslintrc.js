@@ -20,6 +20,8 @@ module.exports = {
         ecmaVersion: 2019
       },
       rules: {
+        'sonarjs/prefer-immediate-return': 'off',
+        'jest/no-mocks-import': 'off',
         'import/export': 'off'
       }
     }
