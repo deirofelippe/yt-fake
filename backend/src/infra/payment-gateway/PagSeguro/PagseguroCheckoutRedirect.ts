@@ -1,16 +1,15 @@
 import axios from 'axios';
-
 import {
-  CheckoutRedirectInput,
-  PaymentGatewayInterface
-} from '../../../domain/libs/PaymentGatewayInterface';
+  PaymentCheckoutRedirectInterface,
+  CheckoutRedirectInput
+} from '../../../domain/payment-gateway/PaymentCheckoutRedirectInterface';
 import { env } from '../../../env';
-import { Xml2jsParser } from '../Xml2jsParser';
+import { Xml2jsParser } from '../../libs/Xml2jsParser';
 
-export class PagSeguro implements PaymentGatewayInterface {
-  public async getCheckoutRedirectUrl(
-    input: CheckoutRedirectInput
-  ): Promise<string> {
+export class PagseguroCheckoutRedirect
+  implements PaymentCheckoutRedirectInterface
+{
+  public async execute(input: CheckoutRedirectInput): Promise<string> {
     const body = this.generateBodyForCheckoutRedirect(input);
     const url = this.generateUrlForCheckoutRedirect();
 
